@@ -1,3 +1,5 @@
+#.libPaths("C:/Rpackages/R/win-library/4.1") # (elise setting package library location)
+
 library("splus2R")
 library('LaplacesDemon')
 ###Data####

@@ -4,7 +4,7 @@ library("splus2R")
 library('LaplacesDemon')
 ###Data####
 N<-N # observed data, assumed to be a matrix that is year by pixel
-tmax<-dim(N)[1]
+tmax<-dim(N)[1] # should we set this to 31 to withold 5 years of data to test forecast?
 pmax<-dim(N)[2]
 D<-Dsq
 #X<-if you have covariates this is where they go

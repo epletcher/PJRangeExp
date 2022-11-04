@@ -41,10 +41,9 @@ checkpoint=Niter*0.01
 ###Containers####
 tauOut<-matrix(NA,Niter,)
 betaOut<-matrix(NA,Niter,bmax)
-NlatOut<-array(NA,c(tmax,100,Niter))
-# NlatOut<-array(NA,c(36,93,Niter)) # change to 90 collect 90 pixel latent states for all years
-# NlatOutLast<-matrix(NA,c(pmax,Niter))
-rep.pix <- c(115:145, 910:940, 1865:1895)
+NlatOut<-array(NA,c(36,93,Niter)) # change to 90 pixels
+NlatOutLast<-matrix(NA,c(pmax,Niter))
+rep.pix <- c(115:145, 910:940, 1865:1895) # representative pixels (high,med,low density)
 
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 

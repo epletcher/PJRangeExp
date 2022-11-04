@@ -3,8 +3,8 @@
 library("splus2R")
 library('LaplacesDemon')
 ###Data####
-N<-N # observed data, assumed to be a matrix that is year by pixel
-tmax<-dim(N)[1]-5 # should we set this to 31 to withold 5 years of data to test forecast?
+N<-N[1:tmax,] # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here)
+tmax<-dim(N)[1] 
 pmax<-dim(N)[2]
 D<-Dsq
 #X<-if you have covariates this is where they go
@@ -36,7 +36,7 @@ for (t in 2:tmax){
 }
 
 
-Niter<-5000 ###Number of interations. Keep in mind this will need to be more than you needed for stan  
+Niter<-20000 ###Number of interations. Keep in mind this will need to be more than you needed for stan  
 checkpoint=Niter*0.01
 ###Containers####
 tauOut<-matrix(NA,Niter,)

@@ -61,11 +61,12 @@ sampleLatent<-function(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax) {
 
 ###############Sampling Dispersal and 
 
-UpdateBeta<-function(tmax,beta,Nlat,M,p){
+UpdateBeta<-function(tmax,beta,Nlat,M,p){ # add X and C to list of arguments
 Npred<-matrix(NA,tmax,p)
 G<-matrix(NA,tmax,p)
 for (t in 2:tmax){
 G[t,]<-exp(beta[1]+beta[2]*Nlat[t-1,])
+#G[t,]<-exp((beta[1]+X[t,,]*C)+beta[2]*Nlat[t-1,])
 Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
 
 
@@ -75,6 +76,7 @@ return(list(Npred=Npred,G=G))
 
 }
 
+# separate updateBetaClim function ?
 
 UpdateDispersal<-function(tmax,tau,Nlat,G,p,D){
   Npred<-matrix(NA,tmax,p)

@@ -4,7 +4,7 @@ library("splus2R")
 library('LaplacesDemon')
 ###Data####
 N<-N # observed data, assumed to be a matrix that is year by pixel
-tmax<-dim(N)[1] # should we set this to 31 to withold 5 years of data to test forecast?
+tmax<-dim(N)[1]-5 # should we set this to 31 to withold 5 years of data to test forecast?
 pmax<-dim(N)[2]
 D<-Dsq
 #X<-if you have covariates this is where they go
@@ -41,7 +41,11 @@ checkpoint=Niter*0.01
 ###Containers####
 tauOut<-matrix(NA,Niter,)
 betaOut<-matrix(NA,Niter,bmax)
-NlatOut<-array(NA,c(36,100,Niter))
+NlatOut<-array(NA,c(tmax,100,Niter))
+# NlatOut<-array(NA,c(36,93,Niter)) # change to 90 collect 90 pixel latent states for all years
+# NlatOutLast<-matrix(NA,c(pmax,Niter))
+rep.pix <- c(115:145, 910:940, 1865:1895)
+
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
 accept.beta=accept.tau=0
@@ -103,8 +107,8 @@ for (i in 1:Niter){
   for (t in 1:tmax){
   Nlat[t,]<-sampleLatent(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax)
   }
-  NlatOut[,,i]<-Nlat[,1:100]
-  
+  NlatOut[,,i]<-Nlat[,rep.pix]
+  NlatOutLast[,i]<-Nlat[tmax,]
   
   print(i)
   

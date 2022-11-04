@@ -3,7 +3,7 @@
 library("splus2R")
 library('LaplacesDemon')
 ###Data####
-N<-N[1:tmax,] # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here)
+N<-N[1:31,] # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here)
 tmax<-dim(N)[1] 
 pmax<-dim(N)[2]
 D<-Dsq
@@ -123,7 +123,7 @@ for (i in 1:Niter){
   
 }
 
-
+save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v1.RData")
 
 
 

@@ -1,15 +1,19 @@
 #.libPaths("C:/Rpackages/R/win-library/4.1") # (elise setting package library location)
 
+# load workspacefile with prepped data: 
+# load("G:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Scripts/data_prepped.RData")
+
 library("splus2R")
 library('LaplacesDemon')
+
 ###Data####
 N<-N[1:tmax,] # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here, to test forecast)
 tmax<-dim(N)[1] 
 pmax<-dim(N)[2]
 D<-Dsq
-# X<-climate[1:tmax,,] # covariates this is where they go
+# X<-enviro.var[1:tmax,,1:3] # climate covariates this is where they go (1:3 are climate, 4 and 5 are topographic)
 bmax<-2
-# cmax <- dim(X)[3] number of climate covariates
+# cmax <- dim(X)[3]-2 number of climate covariates (minus topographic vars)
 
 
 ####priors####

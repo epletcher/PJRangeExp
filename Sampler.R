@@ -59,7 +59,7 @@ tau.tune=.001
 for (i in 1:Niter){
   
   
-  beta0.star=rmvnorm(1,beta0,beta0.tune)
+  beta0.star=rnorm(1,beta0,beta0.tune)
   Out=UpdateBeta(tmax=tmax,b0=beta0.star,b1=beta1,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
@@ -76,7 +76,7 @@ for (i in 1:Niter){
   }
   beta0Out[i,1]<-beta0
   
-  beta1.star=rmvnorm(1,beta1,beta1.tune)
+  beta1.star=rnorm(1,beta1,beta1.tune)
   Out=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1.star,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G

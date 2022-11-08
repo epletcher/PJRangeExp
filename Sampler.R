@@ -16,7 +16,8 @@ bmax<-2 #length(X[1,]) number of covariates
 
 ###Starting Values###
 Nlat<-N #Starting values for latent states is the observed data
-beta<-c(.01,-.01) ###Give beta some starting values based on what we know
+beta0<-.01 ###Give beta some starting values based on what we know
+beta1<-0.01
 tau<-.1###Give tau a reasonable starting value. 
 sig.p<-.1##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values
@@ -31,7 +32,7 @@ M<-t(Mint/apply(Mint,1,sum))  ##calculate M starting M given Tau
 Npred<-G<-matrix(NA,tmax,pmax)
 
 for (t in 2:tmax){
-  G[t,]<-exp(beta[1]+beta[2]*Nlat[t-1,])
+  G[t,]<-exp(beta0+beta1*Nlat[t-1,])
   Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
 }
 
@@ -47,8 +48,10 @@ rep.pix <- c(115:145, 910:940, 1865:1895) # representative pixels (high,med,low 
 
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
-accept.beta=accept.tau=0
-beta.tune=diag(c(.000001,.000001))
+accept.beta1=accept.beta0=accept.tau=0
+#beta.tune=diag(c(.000001,.000001))
+beta0.tune=.000001
+beta1.tune=.000001
 tau.tune=.001
 
 
@@ -56,22 +59,39 @@ tau.tune=.001
 for (i in 1:Niter){
   
   
-  beta.star=rmvnorm(1,beta,beta.tune)
-  Out=UpdateBeta(tmax=tmax,b=beta.star,Nlat=Nlat,M=M,p=p)
+  beta0.star=rmvnorm(1,beta0,beta0.tune)
+  Out=UpdateBeta(tmax=tmax,b0=beta0.star,b1=beta1,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBeta(tmax=tmax,b=beta,Nlat=Nlat,M=M,p=p)
+  now=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
   mh=min(exp(mh1-mh2),1)
   if(mh>runif(1)){
     G=G.star
-    beta=beta.star
-    accept.beta=accept.beta+1
+    beta0=beta0.star
+    accept.beta0=accept.beta0+1
     
   }
-  betaOut[i,]<-beta
+  beta0Out[i,1]<-beta0
+  
+  beta1.star=rmvnorm(1,beta1,beta1.tune)
+  Out=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1.star,Nlat=Nlat,M=M,p=p)
+  Npred.star<-Out$Npred
+  G.star<-Out$G
+  now=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1,Nlat=Nlat,M=M,p=p)
+  Npred<-now$Npred
+  mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
+  mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
+  mh=min(exp(mh1-mh2),1)
+  if(mh>runif(1)){
+    G=G.star
+    beta1=beta1.star
+    accept.beta1=accept.beta1+1
+    
+  }
+  beta1Out[i,2]<-beta1
   
   tau.star=rnorm(1,tau,tau.tune)
   Out=UpdateDispersal(tmax=tmax,tau=tau.star,Nlat=Nlat,G=G,p=p,D=D)
@@ -112,8 +132,11 @@ for (i in 1:Niter){
   print(i)
   
   if(i%%checkpoint==0){
-    if(accept.beta/i<0.35) beta.tune=beta.tune*.9
-    if(accept.beta/i>0.45) beta.tune=beta.tune*1.1
+    if(accept.beta0/i<0.35) beta0.tune=beta0.tune*.9
+    if(accept.beta0/i>0.45) beta0.tune=beta0.tune*1.1
+    
+    if(accept.beta1/i<0.35) beta1.tune=beta1.tune*.9
+    if(accept.beta1/i>0.45) beta1.tune=beta1.tune*1.1
     
     if(accept.tau/i<0.35) tau.tune=tau.tune*.9
     if(accept.tau/i>0.45) tau.tune=tau.tune*1.1
@@ -123,7 +146,7 @@ for (i in 1:Niter){
   
 }
 
-save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v1.RData")
+save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v2.RData")
 
 
 

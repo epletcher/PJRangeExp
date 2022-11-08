@@ -74,7 +74,7 @@ for (i in 1:Niter){
     accept.beta0=accept.beta0+1
     
   }
-  beta0Out[i,1]<-beta0
+  betaOut[i,1]<-beta0
   
   beta1.star=rnorm(1,beta1,beta1.tune)
   Out=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1.star,Nlat=Nlat,M=M,p=p)
@@ -91,7 +91,7 @@ for (i in 1:Niter){
     accept.beta1=accept.beta1+1
     
   }
-  beta1Out[i,2]<-beta1
+  betaOut[i,2]<-beta1
   
   tau.star=rnorm(1,tau,tau.tune)
   Out=UpdateDispersal(tmax=tmax,tau=tau.star,Nlat=Nlat,G=G,p=p,D=D)

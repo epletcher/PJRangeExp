@@ -17,7 +17,7 @@ bmax<-2 #length(X[1,]) number of covariates
 ###Starting Values###
 Nlat<-N #Starting values for latent states is the observed data
 beta0<-.01 ###Give beta some starting values based on what we know
-beta1<-0.01
+beta1<--0.01
 tau<-.1###Give tau a reasonable starting value. 
 sig.p<-.1##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values

@@ -17,7 +17,7 @@ bmax<-2 #length(X[1,]) number of covariates
 ###Starting Values###
 Nlat<-N #Starting values for latent states is the observed data
 beta0<-.01 ###Give beta some starting values based on what we know
-beta1<--0.01
+beta1<--0.0001
 tau<-.1###Give tau a reasonable starting value. 
 sig.p<-.1##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values
@@ -51,7 +51,7 @@ sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 accept.beta1=accept.beta0=accept.tau=0
 #beta.tune=diag(c(.000001,.000001))
 beta0.tune=.000001
-beta1.tune=.000001
+beta1.tune=.0001
 tau.tune=.001
 
 

@@ -56,7 +56,7 @@ tau.tune=.001
 
 
 
-for (i in 1:Niter){
+for (i in 4419:Niter){ # edit starting iteration if start/stopping
   
   
   beta0.star=rnorm(1,beta0,beta0.tune)

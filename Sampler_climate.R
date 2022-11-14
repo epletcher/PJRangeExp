@@ -11,9 +11,9 @@ N<-N[1:tmax,] # observed data, assumed to be a matrix that is year by pixel (rem
 tmax<-dim(N)[1] 
 pmax<-dim(N)[2]
 D<-Dsq
-# X<-enviro.var[1:tmax,,1:3] # climate covariates this is where they go (1:3 are climate, 4 and 5 are topographic)
+X<-enviro.var[1:tmax,,3] # covariates this is where they go (1 = tmean, 2 = tmean, 3 = vpdmax, 4 = heatload, 5 = elev)
 bmax<-2
-# cmax <- dim(X)[3]-2 number of climate covariates (minus topographic vars)
+cmax <- dim(X) # number of climate covariates (minus topographic vars)
 
 
 ####priors####

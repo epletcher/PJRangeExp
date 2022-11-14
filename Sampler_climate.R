@@ -24,7 +24,7 @@ Nlat<-N #Starting values for latent states is the observed data
 beta0<-.01 ###Give beta some starting values based on what we know
 beta1<--0.0001
 tau<-.1###Give tau a reasonable starting value. 
-gamma <- -0.01 # C is a vector of regression coefs for climate covars. Set these as mean of standardized
+gamma <- -0.01 # regression coef for vpdmax
 sig.p<-.1##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values
 ro <- 0.5

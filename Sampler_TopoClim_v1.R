@@ -39,7 +39,7 @@ M<-t(Mint/apply(Mint,1,sum))  ##calculate M starting M given Tau
 Npred<-G<-matrix(NA,tmax,pmax)
 
 for (t in 2:tmax){
-  G[t,]<-exp((beta0+X[t,]*gamma)+beta1*Nlat[t-1,])
+  G[t,]<-exp((beta0+X[t,,1]*gam0+X[t,,2]*gam1+X[t,,3]*gam2)+beta1*Nlat[t-1,])
   Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
 }
 
@@ -72,7 +72,7 @@ for (i in 1:Niter){
   Out=UpdateBetaToCl(tmax=tmax,b0=beta0.star,b1=beta1,X=X,gamma0=gam0,gamma1=gam1,gamma2=gam2,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetaClim(tmax=tmax,b0=beta0,b1=beta1,X=X,gamma0=gam0,gamma1=gam1,gamma2=gam2,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gamma0=gam0,gamma1=gam1,gamma2=gam2,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -84,6 +84,7 @@ for (i in 1:Niter){
     
   }
   betaOut[i,1]<-beta0
+  
   # density dependent param
   beta1.star=rnorm(1,beta1,beta1.tune)
   Out=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1.star,X=X,gamma0=gam0,gamma1=gam1,gamma2=gam2,Nlat=Nlat,M=M,p=p)
@@ -122,7 +123,7 @@ for (i in 1:Niter){
   
   #heatload regression coef
   gam1.star=rnorm(1,gam1,gam1.tune)
-  Out=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gamma0=gam0,gamma1=gam1,star,gamma2=gam2,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gamma0=gam0,gamma1=gam1.star,gamma2=gam2,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
   now=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gamma0=gam0,gamma1=gam1,gamma2=gam2,Nlat=Nlat,M=M,p=p)
@@ -202,8 +203,14 @@ for (i in 1:Niter){
     if(accept.beta1/i<0.35) beta1.tune=beta1.tune*.9
     if(accept.beta1/i>0.45) beta1.tune=beta1.tune*1.1
     
-    if(accept.gamma/i<0.35) gamma.tune=gamma.tune*.9
-    if(accept.gamma/i>0.45) gamma.tune=gamma.tune*1.1
+    if(accept.gam0/i<0.35) gam0.tune=gam0.tune*.9
+    if(accept.gam0/i>0.45) gam0.tune=gam0.tune*1.1
+    
+    if(accept.gam1/i<0.35) gam1.tune=gam1.tune*.9
+    if(accept.gam1/i>0.45) gam1.tune=gam1.tune*1.1
+    
+    if(accept.gam2/i<0.35) gam2.tune=gam2.tune*.9
+    if(accept.gam2/i>0.45) gam2.tune=gam2.tune*1.1
     
     if(accept.tau/i<0.35) tau.tune=tau.tune*.9
     if(accept.tau/i>0.45) tau.tune=tau.tune*1.1

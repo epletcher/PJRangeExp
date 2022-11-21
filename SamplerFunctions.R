@@ -95,7 +95,7 @@ UpdateBetaToCl<-function(tmax,b0,b1,X,gamma0,gamma1,gamma2,Nlat,M,p){ # add X an
   Npred<-matrix(NA,tmax,p)
   G<-matrix(NA,tmax,p)
   for (t in 2:tmax){
-    G[t,]<-exp((b0+X[t,1]*gamma0+X[t,2]*gamma1+gamma2+X[t,3])+b1*Nlat[t-1,]) 
+    G[t,]<-exp((b0+X[t,,1]*gamma0+X[t,,2]*gamma1+gamma2+X[t,,3])+b1*Nlat[t-1,]) 
     Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
     
     
@@ -106,7 +106,7 @@ UpdateBetaToCl<-function(tmax,b0,b1,X,gamma0,gamma1,gamma2,Nlat,M,p){ # add X an
 }
 
 # growth function w climate and topo covariates on beta0 and topo covars on beta1
-UpdateBetaToCl<-function(tmax,b0,b1,X,gamma0,gamma1,gamma2,Nlat,M,p){ # add X and C to list of arguments
+UpdateBetaToClV2<-function(tmax,b0,b1,X,gamma0,gamma1,gamma2,Nlat,M,p){ # add X and C to list of arguments
   Npred<-matrix(NA,tmax,p)
   G<-matrix(NA,tmax,p)
   for (t in 2:tmax){

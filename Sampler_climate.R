@@ -172,6 +172,6 @@ for (i in 1:Niter){
   
 }
 
-
+save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_clim_v1.RData")
 
 

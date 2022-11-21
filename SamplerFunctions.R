@@ -59,7 +59,7 @@ sampleLatent<-function(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax) {
 
 
 
-###############Sampling Dispersal and 
+###############Sampling Dispersal and growth
 
 UpdateBeta<-function(tmax,b0,b1,Nlat,M,p){ # add X and C to list of arguments
 Npred<-matrix(NA,tmax,p)
@@ -90,7 +90,36 @@ UpdateBetaClim<-function(tmax,b0,b1,X,gamma,Nlat,M,p){ # add X and C to list of 
   
 }
 
+# growth function w climate and topo covariates on beta0
+UpdateBetaToCl<-function(tmax,b0,b1,X,gamma0,gamma1,gamma2,Nlat,M,p){ # add X and C to list of arguments
+  Npred<-matrix(NA,tmax,p)
+  G<-matrix(NA,tmax,p)
+  for (t in 2:tmax){
+    G[t,]<-exp((b0+X[t,1]*gamma0+X[t,2]*gamma1+gamma2+X[t,3])+b1*Nlat[t-1,]) 
+    Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
+    
+    
+    
+  }
+  return(list(Npred=Npred,G=G))
+  
+}
 
+# growth function w climate and topo covariates on beta0 and topo covars on beta1
+UpdateBetaToCl<-function(tmax,b0,b1,X,gamma0,gamma1,gamma2,Nlat,M,p){ # add X and C to list of arguments
+  Npred<-matrix(NA,tmax,p)
+  G<-matrix(NA,tmax,p)
+  for (t in 2:tmax){
+    G[t,]<-exp((b0+X[t,1]*gamma0+X[t,2]*gamma1+gamma2+X[t,3])+(b1+X[t,2]*""+X[t,3]*"")*Nlat[t-1,]) 
+    Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
+    
+    
+    
+  }
+  return(list(Npred=Npred,G=G))
+  
+}
+# dispersal
 UpdateDispersal<-function(tmax,tau,Nlat,G,p,D){
   Npred<-matrix(NA,tmax,p)
   Mint<-exp(-(D/tau))

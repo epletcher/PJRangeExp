@@ -42,10 +42,10 @@ checkpoint=Niter*0.01
 ###Containers####
 tauOut<-matrix(NA,Niter,)
 betaOut<-matrix(NA,Niter,bmax)
-NlatOut<-array(NA,c(tmax,93,Niter)) # change to 93 pixels
+NlatOut<-array(NA,c(tmax,pmax,Niter/10)) # change to all pixels, but only every 10th iteration
 NlatOutLast<-matrix(NA,pmax,Niter)
-rep.pix <- c(115:145, 910:940, 1865:1895) # representative pixels (high,med,low density)
-
+#rep.pix <- c(115:145, 910:940, 1865:1895) # representative pixels (high,med,low density)
+tenIter <- seq(1,20000, by = 10) # vecotr of every 10th iteration
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
 accept.beta1=accept.beta0=accept.tau=0
@@ -56,7 +56,7 @@ tau.tune=.001
 
 
 
-for (i in 4419:Niter){ # edit starting iteration if start/stopping
+for (i in 1:Niter){ # edit starting iteration if start/stopping
   
   
   beta0.star=rnorm(1,beta0,beta0.tune)
@@ -126,7 +126,10 @@ for (i in 4419:Niter){ # edit starting iteration if start/stopping
   for (t in 1:tmax){
   Nlat[t,]<-sampleLatent(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax)
   }
-  NlatOut[,,i]<-Nlat[,rep.pix]
+  
+  if(i==((tenIter[i]-1)/10)){
+    NlatOut[,,i/10] <- Nlat}
+  
   NlatOutLast[,i]<-Nlat[tmax,]
   
   print(i)

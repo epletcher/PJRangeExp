@@ -91,11 +91,11 @@ UpdateBetaClim<-function(tmax,b0,b1,X,gam0,gam1,Nlat,M,p){ # add X and C to list
 }
 
 # growth function w climate and topo covariates on beta0
-UpdateBetaToCl<-function(tmax,b0,b1,X,gamma0,gamma1,gamma2,Nlat,M,p){ # add X and C to list of arguments
+UpdateBetaToCl<-function(tmax,b0,b1,X,gam0,gam1,gam2,gam3,Nlat,M,p){ # add X and gammas to list of arguments
   Npred<-matrix(NA,tmax,p)
   G<-matrix(NA,tmax,p)
   for (t in 2:tmax){
-    G[t,]<-exp((b0+X[t,,1]*gamma0+X[t,,2]*gamma1+gamma2+X[t,,3])+b1*Nlat[t-1,]) 
+    G[t,]<-exp((b0+X[t,,1]*gam0+X[t,,2]*gam1+gam2*X[t,,3]+gam3*X[t,,4])+b1*Nlat[t-1,]) 
     Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
     
     
@@ -106,14 +106,12 @@ UpdateBetaToCl<-function(tmax,b0,b1,X,gamma0,gamma1,gamma2,Nlat,M,p){ # add X an
 }
 
 # growth function w climate and topo covariates on beta0 and topo covars on beta1
-UpdateBetaToClV2<-function(tmax,b0,b1,X,gamma0,gamma1,gamma2,Nlat,M,p){ # add X and C to list of arguments
+UpdateBetaToClV2<-function(tmax,b0,b1,X,gam0,gam1,gam2,gam3,phi0,phi1,Nlat,M,p){ # add X and C to list of arguments
   Npred<-matrix(NA,tmax,p)
   G<-matrix(NA,tmax,p)
   for (t in 2:tmax){
-    G[t,]<-exp((b0+X[t,1]*gamma0+X[t,2]*gamma1+gamma2+X[t,3])+(b1+X[t,2]*phi0[t]+X[t,3]*phi1[t])*Nlat[t-1,]) 
+    G[t,]<-exp((b0+X[t,,1]*gam0+X[t,,2]*gam1+X[t,,3]*gam2+X[t,,4]*gam3)+(b1+X[t,,3]*phi0[t]+X[t,,4]*phi1[t])*Nlat[t-1,]) 
     Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
-    
-    
     
   }
   return(list(Npred=Npred,G=G))

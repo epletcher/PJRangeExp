@@ -76,11 +76,11 @@ return(list(Npred=Npred,G=G))
 }
 
 # growth function w climate covariate
-UpdateBetaClim<-function(tmax,b0,b1,X,gamma,Nlat,M,p){ # add X and C to list of arguments
+UpdateBetaClim<-function(tmax,b0,b1,X,gam0,gam1,Nlat,M,p){ # add X and C to list of arguments
   Npred<-matrix(NA,tmax,p)
   G<-matrix(NA,tmax,p)
   for (t in 2:tmax){
-    G[t,]<-exp((b0+X[t,]*gamma)+b1*Nlat[t-1,]) 
+    G[t,]<-exp((b0+X[t,,1]*gam0+X[t,,2]*gam1)+b1*Nlat[t-1,]) 
     Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
     
     

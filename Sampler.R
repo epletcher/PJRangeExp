@@ -16,10 +16,10 @@ bmax<-2 #length(X[1,]) number of covariates
 
 ###Starting Values###
 Nlat<-N #Starting values for latent states is the observed data
-beta0<-.01 ###Give beta some starting values based on what we know
-beta1<--0.0001
-tau<-.1###Give tau a reasonable starting value. 
-sig.p<-.1##give sig.p reasonable starting values
+beta0<-.019 ###Give beta some starting values based on what we know
+beta1<--0.001
+tau<-.033###Give tau a reasonable starting value. 
+sig.p<-1.3##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values
 ro <- 0.5
 qo1 <- (ro/o1)+1
@@ -39,13 +39,14 @@ for (t in 2:tmax){
 
 Niter<-20000 ###Number of interations. Keep in mind this will need to be more than you needed for stan  
 checkpoint=Niter*0.01
+
 ###Containers####
 tauOut<-matrix(NA,Niter,)
 betaOut<-matrix(NA,Niter,bmax)
 NlatOut<-array(NA,c(tmax,pmax,Niter/10)) # change to all pixels, but only every 10th iteration
 NlatOutLast<-matrix(NA,pmax,Niter)
 #rep.pix <- c(115:145, 910:940, 1865:1895) # representative pixels (high,med,low density)
-tenIter <- seq(1,20000, by = 10) # vecotr of every 10th iteration
+tenIter <- seq(10,20000, by = 10) # vector of every 10th iteration
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
 accept.beta1=accept.beta0=accept.tau=0
@@ -127,7 +128,7 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   Nlat[t,]<-sampleLatent(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax)
   }
   
-  if(i==((tenIter[i]-1)/10)){
+  if(i %in% tenIter) {
     NlatOut[,,i/10] <- Nlat}
   
   NlatOutLast[,i]<-Nlat[tmax,]

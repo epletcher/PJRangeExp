@@ -95,7 +95,7 @@ UpdateBetaToCl<-function(tmax,b0,b1,X,gam0,gam1,gam2,gam3,Nlat,M,p){ # add X and
   Npred<-matrix(NA,tmax,p)
   G<-matrix(NA,tmax,p)
   for (t in 2:tmax){
-    G[t,]<-exp((b0+X[t,,1]*gam0+X[t,,2]*gam1+gam2*X[t,,3]+gam3*X[t,,4])+b1*Nlat[t-1,]) 
+    G[t,]<-exp((b0+X[t,,1]*gam0+X[t,,2]*gam1+X[t,,3]*gam2+X[t,,4]*gam3)+b1*Nlat[t-1,]) 
     Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
     
     

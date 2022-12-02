@@ -28,7 +28,7 @@ gam0<-0 # regression coef for ppt
 gam1<-0 # regression coef for tmean
 gam2<-0 # regression coef for heatload
 gam3<-0 # regression coef for elev
-sig.p<-.1##give sig.p reasonable starting values
+sig.p<-1.3##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values
 ro <- 0.5
 qo1 <- (ro/o1)+1
@@ -60,7 +60,7 @@ sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 accept.gam0=accept.gam1=accept.gam2=accept.gam3=accept.beta1=accept.beta0=accept.tau=0
 
 #beta.tune=diag(c(.000001,.000001))
-beta0.tune=.000001
+beta0.tune=.0001
 beta1.tune=.0001
 tau.tune=.001
 gam0.tune=.001
@@ -246,6 +246,6 @@ for (i in 1:Niter){
   
 }
 
-
+save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_topoClim_v1.RData")
 
 

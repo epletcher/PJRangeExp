@@ -150,7 +150,7 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   
 }
 
-save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v2.RData")
+save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v3.RData")
 
 
 

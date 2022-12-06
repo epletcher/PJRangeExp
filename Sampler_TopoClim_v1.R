@@ -68,7 +68,7 @@ gam1.tune=.001
 gam2.tune=.001
 gam3.tune=.001
 
-for (i in 1:Niter){
+for (i in 10929:Niter){
   
   # growth rate
   beta0.star=rnorm(1,beta0,beta0.tune)

@@ -60,8 +60,8 @@ accept.gam1=accept.gam0=accept.beta1=accept.beta0=accept.tau=0
 beta0.tune=.0001
 beta1.tune=.0001
 tau.tune=.001
-gam0.tune=.0001
-gam1.tune=.0001
+gam0.tune=.001
+gam1.tune=.001
 
 for (i in 1:Niter){
   
@@ -195,6 +195,6 @@ for (i in 1:Niter){
   
 }
 
-save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_clim_v1.RData")
+save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_clim_v2.RData")
 
 

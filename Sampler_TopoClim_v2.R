@@ -105,12 +105,12 @@ for (i in 1:Niter){
   }
   betaOut[i,2]<-beta1
   
-  #vpdmax regression coef
+  #ppt regression coef
   gam0.star=rnorm(1,gam0,gam0.tune)
-  Out=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gamma0=gam0.star,gamma1=gam1,gamma2=gam2,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gam0=gam0.star,gam1=gam1,gam2=gam2,gam3=gam3,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gamma0=gam0,gamma1=gam1,gamma2=gam2,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gam0=gam0,gam1=gam1,gam2=gam2,gam3=gam3,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -123,12 +123,12 @@ for (i in 1:Niter){
   }
   gammaOut[i,1]<-gam0
   
-  #heatload regression coef
+  #tmean regression coef
   gam1.star=rnorm(1,gam1,gam1.tune)
-  Out=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gamma0=gam0,gamma1=gam1.star,gamma2=gam2,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gam0=gam0,gam1=gam1.star,gam2=gam2,gam3=gam3,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gamma0=gam0,gamma1=gam1,gamma2=gam2,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gam0=gam0,gam1=gam1,gam2=gam2,gam3=gam3,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -141,12 +141,12 @@ for (i in 1:Niter){
   }
   gammaOut[i,2]<-gam1
   
-  #elevation regression coef
+  #heatload regression coef
   gam2.star=rnorm(1,gam2,gam2.tune)
-  Out=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gamma0=gam0,gamma1=gam1,gamma2=gam2.star,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gam0=gam0,gam1=gam1,gam2=gam2.star,gam3=gam3,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gamma0=gam0,gamma1=gam1,gamma2=gam2,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gam0=gam0,gam1=gam1,gam2=gam2,gam3=gam3,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -159,13 +159,31 @@ for (i in 1:Niter){
   }
   gammaOut[i,3]<-gam2
   
+  #elevation regression coef
+  gam3.star=rnorm(1,gam3,gam3.tune)
+  Out=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gam0=gam0,gam1=gam1,gam2=gam2,gam3=gam3.star,Nlat=Nlat,M=M,p=p)
+  Npred.star<-Out$Npred
+  G.star<-Out$G
+  now=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gam0=gam0,gam1=gam1,gam2=gam2,gam3=gam3,Nlat=Nlat,M=M,p=p)
+  Npred<-now$Npred
+  mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
+  mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
+  mh=min(exp(mh1-mh2),1)
+  if(mh>runif(1)){
+    G=G.star
+    gam3=gam3.star
+    accept.gam3=accept.gam3+1
+    
+  }
+  gammaOut[i,4]<-gam3
+  
   # heatload on density dependence
   phi0 <- rep(0, tmax)
   phi0.tune <- rep(0, 0.001)
   
   for (t in 1:length(tmax)) {
   phi0.star=rnorm(1,phi0[t],phi0.tune[t])
-  Out=UpdateBetaToClv2(tmax=tmax,b0=beta0,b1=beta1,X=X,gamma0=gam0,gamma1=gam1,gamma2=gam2,phi0.star=phi.star,phi0=phi0[-t],phi1=phi1,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetaToClv2(tmax=tmax,b0=beta0,b1=beta1,X=X,gam0=gam0,gam1=gam1,gam2=gam2,gam3=gam3,phi0.star=phi.star,phi0=phi0[-t],phi1=phi1,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
   now=UpdateBetaToCl(tmax=tmax,b0=beta0,b1=beta1,X=X,gamma0=gam0,gamma1=gam1,gamma2=gam2,phi0=phi0,phi1=phi1,Nlat=Nlat,M=M,p=p)

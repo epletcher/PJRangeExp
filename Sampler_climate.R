@@ -57,11 +57,11 @@ sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
 accept.gam1=accept.gam0=accept.beta1=accept.beta0=accept.tau=0
 #beta.tune=diag(c(.000001,.000001))
-beta0.tune=.0001
-beta1.tune=.0001
+beta0.tune=.001
+beta1.tune=.001
 tau.tune=.001
-gam0.tune=.001
-gam1.tune=.001
+gam0.tune=.0001
+gam1.tune=.0001
 
 for (i in 1:Niter){
   

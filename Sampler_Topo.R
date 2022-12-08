@@ -11,9 +11,9 @@ N<-N[1:31,] # observed data, assumed to be a matrix that is year by pixel (remov
 tmax<-dim(N)[1] 
 pmax<-dim(N)[2]
 D<-Dsq
-X<-enviro.var[1:tmax,,1:2] # covariates this is where they go (1 = ppt, 2 = tmean, 3 = vpdmax, 4 = heatload, 5 = elev)
-amax<-3
-bmax<-1 # number of climate covariates (minus topographic vars)
+X<-enviro.var[1:tmax,,4:5] # heat load and elev; this is where covars go (1 = tmean, 2 = tmean, 3 = vpdmax, 4 = heatload, 5 = elev)
+amax<-2
+bmax<-2 # number of covariates 
 
 
 ####priors####
@@ -22,9 +22,11 @@ bmax<-1 # number of climate covariates (minus topographic vars)
 ###Starting Values###
 Nlat<-N #Starting values for latent states is the observed data
 alpha0<-.019 ###Give beta some starting values based on what we know
-alpha1<-0 # regression coef for ppt
-alpha2<-0 # regresstion coef for tmean
+alpha1<-0 # regression coef for heatload
+alpha2<-0 # regresstion coef for elev
 beta0<--0.001
+beta1<-0 # regression coef for heatload
+beta2<-0 # regresstion coef for elev
 tau<-.033###Give tau a reasonable starting value. 
 sig.p<-1.3##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values # could try 1.5 or 2
@@ -38,7 +40,7 @@ M<-t(Mint/apply(Mint,1,sum))  ##calculate M starting M given Tau
 Npred<-G<-matrix(NA,tmax,pmax)
 
 for (t in 2:tmax){
-  G[t,]<-exp((alpha0+X[t,,1]*alpha1+X[t,,2]*alpha2)+beta0*Nlat[t-1,])
+  G[t,]<-exp((alpha0+X[t,,1]*alpha1+X[t,,2]*alpha2)+(beta0+X[t,,1]*beta1+X[t,,2]*beta2)*Nlat[t-1,])
   Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
 }
 
@@ -61,16 +63,18 @@ alpha0.tune=.001
 alpha1.tune=.0001
 alpha2.tune=.0001
 beta0.tune=.001
+beta1.tune=.0001
+beta2.tune=.0001
 tau.tune=.001
 
-for (i in 1:Niter){
+for (i in 10929:Niter){
   
   #alpha 0
   alpha0.star=rnorm(1,alpha0,alpha0.tune)
-  Out=UpdateBetaClim(tmax=tmax,a0=alpha0.star,a1=alpha1,a2=alpha2,X=X,b0=beta0,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetaTop(tmax=tmax,a0=alpha0.star,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetaClim(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -85,10 +89,10 @@ for (i in 1:Niter){
   
   #alpha1
   alpha1.star=rnorm(1,alpha1,alpha1.tune)
-  Out=UpdateBetaClim(tmax=tmax,a0=alpha0,a1=alpha1.star,a2=alpha2,X=X,b0=beta0,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1.star,a2=alpha2,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetaClim(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -103,10 +107,10 @@ for (i in 1:Niter){
   
   #alpha2
   alpha2.star=rnorm(1,alpha2,alpha2.tune)
-  Out=UpdateBetaClim(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2.star,X=X,b0=beta0,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2.star,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetaClim(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -121,10 +125,10 @@ for (i in 1:Niter){
   
   #beta 0
   beta0.star=rnorm(1,beta0,beta0.tune)
-  Out=UpdateBetaClim(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0.star,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0.star,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetaClim(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -137,7 +141,43 @@ for (i in 1:Niter){
   }
   betaOut[i,1]<-beta0
   
-  #tau
+  #beta 1
+  beta1.star=rnorm(1,beta1,beta1.tune)
+  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1.star,b2=beta2,Nlat=Nlat,M=M,p=p)
+  Npred.star<-Out$Npred
+  G.star<-Out$G
+  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  Npred<-now$Npred
+  mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
+  mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
+  mh=min(exp(mh1-mh2),1)
+  if(mh>runif(1)){
+    G=G.star
+    beta1=beta1.star
+    accept.beta1=accept.beta1+1
+    
+  }
+  betaOut[i,2]<-beta1
+  
+  #beta 2
+  beta2.star=rnorm(1,beta2,beta2.tune)
+  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1,b2=beta2.star,Nlat=Nlat,M=M,p=p)
+  Npred.star<-Out$Npred
+  G.star<-Out$G
+  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  Npred<-now$Npred
+  mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
+  mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
+  mh=min(exp(mh1-mh2),1)
+  if(mh>runif(1)){
+    G=G.star
+    beta2=beta2.star
+    accept.beta2=accept.beta2+1
+    
+  }
+  betaOut[i,3]<-beta2
+  
+  # dispersal param
   tau.star=rnorm(1,tau,tau.tune)
   Out=UpdateDispersal(tmax=tmax,tau=tau.star,Nlat=Nlat,G=G,p=p,D=D)
   Npred.star<-Out$Npred
@@ -157,7 +197,7 @@ for (i in 1:Niter){
   tauOut[i,]<-tau
   
   
-  #sigmas
+  
   for (t in 2:tmax){
     Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
   }
@@ -167,7 +207,7 @@ for (i in 1:Niter){
   #sig.o<-sqrt(sampleObS(Nlat=c(Nlat),N=c(N),a=3,b=.5))
   sig.oOut[i,]<-sig.o
   
-  #latent
+  
   for (t in 1:tmax){
     Nlat[t,]<-sampleLatent(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax)
   }
@@ -177,7 +217,7 @@ for (i in 1:Niter){
   NlatOutLast[,i]<-Nlat[tmax,]
   
   print(i)
-  #tuning
+  
   if(i%%checkpoint==0){
     if(accept.alpha0/i<0.35) alpha0.tune=alpha0.tune*.9
     if(accept.alpha0/i>0.45) alpha0.tune=alpha0.tune*1.1
@@ -191,6 +231,12 @@ for (i in 1:Niter){
     if(accept.beta0/i<0.35) beta0.tune=beta0.tune*.9
     if(accept.beta0/i>0.45) beta0.tune=beta0.tune*1.1
     
+    if(accept.beta1/i<0.35) beta1.tune=beta1.tune*.9
+    if(accept.beta1/i>0.45) beta1.tune=beta1.tune*1.1
+    
+    if(accept.beta2/i<0.35) beta2.tune=beta2.tune*.9
+    if(accept.beta2/i>0.45) beta2.tune=beta2.tune*1.1
+    
     if(accept.tau/i<0.35) tau.tune=tau.tune*.9
     if(accept.tau/i>0.45) tau.tune=tau.tune*1.1
   }
@@ -199,6 +245,6 @@ for (i in 1:Niter){
   
 }
 
-save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_clim_v3.RData")
+save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_topo_v1.RData")
 
 

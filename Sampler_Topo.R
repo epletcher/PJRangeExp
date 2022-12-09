@@ -12,8 +12,8 @@ tmax<-dim(N)[1]
 pmax<-dim(N)[2]
 D<-Dsq
 X<-enviro.var[1:tmax,,4:5] # heat load and elev; this is where covars go (1 = tmean, 2 = tmean, 3 = vpdmax, 4 = heatload, 5 = elev)
-amax<-2
-bmax<-2 # number of covariates 
+amax<-3
+bmax<-3 # number of covariates 
 
 
 ####priors####
@@ -57,17 +57,17 @@ NlatOutLast<-matrix(NA,pmax,Niter)
 tenIter <- seq(10,20000, by = 10) # vector of every 10th iteration
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
-accept.alpha2=accept.alpha1=accept.alpha0=accept.beta0=accept.tau=0
+accept.alpha2=accept.alpha1=accept.alpha0=accept.beta2=accept.beta1=accept.beta0=accept.tau=0
 #beta.tune=diag(c(.000001,.000001))
-alpha0.tune=.001
-alpha1.tune=.0001
-alpha2.tune=.0001
-beta0.tune=.001
-beta1.tune=.0001
-beta2.tune=.0001
+alpha0.tune=.0001
+alpha1.tune=.001
+alpha2.tune=.001
+beta0.tune=.0001
+beta1.tune=.001
+beta2.tune=.001
 tau.tune=.001
 
-for (i in 10929:Niter){
+for (i in 1:Niter){
   
   #alpha 0
   alpha0.star=rnorm(1,alpha0,alpha0.tune)
@@ -241,10 +241,12 @@ for (i in 10929:Niter){
     if(accept.tau/i>0.45) tau.tune=tau.tune*1.1
   }
   
-  
+  if(i %in% seq(1000,20000, by = 1000)) {
+    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_topo_v1.RData")
+  }
   
 }
 
-save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_topo_v1.RData")
+#save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_topo_v1.RData")
 
 

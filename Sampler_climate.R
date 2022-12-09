@@ -58,12 +58,12 @@ sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 accept.alpha2=accept.alpha1=accept.alpha0=accept.beta0=accept.tau=0
 #beta.tune=diag(c(.000001,.000001))
 alpha0.tune=.001
-alpha1.tune=.0001
-alpha2.tune=.0001
-beta0.tune=.001
+alpha1.tune=.001
+alpha2.tune=.001
+beta0.tune=.0001
 tau.tune=.001
 
-for (i in 1:Niter){
+for (i in 3354:Niter){
   
   #alpha 0
   alpha0.star=rnorm(1,alpha0,alpha0.tune)
@@ -195,7 +195,9 @@ for (i in 1:Niter){
     if(accept.tau/i>0.45) tau.tune=tau.tune*1.1
   }
   
-  
+  if(i %in% seq(1000,20000, by = 1000)) {
+    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_clim_v3.RData")
+  }
   
 }
 

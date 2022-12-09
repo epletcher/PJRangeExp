@@ -72,7 +72,7 @@ beta1.tune=.0001
 beta2.tune=.0001
 tau.tune=.001
 
-for (i in 10929:Niter){
+for (i in 1:Niter){
   
   #alpha 0
   alpha0.star=rnorm(1,alpha0,alpha0.tune)
@@ -91,8 +91,6 @@ for (i in 10929:Niter){
     
   }
   alphaOut[i,1]<-alpha0
-  
-  #**********left off here****************
   
   #alpha1
   alpha1.star=rnorm(1,alpha1,alpha1.tune)
@@ -114,10 +112,10 @@ for (i in 10929:Niter){
   
   #alpha2
   alpha2.star=rnorm(1,alpha2,alpha2.tune)
-  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2.star,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2.star,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -130,12 +128,48 @@ for (i in 10929:Niter){
   }
   alphaOut[i,3]<-alpha2
   
-  #beta 0
-  beta0.star=rnorm(1,beta0,beta0.tune)
-  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0.star,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  #alpha3
+  alpha3.star=rnorm(1,alpha3,alpha3.tune)
+  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3.star,a4=alpha4,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  Npred<-now$Npred
+  mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
+  mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
+  mh=min(exp(mh1-mh2),1)
+  if(mh>runif(1)){
+    G=G.star
+    alpha3=alpha3.star
+    accept.alpha3=accept.alpha3+1
+    
+  }
+  alphaOut[i,4]<-alpha3
+  
+  #alpha4
+  alpha4.star=rnorm(1,alpha4,alpha4.tune)
+  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4.star,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  Npred.star<-Out$Npred
+  G.star<-Out$G
+  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  Npred<-now$Npred
+  mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
+  mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
+  mh=min(exp(mh1-mh2),1)
+  if(mh>runif(1)){
+    G=G.star
+    alpha4=alpha4.star
+    accept.alpha4=accept.alpha4+1
+    
+  }
+  alphaOut[i,5]<-alpha4
+  
+  #beta 0
+  beta0.star=rnorm(1,beta0,beta0.tune)
+  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0.star,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  Npred.star<-Out$Npred
+  G.star<-Out$G
+  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -150,10 +184,10 @@ for (i in 10929:Niter){
   
   #beta 1
   beta1.star=rnorm(1,beta1,beta1.tune)
-  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1.star,b2=beta2,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1.star,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -168,10 +202,10 @@ for (i in 10929:Niter){
   
   #beta 2
   beta2.star=rnorm(1,beta2,beta2.tune)
-  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1,b2=beta2.star,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1,b2=beta2.star,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -234,6 +268,12 @@ for (i in 10929:Niter){
     
     if(accept.alpha2/i<0.35) alpha2.tune=alpha2.tune*.9
     if(accept.alpha2/i>0.45) alpha2.tune=alpha2.tune*1.1
+    
+    if(accept.alpha3/i<0.35) alpha3.tune=alpha3.tune*.9
+    if(accept.alpha3/i>0.45) alpha3.tune=alpha3.tune*1.1
+    
+    if(accept.alpha4/i<0.35) alpha4.tune=alpha4.tune*.9
+    if(accept.alpha4/i>0.45) alpha4.tune=alpha4.tune*1.1
     
     if(accept.beta0/i<0.35) beta0.tune=beta0.tune*.9
     if(accept.beta0/i>0.45) beta0.tune=beta0.tune*1.1

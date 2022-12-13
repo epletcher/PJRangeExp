@@ -62,14 +62,14 @@ sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 accept.alpha4=accept.alpha3=accept.alpha2=accept.alpha1=accept.alpha0=accept.beta2=accept.beta1=accept.beta0=accept.tau=0
 
 #beta.tune=diag(c(.000001,.000001))
-alpha0.tune=.001
-alpha1.tune=.0001
-alpha2.tune=.0001
-alpha3.tune=.0001
-alpha4.tune=.0001
-beta0.tune=.001
-beta1.tune=.0001
-beta2.tune=.0001
+alpha0.tune=.0001
+alpha1.tune=.001
+alpha2.tune=.001
+alpha3.tune=.001
+alpha4.tune=.001
+beta0.tune=.0001
+beta1.tune=.001
+beta2.tune=.001
 tau.tune=.001
 
 for (i in 1:Niter){
@@ -289,9 +289,10 @@ for (i in 1:Niter){
   }
   
   
+  if(i %in% seq(1000,20000, by = 1000)) {
+    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_topoClim_v1.RData")
+  }
   
 }
-
-save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_topo_v1.RData")
 
 

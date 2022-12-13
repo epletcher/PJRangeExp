@@ -12,8 +12,8 @@ tmax<-dim(N)[1]
 pmax<-dim(N)[2]
 D<-Dsq
 X<-enviro.var[1:tmax,,-3] # all covariates except vpdmax; this is where covars go (1 = tmean, 2 = tmean, 3 = vpdmax, 4 = heatload, 5 = elev)
-amax<-4
-bmax<-2 # number of covariates 
+amax<-5
+bmax<-3 # number of covariates 
 
 
 ####priors####
@@ -187,7 +187,7 @@ for (i in 1:Niter){
   Out=UpdateBetaToCl(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1.star,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaToCl(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -205,7 +205,7 @@ for (i in 1:Niter){
   Out=UpdateBetaToCl(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1,b2=beta2.star,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetaTop(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaToCl(tmax=tmax,a0=alpha0,a1=alpha1,a2=alpha2,a3=alpha3,a4=alpha4,X=X,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior

@@ -42,7 +42,7 @@ M<-t(Mint/apply(Mint,1,sum))  ##calculate M starting M given Tau
 Npred<-G<-matrix(NA,tmax,pmax)
 
 for (t in 2:tmax){
-  G[t,]<-exp((alpha0+X[t,,1]*alpha1+X[t,,2]*alpha2+X[t,,3]*alpha3+X[t,,4]*alpha4)+(beta0+X[t,,1]*beta1+X[t,,2]*beta2)*Nlat[t-1,])
+  G[t,]<-exp((alpha0+X[t,,1]*alpha1+X[t,,2]*alpha2+X[t,,3]*alpha3+X[t,,4]*alpha4)+(beta0+X[t,,3]*beta1+X[t,,4]*beta2)*Nlat[t-1,])
   Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
 }
 

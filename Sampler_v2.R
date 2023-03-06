@@ -65,10 +65,10 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   
   
   beta0.star=rnorm(1,beta0,beta0.tune)
-  Out=UpdateBetanonM(tmax=tmax,b0=beta0.star,b1=beta1,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetanonM(tmax=tmax,a0=beta0.star,b0=beta1,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetanonM(tmax=tmax,b0=beta0,b1=beta1,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetanonM(tmax=tmax,a0=beta0,b0=beta1,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -82,10 +82,10 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   betaOut[i,1]<-beta0
   
   beta1.star=rnorm(1,beta1,beta1.tune)
-  Out=UpdateBetanonM(tmax=tmax,b0=beta0,b1=beta1.star,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetanonM(tmax=tmax,a0=beta0,b0=beta1.star,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBetanonM(tmax=tmax,b0=beta0,b1=beta1,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetanonM(tmax=tmax,a0=beta0,b0=beta1,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior

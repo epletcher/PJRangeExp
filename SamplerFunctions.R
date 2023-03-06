@@ -75,6 +75,19 @@ return(list(Npred=Npred,G=G))
 
 }
 
+# update beta with growth not multiplicative
+UpdateBetanonM<-function(tmax,a0,b0,Nlat,M,p){ # add X and C to list of arguments
+  Npred<-matrix(NA,tmax,p)
+  G<-matrix(NA,tmax,p)
+  for (t in 2:tmax){
+    G[t,]<-a0+b0*Nlat[t-1,]
+    Npred[t,]<-M%*%(G[t,])
+    
+  }
+  return(list(Npred=Npred,G=G))
+  
+}
+
 # growth function w climate covariate
 UpdateBetaClim<-function(tmax,a0,a1,a2,X,b0,Nlat,M,p){ # add X and C to list of arguments
   Npred<-matrix(NA,tmax,p)

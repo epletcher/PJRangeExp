@@ -56,7 +56,40 @@ sampleLatent<-function(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax) {
   
 }  
 
-
+sampleLatentnonM<-function(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax) {  
+  ###This function sequentially adds info from the different data sources to inform latent state
+  #zero out
+  s2<-sig.p^2
+  o1<-sig.o^2
+  Vi=0
+  v=0
+  
+  #1. Contribution of Observations
+  Vi=1/o1
+  v=(N[t,]/o1)
+  
+  
+  #2. Contribution of previous time step. Not included if we are in the first time step
+  if(t>1){
+    mu1<-M%*%(G[t,])
+    Vi=Vi+1/s2
+    v=v+mu1/s2
+  }
+  
+  #2. Contribution of previous time step
+  # should fix G to be matrix
+  if(t<tmax){
+    mu2<-Minv%*%(1/G[t+1,]) ####Here y is arranged year by pixel and X is year by pixel by covariate 
+    Vi=Vi+1/s2
+    v=v+mu2/s2
+  }
+  
+  
+  V<-1/Vi
+  Nlat_t<-rnorm(length(v),c(V*v),sqrt(V))
+  return(Nlat_t)
+  
+}  
 
 
 ###############Sampling Dispersal and growth

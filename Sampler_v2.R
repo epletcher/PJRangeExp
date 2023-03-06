@@ -4,7 +4,7 @@ library("splus2R")
 library('LaplacesDemon')
 
 #load data prep workspace
-load("G:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Scripts/data_prepped.RData")
+load("D:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Scripts/data_prepped.RData")
 
 ###Data####
 N<-N[1:31,] # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here)

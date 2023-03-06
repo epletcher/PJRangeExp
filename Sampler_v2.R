@@ -129,7 +129,7 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   
   
   for (t in 1:tmax){
-  Nlat[t,]<-sampleLatent(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax)
+  Nlat[t,]<-sampleLatentnonM(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax)
   }
   
   if(i %in% tenIter) {

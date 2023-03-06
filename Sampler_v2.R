@@ -1,4 +1,4 @@
-.libPaths("C:/Rpackages/R/win-library/4.1") # (elise setting package library location)
+#.libPaths("C:/Rpackages/R/win-library/4.1") # (elise setting package library location)
 
 library("splus2R")
 library('LaplacesDemon')
@@ -154,7 +154,7 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   
 }
 
-save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v3.RData")
+save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_nonM_v1.RData")
 
 
 

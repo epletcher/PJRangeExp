@@ -56,7 +56,7 @@ sampleLatent<-function(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax) {
   
 }  
 
-sampleLatentnonM<-function(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax) {  
+sampleLatentnonM<-function(Npred,Nlat,N,b0,b1,M,Minv,sig.o,sig.p,tmax) {  
   ###This function sequentially adds info from the different data sources to inform latent state
   #zero out
   s2<-sig.p^2
@@ -71,7 +71,7 @@ sampleLatentnonM<-function(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax) {
   
   #2. Contribution of previous time step. Not included if we are in the first time step
   if(t>1){
-    mu1<-M%*%(G[t,])
+    mu1<-M%*%(b0+b1*Nlat[t,])
     Vi=Vi+1/s2
     v=v+mu1/s2
   }
@@ -79,7 +79,7 @@ sampleLatentnonM<-function(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax) {
   #2. Contribution of previous time step
   # should fix G to be matrix
   if(t<tmax){
-    mu2<-Minv%*%(1/G[t+1,]) ####Here y is arranged year by pixel and X is year by pixel by covariate 
+    mu2<-(((Minv%*%Nlat[t+1,])-b0)/b1) ####Here y is arranged year by pixel and X is year by pixel by covariate 
     Vi=Vi+1/s2
     v=v+mu2/s2
   }

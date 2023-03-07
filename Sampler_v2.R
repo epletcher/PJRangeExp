@@ -55,7 +55,7 @@ sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
 accept.beta1=accept.beta0=accept.tau=0
 #beta.tune=diag(c(.000001,.000001))
-beta0.tune=.000001
+beta0.tune=.00001
 beta1.tune=.0001
 tau.tune=.001
 
@@ -150,11 +150,14 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
     if(accept.tau/i>0.45) tau.tune=tau.tune*1.1
   }
     
+  if(i %in% seq(1000,20000, by = 1000)) {
+    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_nonM_v1.RData")
+  }
   
   
 }
 
-save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_nonM_v1.RData")
+#save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_nonM_v1.RData")
 
 
 

@@ -1,5 +1,7 @@
 #.libPaths("C:/Rpackages/R/win-library/4.1") # (elise setting package library location)
 
+# version of the sampler with a quadratic term for population growth 
+
 library("splus2R")
 library('LaplacesDemon')
 ###Data####
@@ -8,7 +10,7 @@ tmax<-dim(N)[1]
 pmax<-dim(N)[2]
 D<-Dsq
 #X<-if you have covariates this is where they go
-bmax<-2 #length(X[1,]) number of covariates
+bmax<-3 #length(X[1,]) number of covariates
 
 
 ####priors####
@@ -18,6 +20,7 @@ bmax<-2 #length(X[1,]) number of covariates
 Nlat<-N #Starting values for latent states is the observed data
 beta0<-.019 ###Give beta some starting values based on what we know
 beta1<--0.001
+beta2 <- 0
 tau<-.033###Give tau a reasonable starting value. 
 sig.p<-1.3##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values
@@ -32,7 +35,7 @@ M<-t(Mint/apply(Mint,1,sum))  ##calculate M starting M given Tau
 Npred<-G<-matrix(NA,tmax,pmax)
 
 for (t in 2:tmax){
-  G[t,]<-exp(beta0+beta1*Nlat[t-1,])
+  G[t,]<-exp(beta0+beta1*Nlat[t-1,]+beta2*(Nlat[t-1,]^2))
   Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
 }
 
@@ -49,10 +52,11 @@ NlatOutLast<-matrix(NA,pmax,Niter)
 tenIter <- seq(10,20000, by = 10) # vector of every 10th iteration
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
-accept.beta1=accept.beta0=accept.tau=0
+accept.beta2=accept.beta1=accept.beta0=accept.tau=0
 #beta.tune=diag(c(.000001,.000001))
 beta0.tune=.000001
 beta1.tune=.0001
+beta2.tune=.0001
 tau.tune=.001
 
 
@@ -61,10 +65,10 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   
   
   beta0.star=rnorm(1,beta0,beta0.tune)
-  Out=UpdateBeta(tmax=tmax,b0=beta0.star,b1=beta1,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetaQuad(tmax=tmax,b0=beta0.star,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaQuad(tmax=tmax,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -78,10 +82,10 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   betaOut[i,1]<-beta0
   
   beta1.star=rnorm(1,beta1,beta1.tune)
-  Out=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1.star,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBetaQuad(tmax=tmax,b0=beta0,b1=beta1.star,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1,Nlat=Nlat,M=M,p=p)
+  now=UpdateBetaQuad(tmax=tmax,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -93,6 +97,23 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
     
   }
   betaOut[i,2]<-beta1
+  
+  beta2.star=rnorm(1,beta2,beta2.tune)
+  Out=UpdateBetaQuad(tmax=tmax,b0=beta0,b1=beta1,b2=beta2.star,Nlat=Nlat,M=M,p=p)
+  Npred.star<-Out$Npred
+  G.star<-Out$G
+  now=UpdateBetaQuad(tmax=tmax,b0=beta0,b1=beta1,b2=beta2,Nlat=Nlat,M=M,p=p)
+  Npred<-now$Npred
+  mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
+  mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
+  mh=min(exp(mh1-mh2),1)
+  if(mh>runif(1)){
+    G=G.star
+    beta2=beta2.star
+    accept.beta2=accept.beta2+1
+    
+  }
+  betaOut[i,3]<-beta2
   
   tau.star=rnorm(1,tau,tau.tune)
   Out=UpdateDispersal(tmax=tmax,tau=tau.star,Nlat=Nlat,G=G,p=p,D=D)
@@ -142,15 +163,20 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
     if(accept.beta1/i<0.35) beta1.tune=beta1.tune*.9
     if(accept.beta1/i>0.45) beta1.tune=beta1.tune*1.1
     
+    if(accept.beta2/i<0.35) beta2.tune=beta2.tune*.9
+    if(accept.beta2/i>0.45) beta2.tune=beta2.tune*1.1
+    
     if(accept.tau/i<0.35) tau.tune=tau.tune*.9
     if(accept.tau/i>0.45) tau.tune=tau.tune*1.1
   }
     
-  
+  if(i %in% seq(1000,20000, by = 1000)) {
+    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_quad.RData")
+  }
   
 }
 
-save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v3.RData")
+#save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_quad.RData")
 
 
 

@@ -15,14 +15,14 @@ bmax<-2 #length(X[1,]) number of covariates
 
 
 ###Starting Values###
-Nlat<-N #Starting values for latent states is the observed data
+#Nlat<-N #Starting values for latent states is the observed data
 beta0<-.019 ###Give beta some starting values based on what we know
 beta1<--0.001
 tau<-.033###Give tau a reasonable starting value. 
 sig.p<-1.3##give sig.p reasonable starting values
-o1<-sig.o<-1##give sig.o reasonable starting values
-ro <- 0.5
-qo1 <- (ro/o1)+1
+# o1<-sig.o<-1##give sig.o reasonable starting values
+# ro <- 0.5
+# qo1 <- (ro/o1)+1
 
 
 Mint<-exp(-(D/tau))
@@ -32,8 +32,8 @@ M<-t(Mint/apply(Mint,1,sum))  ##calculate M starting M given Tau
 Npred<-G<-matrix(NA,tmax,pmax)
 
 for (t in 2:tmax){
-  G[t,]<-exp(beta0+beta1*Nlat[t-1,])
-  Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
+  G[t,]<-exp(beta0+beta1*N[t-1,])
+  Npred[t,]<-M%*%(diag(G[t,])%*%N[t-1,])
 }
 
 
@@ -43,10 +43,10 @@ checkpoint=Niter*0.01
 ###Containers####
 tauOut<-matrix(NA,Niter,)
 betaOut<-matrix(NA,Niter,bmax)
-NlatOut<-array(NA,c(tmax,pmax,Niter/10)) # change to all pixels, but only every 10th iteration
-NlatOutLast<-matrix(NA,pmax,Niter)
+# NlatOut<-array(NA,c(tmax,pmax,Niter/10)) # change to all pixels, but only every 10th iteration
+# NlatOutLast<-matrix(NA,pmax,Niter)
 #rep.pix <- c(115:145, 910:940, 1865:1895) # representative pixels (high,med,low density)
-tenIter <- seq(10,20000, by = 10) # vector of every 10th iteration
+# tenIter <- seq(10,20000, by = 10) # vector of every 10th iteration
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
 accept.beta1=accept.beta0=accept.tau=0
@@ -61,13 +61,13 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   
   
   beta0.star=rnorm(1,beta0,beta0.tune)
-  Out=UpdateBeta(tmax=tmax,b0=beta0.star,b1=beta1,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBeta(tmax=tmax,b0=beta0.star,b1=beta1,N=N,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1,Nlat=Nlat,M=M,p=p)
+  now=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1,N=N,M=M,p=p)
   Npred<-now$Npred
-  mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
-  mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
+  mh1=sum(dnorm(N[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
+  mh2=sum(dnorm(N[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
   mh=min(exp(mh1-mh2),1)
   if(mh>runif(1)){
     G=G.star
@@ -78,13 +78,13 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   betaOut[i,1]<-beta0
   
   beta1.star=rnorm(1,beta1,beta1.tune)
-  Out=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1.star,Nlat=Nlat,M=M,p=p)
+  Out=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1.star,N=N,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1,Nlat=Nlat,M=M,p=p)
+  now=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1,N=N,M=M,p=p)
   Npred<-now$Npred
-  mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
-  mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
+  mh1=sum(dnorm(N[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
+  mh2=sum(dnorm(N[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
   mh=min(exp(mh1-mh2),1)
   if(mh>runif(1)){
     G=G.star
@@ -95,13 +95,13 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   betaOut[i,2]<-beta1
   
   tau.star=rnorm(1,tau,tau.tune)
-  Out=UpdateDispersal(tmax=tmax,tau=tau.star,Nlat=Nlat,G=G,p=p,D=D)
+  Out=UpdateDispersal(tmax=tmax,tau=tau.star,N=N,G=G,p=p,D=D)
   Npred.star<-Out$Npred
   M.star<-Out$M
-  now=UpdateDispersal(tmax=tmax,tau=tau,Nlat=Nlat,G=G,p=p,D=D)
+  now=UpdateDispersal(tmax=tmax,tau=tau,N=N,G=G,p=p,D=D)
   Npred<-now$Npred
-  mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
-  mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
+  mh1=sum(dnorm(N[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
+  mh2=sum(dnorm(N[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
   mh=min(exp(mh1-mh2),1)
   if(mh>runif(1)){
     M=M.star
@@ -115,24 +115,24 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
 
   
   for (t in 2:tmax){
-    Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
+    Npred[t,]<-M%*%(diag(G[t,])%*%N[t-1,])
   }
-  sig.p<-sqrt(sampleSigma(Nlat=c(Nlat[-1,]),Npred=c(Npred[-1,]),a=3,b=.5))
+  sig.p<-sqrt(sampleSigma(N=c(N[-1,]),Npred=c(Npred[-1,]),a=3,b=.5))
   sig.pOut[i,]<-sig.p
   
   #sig.o<-sqrt(sampleObS(Nlat=c(Nlat),N=c(N),a=3,b=.5))
-  sig.oOut[i,]<-sig.o
+  # sig.oOut[i,]<-sig.o
   
   
-  for (t in 1:tmax){
-  Nlat[t,]<-sampleLatent(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax)
-  }
-  
-  if(i %in% tenIter) {
-    NlatOut[,,i/10] <- Nlat}
-  
-  NlatOutLast[,i]<-Nlat[tmax,]
-  
+  # for (t in 1:tmax){
+  # Nlat[t,]<-sampleLatent(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax)
+  # }
+  # 
+  # if(i %in% tenIter) {
+  #   NlatOut[,,i/10] <- Nlat}
+  # 
+  # NlatOutLast[,i]<-Nlat[tmax,]
+  # 
   print(i)
   
   if(i%%checkpoint==0){
@@ -146,11 +146,13 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
     if(accept.tau/i>0.45) tau.tune=tau.tune*1.1
   }
     
-  
+  if(i %in% seq(1000,20000, by = 1000)) {
+    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_no_obs.RData")
+  }
   
 }
 
-save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v3.RData")
+#save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_no_obs.RData")
 
 
 

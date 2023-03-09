@@ -61,10 +61,10 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   
   
   beta0.star=rnorm(1,beta0,beta0.tune)
-  Out=UpdateBeta(tmax=tmax,b0=beta0.star,b1=beta1,N=N,M=M,p=p)
+  Out=UpdateBeta(tmax=tmax,a0=beta0.star,b0=beta1,N=N,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1,N=N,M=M,p=p)
+  now=UpdateBeta(tmax=tmax,a0=beta0,b0=beta1,N=N,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(N[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(N[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -78,10 +78,10 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   betaOut[i,1]<-beta0
   
   beta1.star=rnorm(1,beta1,beta1.tune)
-  Out=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1.star,N=N,M=M,p=p)
+  Out=UpdateBeta(tmax=tmax,a0=beta0,b0=beta1.star,N=N,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1,N=N,M=M,p=p)
+  now=UpdateBeta(tmax=tmax,a0=beta0,b0=beta1,N=N,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(N[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(N[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior

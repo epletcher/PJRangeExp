@@ -20,11 +20,11 @@ bmax<-2 #length(X[1,]) number of covariates
 
 ###Starting Values###
 Nlat<-N #Starting values for latent states is the observed data
-beta0<-1.19 # change beta starting value since growth is no longer multiplicative
+beta0<-1.19 ###Give beta some starting values based on what we know
 beta1<--0.001
 tau<-.033###Give tau a reasonable starting value. 
 sig.p<-1.3##give sig.p reasonable starting values
-o1<-sig.o<-1##give sig.o reasonable starting values
+o1<-sig.o<-9.6##give sig.o reasonable starting values, try a larger number than 1
 ro <- 0.5
 qo1 <- (ro/o1)+1
 
@@ -124,7 +124,7 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   sig.p<-sqrt(sampleSigma(Nlat=c(Nlat[-1,]),Npred=c(Npred[-1,]),a=3,b=.5))
   sig.pOut[i,]<-sig.p
   
-  #sig.o<-sqrt(sampleObS(Nlat=c(Nlat),N=c(N),a=3,b=.5))
+  sig.o<-sqrt(sampleObS(Nlat=c(Nlat),N=c(N),a=3,b=.5))
   sig.oOut[i,]<-sig.o
   
   
@@ -151,13 +151,13 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   }
     
   if(i %in% seq(1000,20000, by = 1000)) {
-    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_nonM_v1.RData")
+    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_nonM_sigO_v2.RData")
   }
   
   
 }
 
-#save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_nonM_v1.RData")
+#save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_nonM_sigO_v1.RData")
 
 
 

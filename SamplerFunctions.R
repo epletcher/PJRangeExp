@@ -56,40 +56,40 @@ sampleLatent<-function(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax) {
   
 }  
 
-sampleLatentnonM<-function(Npred,Nlat,N,b0,b1,M,Minv,sig.o,sig.p,tmax) {  
-  ###This function sequentially adds info from the different data sources to inform latent state
-  #zero out
-  s2<-sig.p^2
-  o1<-sig.o^2
-  Vi=0
-  v=0
-  
-  #1. Contribution of Observations
-  Vi=1/o1
-  v=(N[t,]/o1)
-  
-  
-  #2. Contribution of previous time step. Not included if we are in the first time step
-  if(t>1){
-    mu1<-M%*%(b0+b1*Nlat[t,])
-    Vi=Vi+1/s2
-    v=v+mu1/s2
-  }
-  
-  #2. Contribution of previous time step
-  # should fix G to be matrix
-  if(t<tmax){
-    mu2<-(((Minv%*%Nlat[t+1,])-b0)/b1) ####Here y is arranged year by pixel and X is year by pixel by covariate 
-    Vi=Vi+1/s2
-    v=v+mu2/s2
-  }
-  
-  
-  V<-1/Vi
-  Nlat_t<-rnorm(length(v),c(V*v),sqrt(V))
-  return(Nlat_t)
-  
-}  
+# sampleLatentnonM<-function(Npred,Nlat,N,b0,b1,M,Minv,sig.o,sig.p,tmax) {  
+#   ###This function sequentially adds info from the different data sources to inform latent state
+#   #zero out
+#   s2<-sig.p^2
+#   o1<-sig.o^2
+#   Vi=0
+#   v=0
+#   
+#   #1. Contribution of Observations
+#   Vi=1/o1
+#   v=(N[t,]/o1)
+#   
+#   
+#   #2. Contribution of previous time step. Not included if we are in the first time step
+#   if(t>1){
+#     mu1<-M%*%(b0+b1*Nlat[t,])
+#     Vi=Vi+1/s2
+#     v=v+mu1/s2
+#   }
+#   
+#   #2. Contribution of previous time step
+#   # should fix G to be matrix
+#   if(t<tmax){
+#     mu2<-(((Minv%*%Nlat[t+1,])-b0)/b1) ####Here y is arranged year by pixel and X is year by pixel by covariate 
+#     Vi=Vi+1/s2
+#     v=v+mu2/s2
+#   }
+#   
+#   
+#   V<-1/Vi
+#   Nlat_t<-rnorm(length(v),c(V*v),sqrt(V))
+#   return(Nlat_t)
+#   
+# }  
 
 
 ###############Sampling Dispersal and growth
@@ -108,13 +108,27 @@ return(list(Npred=Npred,G=G))
 
 }
 
-# update beta with growth not multiplicative
-UpdateBetanonM<-function(tmax,a0,b0,Nlat,M,p){ # add X and C to list of arguments
+# # update beta with growth not multiplicative
+# UpdateBetanonM<-function(tmax,a0,b0,Nlat,M,p){ # add X and C to list of arguments
+#   Npred<-matrix(NA,tmax,p)
+#   G<-matrix(NA,tmax,p)
+#   for (t in 2:tmax){
+#     G[t,]<-a0+b0*Nlat[t-1,]
+#     Npred[t,]<-M%*%(G[t,])
+#     
+#   }
+#   return(list(Npred=Npred,G=G))
+#   
+# }
+
+UpdateBetaQuad<-function(tmax,a0,b0,b1,Nlat,M,p){ # add X and C to list of arguments
   Npred<-matrix(NA,tmax,p)
   G<-matrix(NA,tmax,p)
   for (t in 2:tmax){
-    G[t,]<-a0+b0*Nlat[t-1,]
-    Npred[t,]<-M%*%(G[t,])
+    G[t,]<-exp(a0+b0*Nlat[t-1,]+b1*(Nlat[t-1,]^2))
+    Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
+    
+    
     
   }
   return(list(Npred=Npred,G=G))

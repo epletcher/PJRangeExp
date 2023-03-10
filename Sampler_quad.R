@@ -19,8 +19,8 @@ bmax<-3 #length(X[1,]) number of covariates
 ###Starting Values###
 Nlat<-N #Starting values for latent states is the observed data
 beta0<-.019 ###Give beta some starting values based on what we know
-beta1<--0.001
-beta2 <- 0.01
+beta1<-0.001
+beta2 <- -.0001 
 tau<-.033###Give tau a reasonable starting value. 
 sig.p<-1.3##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values
@@ -39,7 +39,6 @@ for (t in 2:tmax){
   Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
 }
 
-
 Niter<-20000 ###Number of interations. Keep in mind this will need to be more than you needed for stan  
 checkpoint=Niter*0.01
 
@@ -54,9 +53,9 @@ sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
 accept.beta2=accept.beta1=accept.beta0=accept.tau=0
 #beta.tune=diag(c(.000001,.000001))
-beta0.tune=.000001
+beta0.tune=.0001
 beta1.tune=.0001
-beta2.tune=.00001
+beta2.tune=.0001
 tau.tune=.001
 
 

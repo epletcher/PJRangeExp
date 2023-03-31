@@ -1,21 +1,23 @@
 #.libPaths("C:/Rpackages/R/win-library/4.1") # (elise setting package library location)
 
+# load 'dataprepped' workspace
+
 library("splus2R")
 library('LaplacesDemon')
 ###Data####
-N<-N[1:31,] # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here)
-tmax<-dim(N)[1] 
+N # observed data, assumed to be a matrix that is year by pixel
+Noos <- N[31:36,] # out of sample data
+tmax<-dim(N)[1]-5 # leave off last 5 years so that we can evaluate out of sample predictions
 pmax<-dim(N)[2]
 D<-Dsq
 #X<-if you have covariates this is where they go
 bmax<-2 #length(X[1,]) number of covariates
 
-
 ####priors####
 
 
 ###Starting Values###
-Nlat<-N #Starting values for latent states is the observed data
+Nlat<-N[1:31,] #Starting values for latent states is the observed data
 beta0<-.019 ###Give beta some starting values based on what we know
 beta1<--0.001
 tau<-.033###Give tau a reasonable starting value. 
@@ -23,7 +25,6 @@ sig.p<-1.3##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values
 ro <- 0.5
 qo1 <- (ro/o1)+1
-
 
 Mint<-exp(-(D/tau))
 M<-t(Mint/apply(Mint,1,sum))  ##calculate M starting M given Tau
@@ -49,6 +50,10 @@ NlatOutLast<-matrix(NA,pmax,Niter)
 tenIter <- seq(10,20000, by = 10) # vector of every 10th iteration
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
+# out of sample prediction evaluation
+rmseTotOut<-rmseYerOut<-biasOut<-matrix(NA,5,Niter) # evaluation metrics
+Npredoos <- matrix(NA,5,pmax) # out of sample predictions
+
 accept.beta1=accept.beta0=accept.tau=0
 #beta.tune=diag(c(.000001,.000001))
 beta0.tune=.000001
@@ -56,8 +61,7 @@ beta1.tune=.0001
 tau.tune=.001
 
 
-
-for (i in 1:Niter){ # edit starting iteration if start/stopping
+for (i in 1:1){ # edit starting iteration if start/stopping
   
   
   beta0.star=rnorm(1,beta0,beta0.tune)
@@ -146,11 +150,55 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
     if(accept.tau/i>0.45) tau.tune=tau.tune*1.1
   }
     
+  if(i %in% seq(1000,20000, by = 1000)) {
+    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v4.RData")
+  } 
   
+  ## out of sample prediction
+  
+  # fixed origin
+  Nt <- Nlat[31,] # set initial cover value as actual latent value
+  
+  for (t in 1:5){
+    
+    G<-exp(beta0+beta1*Nt)
+
+    Nmean <-M%*%(diag(G)%*%Nt)
+    
+    Nt <- rnorm(pmax, Nmean, sig.p)
+    
+    Npredoos[t,] <- Nt
+    
+  }
+  
+  # cumulative rmse
+  for(t in 1:5) {
+    rmseTotOut[t,i] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,])
+  }
+  
+  # calculate bias
+  for(t in 1:5) {
+    biasOut[t,i] <- biasfunc(pred=Npredoos[t,], obs=Noos[t,])
+  }
+  
+  # rolling origin 
+  for (t in 1:5){
+    
+    G<-exp(beta0+beta1*N[30+t,]) # this doesn't seem right because I am using actual observed data instead of latent values...
+    
+    Nmean <-M%*%(diag(G)%*%N[30+t,])
+    
+    Nt <- rnorm(pmax, Nmean, sig.p)
+    
+    Npredoos[t,] <- Nt
+    
+  }
+  
+  # 1-year rmse
+  for(t in 1:5) {
+    rmseYerOut[t,i] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,])
+  }
   
 }
-
-save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v3.RData")
-
 
 

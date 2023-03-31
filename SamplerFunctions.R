@@ -94,11 +94,11 @@ sampleLatent<-function(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax) {
 
 ###############Sampling Dispersal and growth
 
-UpdateBeta<-function(tmax,a0,b0,Nlat,M,p){ # add X and C to list of arguments
+UpdateBeta<-function(tmax,b0,b1,Nlat,M,p){ # add X and C to list of arguments
 Npred<-matrix(NA,tmax,p)
 G<-matrix(NA,tmax,p)
 for (t in 2:tmax){
-G[t,]<-exp(a0+b0*Nlat[t-1,])
+G[t,]<-exp(b0+b1*Nlat[t-1,])
 Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
 
 
@@ -190,8 +190,19 @@ UpdateDispersal<-function(tmax,tau,Nlat,G,p,D){
 }
 
 
+# rmse
+rmsefunc <- function(pred,obs) {
+  n <- length(pred)
+  RMSE <- sqrt((sum((pred-obs)^2))/n)
+  return(RMSE)
+}
 
-
+# bias
+biasfunc <- function(pred,obs) {
+  n <- length(pred)
+  bias <- (sum(pred-obs))/n
+  return(bias)
+}
 
 
 

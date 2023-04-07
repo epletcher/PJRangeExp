@@ -174,13 +174,11 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
     # cumulative rmse
     for(t in 1:5) {
       rmseTotOut[t,i] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,])
-      rmseTotOutN2[t,i] <- rmsefunc(pred=N2predoos[t,], obs=N2[t,])
     }
     
     # calculate bias
     for(t in 1:5) {
       biasOut[t,i] <- biasfunc(pred=Npredoos[t,], obs=Noos[t,])
-      biasOutN2[t,i] <- biasfunc(pred=N2predoos[t,], obs=Noos[t,])
     }
     
     # calculate density
@@ -209,13 +207,13 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
     }
     
     # calculate bias
-    for(t in 1:5) {
+    for(t in 1:35) {
       biasOutN2[t,i] <- biasfunc(pred=N2predoos[t,], obs=N2[t,])
     }
     
     # calculate density
-    for(t in 1:5) {
-      denseOutN2[t,i] <- densefunc(pred=N2predoos[t,], obs=n2[t,], sig_o=sig.o)
+    for(t in 1:35) {
+      denseOutN2[t,i] <- densefunc(pred=N2predoos[t,], obs=N2[t,], sig_o=sig.o)
     }
     
   }

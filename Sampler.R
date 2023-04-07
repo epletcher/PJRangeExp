@@ -18,8 +18,8 @@ bmax<-2 #length(X[1,]) number of covariates
 
 ###Starting Values###
 Nlat<-N[1:31,] #Starting values for latent states is the observed data
-beta0<-.019 ###Give beta some starting values based on what we know
-beta1<--0.001
+alpha0<-.019 ###Give beta some starting values based on what we know
+beta0<--0.001
 tau<-.033###Give tau a reasonable starting value. 
 sig.p<-1.3##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values
@@ -33,12 +33,13 @@ M<-t(Mint/apply(Mint,1,sum))  ##calculate M starting M given Tau
 Npred<-G<-matrix(NA,tmax,pmax)
 
 for (t in 2:tmax){
-  G[t,]<-exp(beta0+beta1*Nlat[t-1,])
+  G[t,]<-exp(alpha0+beta0*Nlat[t-1,])
   Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
 }
 
 
-Niter<-20000 ###Number of interations. Keep in mind this will need to be more than you needed for stan  
+Niter<-50000 ###Number of iterations. Base this off initial runs: still moving around until 12,000, upping from 20000 to 50000
+burnin<-Niter*0.5
 checkpoint=Niter*0.01
 
 ###Containers####
@@ -51,24 +52,40 @@ tenIter <- seq(10,20000, by = 10) # vector of every 10th iteration
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
 # out of sample prediction evaluation
-rmseTotOut<-rmseYerOut<-biasOut<-matrix(NA,5,Niter) # evaluation metrics
+rmseTotOut<-biasOut<-denseOut<-matrix(NA,5,burnin) # evaluation metrics
 Npredoos <- matrix(NA,5,pmax) # out of sample predictions
 
-accept.beta1=accept.beta0=accept.tau=0
+accept.beta0=accept.alpha0=accept.tau=0
 #beta.tune=diag(c(.000001,.000001))
-beta0.tune=.000001
-beta1.tune=.0001
+alpha0.tune=.000001
+beta0.tune=.0001
 tau.tune=.001
 
 
-for (i in 1:1){ # edit starting iteration if start/stopping
+for (i in 1:Niter){ # edit starting iteration if start/stopping
   
-  
-  beta0.star=rnorm(1,beta0,beta0.tune)
-  Out=UpdateBeta(tmax=tmax,b0=beta0.star,b1=beta1,Nlat=Nlat,M=M,p=p)
+  alpha0.star=rnorm(1,alpha0,alpha0.tune)
+  Out=UpdateBeta(tmax=tmax,a0=alpha0.star,b0=beta0,Nlat=Nlat,M=M,p=p)
   Npred.star<-Out$Npred
   G.star<-Out$G
-  now=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1,Nlat=Nlat,M=M,p=p)
+  now=UpdateBeta(tmax=tmax,a0=alpha0,b0=beta0,Nlat=Nlat,M=M,p=p)
+  Npred<-now$Npred
+  mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
+  mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
+  mh=min(exp(mh1-mh2),1)
+  if(mh>runif(1)){
+    G=G.star
+    alpha0=alpha0.star
+    accept.alpha0=accept.alpha0+1
+    
+  }
+  betaOut[i,1]<-alpha0
+  
+  beta0.star=rnorm(1,beta0,beta0.tune)
+  Out=UpdateBeta(tmax=tmax,a0=alpha0,b0=beta0.star,Nlat=Nlat,M=M,p=p)
+  Npred.star<-Out$Npred
+  G.star<-Out$G
+  now=UpdateBeta(tmax=tmax,a0=alpha0,b0=beta0,Nlat=Nlat,M=M,p=p)
   Npred<-now$Npred
   mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
   mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
@@ -79,24 +96,7 @@ for (i in 1:1){ # edit starting iteration if start/stopping
     accept.beta0=accept.beta0+1
     
   }
-  betaOut[i,1]<-beta0
-  
-  beta1.star=rnorm(1,beta1,beta1.tune)
-  Out=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1.star,Nlat=Nlat,M=M,p=p)
-  Npred.star<-Out$Npred
-  G.star<-Out$G
-  now=UpdateBeta(tmax=tmax,b0=beta0,b1=beta1,Nlat=Nlat,M=M,p=p)
-  Npred<-now$Npred
-  mh1=sum(dnorm(Nlat[-1,],(Npred.star[-1,]),sig.p,log=TRUE)) #implied uniform prior
-  mh2=sum(dnorm(Nlat[-1,],(Npred[-1,]),sig.p,log=TRUE))      #implied uniform prior
-  mh=min(exp(mh1-mh2),1)
-  if(mh>runif(1)){
-    G=G.star
-    beta1=beta1.star
-    accept.beta1=accept.beta1+1
-    
-  }
-  betaOut[i,2]<-beta1
+  betaOut[i,2]<-beta0
   
   tau.star=rnorm(1,tau,tau.tune)
   Out=UpdateDispersal(tmax=tmax,tau=tau.star,Nlat=Nlat,G=G,p=p,D=D)
@@ -140,65 +140,57 @@ for (i in 1:1){ # edit starting iteration if start/stopping
   print(i)
   
   if(i%%checkpoint==0){
+    if(accept.alpha0/i<0.35) alpha0.tune=alpha0.tune*.9
+    if(accept.alpha0/i>0.45) alpha0.tune=alpha0.tune*1.1
+    
     if(accept.beta0/i<0.35) beta0.tune=beta0.tune*.9
     if(accept.beta0/i>0.45) beta0.tune=beta0.tune*1.1
-    
-    if(accept.beta1/i<0.35) beta1.tune=beta1.tune*.9
-    if(accept.beta1/i>0.45) beta1.tune=beta1.tune*1.1
     
     if(accept.tau/i<0.35) tau.tune=tau.tune*.9
     if(accept.tau/i>0.45) tau.tune=tau.tune*1.1
   }
-    
-  if(i %in% seq(1000,20000, by = 1000)) {
-    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v4.RData")
-  } 
   
   ## out of sample prediction
-  
-  # fixed origin
-  Nt <- Nlat[31,] # set initial cover value as actual latent value
-  
-  for (t in 1:5){
+  if(i %in% seq(burnin,Niter,1)) {
     
-    G<-exp(beta0+beta1*Nt)
-
-    Nmean <-M%*%(diag(G)%*%Nt)
+    # withheld years
+    Nt <- Nlat[31,] # set initial cover value as actual latent value
     
-    Nt <- rnorm(pmax, Nmean, sig.p)
+    for (t in 1:5){
+      
+      G<-exp(alpha0+beta0*Nt)
+      
+      Nmean <-M%*%(diag(G)%*%Nt)
+      
+      Nt <- rnorm(pmax, Nmean, sig.p)
+      
+      Npredoos[t,] <- Nt
+      
+    }
     
-    Npredoos[t,] <- Nt
+    # new location
     
-  }
-  
-  # cumulative rmse
-  for(t in 1:5) {
-    rmseTotOut[t,i] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,])
-  }
-  
-  # calculate bias
-  for(t in 1:5) {
-    biasOut[t,i] <- biasfunc(pred=Npredoos[t,], obs=Noos[t,])
-  }
-  
-  # rolling origin 
-  for (t in 1:5){
     
-    G<-exp(beta0+beta1*N[30+t,]) # this doesn't seem right because I am using actual observed data instead of latent values...
+    # cumulative rmse
+    for(t in 1:5) {
+      rmseTotOut[t,i] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,])
+    }
     
-    Nmean <-M%*%(diag(G)%*%N[30+t,])
+    # calculate bias
+    for(t in 1:5) {
+      biasOut[t,i] <- biasfunc(pred=Npredoos[t,], obs=Noos[t,])
+    }
     
-    Nt <- rnorm(pmax, Nmean, sig.p)
-    
-    Npredoos[t,] <- Nt
+    # calculate density
+    for(t in 1:5) {
+      denseOut[t,i] <- densefunc(pred=Npredoos[t,], obs=Noos[t,], sig_o=sig.o)
+    }
     
   }
-  
-  # 1-year rmse
-  for(t in 1:5) {
-    rmseYerOut[t,i] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,])
-  }
-  
+  # save
+  if(i %in% seq(1000,Niter, by = 1000)) {
+    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v4.RData")
+  } 
 }
 
 

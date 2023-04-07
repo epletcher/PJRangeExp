@@ -94,11 +94,11 @@ sampleLatent<-function(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax) {
 
 ###############Sampling Dispersal and growth
 
-UpdateBeta<-function(tmax,b0,b1,Nlat,M,p){ # add X and C to list of arguments
+UpdateBeta<-function(tmax,a0,b0,Nlat,M,p){ # add X and C to list of arguments
 Npred<-matrix(NA,tmax,p)
 G<-matrix(NA,tmax,p)
 for (t in 2:tmax){
-G[t,]<-exp(b0+b1*Nlat[t-1,])
+G[t,]<-exp(a0+b0*Nlat[t-1,])
 Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
 
 
@@ -108,24 +108,11 @@ return(list(Npred=Npred,G=G))
 
 }
 
-# # update beta with growth not multiplicative
-# UpdateBetanonM<-function(tmax,a0,b0,Nlat,M,p){ # add X and C to list of arguments
-#   Npred<-matrix(NA,tmax,p)
-#   G<-matrix(NA,tmax,p)
-#   for (t in 2:tmax){
-#     G[t,]<-a0+b0*Nlat[t-1,]
-#     Npred[t,]<-M%*%(G[t,])
-#     
-#   }
-#   return(list(Npred=Npred,G=G))
-#   
-# }
-
-UpdateBetaQuad<-function(tmax,b0,b1,b2,Nlat,M,p){ # add X and C to list of arguments
+UpdateBetaQuad<-function(tmax,a0,b0,b1,Nlat,M,p){ # add X and C to list of arguments
   Npred<-matrix(NA,tmax,p)
   G<-matrix(NA,tmax,p)
   for (t in 2:tmax){
-    G[t,]<-exp(b0+b1*Nlat[t-1,]+b2*(Nlat[t-1,]^2))
+    G[t,]<-exp(a0+b0*Nlat[t-1,]+b1*(Nlat[t-1,]^2))
     Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
     
     
@@ -204,5 +191,9 @@ biasfunc <- function(pred,obs) {
   return(bias)
 }
 
-
+# density
+densefunc <- function(pred,obs,sig_o) {
+  dense <- exp(sum(dnorm(obs,pred,sig_o,log=T)))
+  return(dense)
+}
 

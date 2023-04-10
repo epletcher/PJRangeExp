@@ -6,12 +6,10 @@ library("splus2R")
 library('LaplacesDemon')
 ###Data####
 N # observed data, assumed to be a matrix that is year by pixel
-N2 # observed data from new location
 Noos <- N[31:36,] # out of sample data
 tmax<-dim(N)[1]-5 # leave off last 5 years so that we can evaluate out of sample predictions
 pmax<-dim(N)[2]
 D<-Dsq
-D2<-Dsq2 # maybe we don't need a second dispersal matrix??
 #X<-if you have covariates this is where they go
 bmax<-2 #length(X[1,]) number of covariates
 
@@ -56,7 +54,6 @@ sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 # out of sample prediction evaluation
 rmseTotOut<-biasOut<-denseOut<-matrix(NA,5,burnin) # evaluation metrics
 Npredoos <- matrix(NA,5,pmax) # out of sample predictions
-N2predoos <- matrix(NA,35,pmax) # predictions for new location
 
 accept.beta0=accept.alpha0=accept.tau=0
 #beta.tune=diag(c(.000001,.000001))
@@ -171,52 +168,15 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
       
     }
     
-    # cumulative rmse
+    # prediction evaluation metrics
     for(t in 1:5) {
-      rmseTotOut[t,i] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,])
-    }
-    
-    # calculate bias
-    for(t in 1:5) {
-      biasOut[t,i] <- biasfunc(pred=Npredoos[t,], obs=Noos[t,])
-    }
-    
-    # calculate density
-    for(t in 1:5) {
-      denseOut[t,i] <- densefunc(pred=Npredoos[t,], obs=Noos[t,], sig_o=sig.o)
-    }
-    
-    # new location
-    Nt <- N2[1,] # set initial cover value as actual value of t=1
-    
-    for (t in 1:35){
-      
-      G<-exp(alpha0+beta0*Nt)
-      
-      Nmean <-M%*%(diag(G)%*%Nt) # dispersal matrix will be different, unless the area chosen is the exact same size as the previous area, which i guess it could be??
-      
-      Nt <- rnorm(pmax, Nmean, sig.p)
-      
-      N2predoos[t,] <- Nt
-      
-    }
-    
-    # cumulative rmse
-    for(t in 1:35) {
-      rmseTotOutN2[t,i] <- rmsefunc(pred=N2predoos[t,], obs=N2[t,])
-    }
-    
-    # calculate bias
-    for(t in 1:35) {
-      biasOutN2[t,i] <- biasfunc(pred=N2predoos[t,], obs=N2[t,])
-    }
-    
-    # calculate density
-    for(t in 1:35) {
-      denseOutN2[t,i] <- densefunc(pred=N2predoos[t,], obs=N2[t,], sig_o=sig.o)
+      rmseTotOut[t,i] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,]) # cumulative rmse
+      biasOut[t,i] <- biasfunc(pred=Npredoos[t,], obs=Noos[t,]) # bias
+      denseOut[t,i] <- densefunc(pred=Npredoos[t,], obs=Noos[t,], sig_o=sig.o) # density
     }
     
   }
+    
   # save
   if(i %in% seq(1000,Niter, by = 1000)) {
     save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v4.RData")

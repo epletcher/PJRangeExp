@@ -9,7 +9,7 @@ library("splus2R")
 library('LaplacesDemon')
 
 ###Data####
-N # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here, to test forecast)
+N # observed data, assumed to be a matrix that is year by pixel
 Noos <- N[31:36,] # out of sample data
 tmax<-dim(N)[1]-5 
 pmax<-dim(N)[2]
@@ -212,6 +212,7 @@ for (i in 1:Niter){
     for (t in 1:5){
       
       G<-exp((alpha0+X[t+31,,1]*alpha1+X[t+31,,2]*alpha2)+beta0*Nt)
+      
       Nmean <-M%*%(diag(G)%*%Nt)
       
       Nt <- rnorm(pmax, Nmean, sig.p)

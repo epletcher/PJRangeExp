@@ -1,5 +1,8 @@
 #.libPaths("C:/Rpackages/R/win-library/4.1") # (elise setting package library location)
 
+# load sampler functions script
+source("R:/Shriver_Lab/PJspread/PJ_spread_repo/SamplerFunctions.R")
+
 # load 'dataprepped' workspace
 
 library("splus2R")
@@ -18,10 +21,10 @@ bmax<-2 #length(X[1,]) number of covariates
 
 ###Starting Values###
 Nlat<-N[1:31,] #Starting values for latent states is the observed data
-alpha0<-.019 ###Give beta some starting values based on what we know
+alpha0<-0.0197 #Give tarting values based on what we know
 beta0<--0.001
-tau<-.033###Give tau a reasonable starting value. 
-sig.p<-1.3##give sig.p reasonable starting values
+tau<-0.0332###Give tau a reasonable starting value. 
+sig.p<-1.335##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values
 ro <- 0.5
 qo1 <- (ro/o1)+1
@@ -43,8 +46,7 @@ burnin<-Niter*0.5
 checkpoint=Niter*0.01
 
 ###Containers####
-tauOut<-matrix(NA,Niter,)
-betaOut<-matrix(NA,Niter,bmax)
+tauOut<-betaOut<-alphaOut<-matrix(NA,Niter,)
 NlatOut<-array(NA,c(tmax,pmax,Niter/10)) # change to all pixels, but only every 10th iteration
 NlatOutLast<-matrix(NA,pmax,Niter)
 #rep.pix <- c(115:145, 910:940, 1865:1895) # representative pixels (high,med,low density)
@@ -79,7 +81,7 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
     accept.alpha0=accept.alpha0+1
     
   }
-  betaOut[i,1]<-alpha0
+  alphaOut[i,]<-alpha0
   
   beta0.star=rnorm(1,beta0,beta0.tune)
   Out=UpdateBeta(tmax=tmax,a0=alpha0,b0=beta0.star,Nlat=Nlat,M=M,p=p)
@@ -96,7 +98,7 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
     accept.beta0=accept.beta0+1
     
   }
-  betaOut[i,2]<-beta0
+  betaOut[i,]<-beta0
   
   tau.star=rnorm(1,tau,tau.tune)
   Out=UpdateDispersal(tmax=tmax,tau=tau.star,Nlat=Nlat,G=G,p=p,D=D)
@@ -179,8 +181,9 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
     
   # save
   if(i %in% seq(1000,Niter, by = 1000)) {
-    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v4.RData")
+    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v4_c1.RData")
   } 
 }
+
 
 

@@ -1,17 +1,20 @@
 #.libPaths("C:/Rpackages/R/win-library/4.1") # (elise setting package library location)
 
-# load workspacefile with prepped data: 
-# load("G:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Scripts/data_prepped.RData")
+# load sampler functions script
+source("R:/Shriver_Lab/PJspread/PJ_spread_repo/SamplerFunctions.R")
+
+# load 'data prepped' workspace
 
 library("splus2R")
 library('LaplacesDemon')
 
 ###Data####
-N<-N[1:31,] # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here, to test forecast)
-tmax<-dim(N)[1] 
+N # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here, to test forecast)
+Noos <- N[31:36,] # out of sample data
+tmax<-dim(N)[1]-5 
 pmax<-dim(N)[2]
 D<-Dsq
-X<-enviro.var[1:tmax,,1:2] # covariates this is where they go (1 = ppt, 2 = tmean, 3 = vpdmax, 4 = heatload, 5 = elev)
+X<-enviro.var[,,1:2] # covariates this is where they go (1 = ppt, 2 = tmean, 3 = vpdmax, 4 = heatload, 5 = elev)
 amax<-3
 bmax<-1 # number of climate covariates (minus topographic vars)
 
@@ -20,12 +23,12 @@ bmax<-1 # number of climate covariates (minus topographic vars)
 
 
 ###Starting Values###
-Nlat<-N #Starting values for latent states is the observed data
-alpha0<-.019 ###Give beta some starting values based on what we know
-alpha1<-0 # regression coef for ppt
-alpha2<-0 # regresstion coef for tmean
-beta0<--0.001
-tau<-.033###Give tau a reasonable starting value. 
+Nlat<-N[1:31,] #Starting values for latent states is the observed data
+alpha0<-.01197 ###Give beta some starting values based on what we know
+alpha1<-0.0519 # regression coef for ppt
+alpha2<-0.0022 # regresstion coef for tmean
+beta0<--0.00075
+tau<-.0323###Give tau a reasonable starting value. 
 sig.p<-1.3##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values # could try 1.5 or 2
 ro <- 0.5
@@ -43,8 +46,10 @@ for (t in 2:tmax){
 }
 
 
-Niter<-20000 ###Number of interations. Keep in mind this will need to be more than you needed for stan  
+Niter<-30000 ###Number of iterations. Base this off initial runs. 
 checkpoint=Niter*0.01
+burnin<-Niter*0.5
+
 ###Containers####
 tauOut<-matrix(NA,Niter,)
 alphaOut <- matrix(NA,Niter,amax) 
@@ -55,15 +60,18 @@ NlatOutLast<-matrix(NA,pmax,Niter)
 tenIter <- seq(10,20000, by = 10) # vector of every 10th iteration
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
+# out of sample prediction evaluation
+rmseTotOut<-biasOut<-denseOut<-matrix(NA,5,burnin) # evaluation metrics
+Npredoos <- matrix(NA,5,pmax) # out of sample predictions
+
 accept.alpha2=accept.alpha1=accept.alpha0=accept.beta0=accept.tau=0
-#beta.tune=diag(c(.000001,.000001))
 alpha0.tune=.001
-alpha1.tune=.001
-alpha2.tune=.001
-beta0.tune=.0001
+alpha1.tune=.01
+alpha2.tune=.01
+beta0.tune=.001
 tau.tune=.001
 
-for (i in 3354:Niter){
+for (i in 1:Niter){
   
   #alpha 0
   alpha0.star=rnorm(1,alpha0,alpha0.tune)
@@ -195,12 +203,37 @@ for (i in 3354:Niter){
     if(accept.tau/i>0.45) tau.tune=tau.tune*1.1
   }
   
-  if(i %in% seq(1000,20000, by = 1000)) {
-    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_clim_v3.RData")
+  ## out of sample prediction
+  if(i %in% seq(burnin,Niter,1)) {
+    
+    # withheld years
+    Nt <- Nlat[31,] # set initial cover value as actual latent value
+    
+    for (t in 1:5){
+      
+      G<-exp((alpha0+X[t+31,,1]*alpha1+X[t+31,,2]*alpha2)+beta0*Nt)
+      Nmean <-M%*%(diag(G)%*%Nt)
+      
+      Nt <- rnorm(pmax, Nmean, sig.p)
+      
+      Npredoos[t,] <- Nt
+      
+    }
+    
+    # prediction evaluation metrics
+    for(t in 1:5) {
+      rmseTotOut[t,i] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,]) # cumulative rmse
+      biasOut[t,i] <- biasfunc(pred=Npredoos[t,], obs=Noos[t,]) # bias
+      denseOut[t,i] <- densefunc(pred=Npredoos[t,], obs=Noos[t,], sig_o=sig.o) # density
+    }
+    
+  }
+  
+  #save
+  if(i %in% seq(1000,Niter, by = 1000)) {
+    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_clim_v4_c1.RData")
   }
   
 }
-
-save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_clim_v3.RData")
 
 

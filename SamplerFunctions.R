@@ -17,10 +17,6 @@ sampleObS<-function(Nlat,N,a,b){  ###This function will return variance. Need to
 }
 
 
-#####for t+1 Minv%*%diag(1/G)%*%Npred[t+1,]
-
-
-
 sampleLatent<-function(Npred,Nlat,N,G,M,Minv,sig.o,sig.p,tmax) {  
   ###This function sequentially adds info from the different data sources to inform latent state
   #zero out

@@ -249,7 +249,7 @@ for (i in 1:Niter){
   }
   
   ## out of sample prediction
-  #if(i %in% seq(burnin,Niter,1)) {
+  if(i %in% seq(burnin,Niter,1)) {
     
     # withheld years
     Nt <- Nlat[31,] # set initial cover value as actual latent value
@@ -273,7 +273,7 @@ for (i in 1:Niter){
       denseOut[t,i] <- densefunc(pred=Npredoos[t,], obs=Noos[t,], sig_o=sig.o) # density
     }
     
-  #}
+  }
   
   #save
   if(i %in% seq(1000,Niter, by = 1000)) {

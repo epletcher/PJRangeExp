@@ -9,7 +9,7 @@ library("splus2R")
 library('LaplacesDemon')
 
 ###Data####
-N # observed data, assumed to be a matrix that is year by pixel
+# N # observed data, assumed to be a matrix that is year by pixel
 Noos <- N[31:36,] # out of sample data
 tmax<-dim(N)[1]-5 
 pmax<-dim(N)[2]
@@ -65,7 +65,7 @@ rmseTotOut<-biasOut<-denseOut<-matrix(NA,5,burnin) # evaluation metrics
 Npredoos <- matrix(NA,5,pmax) # out of sample predictions
 
 accept.alpha2=accept.alpha1=accept.alpha0=accept.beta0=accept.tau=0
-alpha0.tune=.01
+alpha0.tune=.02
 alpha1.tune=.01
 alpha2.tune=.01
 beta0.tune=.001
@@ -204,7 +204,7 @@ for (i in 1:Niter){
   }
   
   ## out of sample prediction
-  if(i %in% seq(burnin,Niter,1)) {
+  if(i %in% seq(burnin+1,Niter,1)) {
     
     # withheld years
     Nt <- Nlat[31,] # set initial cover value as actual latent value

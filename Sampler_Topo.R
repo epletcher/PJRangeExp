@@ -9,7 +9,7 @@ library("splus2R")
 library('LaplacesDemon')
 
 ###Data####
-N # observed data, assumed to be a matrix that is year by pixel
+# N # observed data, assumed to be a matrix that is year by pixel
 tmax<-dim(N)[1]-5
 pmax<-dim(N)[2]
 D<-Dsq
@@ -249,16 +249,16 @@ for (i in 1:Niter){
   }
   
   ## out of sample prediction
-  if(i %in% seq(burnin,Niter,1)) {
+  if(i %in% seq(burnin+1,Niter,1)) {
     
     # withheld years
     Nt <- Nlat[31,] # set initial cover value as actual latent value
     
     for (t in 1:5){
       
-      G<-exp((alpha0+X[t+31,,1]*alpha1+X[t+31,,2]*alpha2)+(beta0+X[t+31,,1]*beta1+X[t+31,,2]*beta2)*Nt)
+      Gnew<-exp((alpha0+X[t+31,,1]*alpha1+X[t+31,,2]*alpha2)+(beta0+X[t+31,,1]*beta1+X[t+31,,2]*beta2)*Nt)
       
-      Nmean <-M%*%(diag(G)%*%Nt)
+      Nmean <-M%*%(diag(Gnew)%*%Nt)
       
       Nt <- rnorm(pmax, Nmean, sig.p)
       

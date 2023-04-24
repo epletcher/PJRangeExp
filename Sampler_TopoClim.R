@@ -7,11 +7,11 @@ library("splus2R")
 library('LaplacesDemon')
 
 ###Data####
-N<-N[1:31,] # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here, to test forecast)
-tmax<-dim(N)[1] 
+# N<-N # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here, to test forecast)
+tmax<-dim(N)[1]-5 
 pmax<-dim(N)[2]
 D<-Dsq
-X<-enviro.var[1:tmax,,-3] # all covariates except vpdmax; this is where covars go (1 = tmean, 2 = tmean, 3 = vpdmax, 4 = heatload, 5 = elev)
+X<-enviro.var[1:tmax,,-3] # all covariates except vpdmax; this is where covars go (1 = ppt, 2 = tmean, 3 = vpdmax, 4 = heatload, 5 = elev)
 amax<-5
 bmax<-3 # number of covariates 
 
@@ -20,15 +20,15 @@ bmax<-3 # number of covariates
 
 
 ###Starting Values###
-Nlat<-N #Starting values for latent states is the observed data
-alpha0<-.019 ###Give beta some starting values based on what we know
-alpha1<-0 # regression coef for ppt
-alpha2<-0 # regresstion coef for tmean
-alpha3<-0 # regression coef for heatload
-alpha4<-0 # regresstion coef for elev
-beta0<--0.001
+Nlat<-N[1:31,] #Starting values for latent states is the observed data
+alpha0<--.004 ###Give beta some starting values based on what we know
+alpha1<-0.052 # regression coef for ppt
+alpha2<-0.004 # regresstion coef for tmean
+alpha3<-0.001 # regression coef for heatload
+alpha4<-0.01 # regresstion coef for elev
+beta0<-0.0009
 beta1<-0 # regression coef for heatload
-beta2<-0 # regresstion coef for elev
+beta2<--0.--1 # regresstion coef for elev
 tau<-.033###Give tau a reasonable starting value. 
 sig.p<-1.3##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values # could try 1.5 or 2
@@ -47,8 +47,9 @@ for (t in 2:tmax){
 }
 
 
-Niter<-20000 ###Number of interations. Keep in mind this will need to be more than you needed for stan  
+Niter<-30000 ###Number of iterations. Chose based off initial run  
 checkpoint=Niter*0.01
+burnin=Niter*0.5
 ###Containers####
 tauOut<-matrix(NA,Niter,)
 alphaOut <- matrix(NA,Niter,amax) 
@@ -59,9 +60,12 @@ NlatOutLast<-matrix(NA,pmax,Niter)
 tenIter <- seq(10,20000, by = 10) # vector of every 10th iteration
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
+# out of sample prediction evaluation
+rmseTotOut<-biasOut<-denseOut<-matrix(NA,5,burnin) # evaluation metrics
+Npredoos <- matrix(NA,5,pmax) # out of sample predictions
+
 accept.alpha4=accept.alpha3=accept.alpha2=accept.alpha1=accept.alpha0=accept.beta2=accept.beta1=accept.beta0=accept.tau=0
 
-#beta.tune=diag(c(.000001,.000001))
 alpha0.tune=.0001
 alpha1.tune=.001
 alpha2.tune=.001
@@ -288,9 +292,35 @@ for (i in 1:Niter){
     if(accept.tau/i>0.45) tau.tune=tau.tune*1.1
   }
   
-  
-  if(i %in% seq(1000,20000, by = 1000)) {
-    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_topoClim_v1.RData")
+  ## out of sample prediction
+  if(i %in% seq(burnin+1,Niter,1)) {
+    
+    # withheld years
+    Nt <- Nlat[31,] # set initial cover value as actual latent value
+    
+    for (t in 1:5){
+      
+      Gnew<-exp((alpha0+X[t+31,,1]*alpha1+X[t+31,,2]*alpha2+X[t+31,,3]*alpha3+X[t+31,,4]*alpha4)+(beta0+X[t+31,,3]*beta1+X[t+31,,4]*beta2)*Nt)
+      
+      Nmean <-M%*%(diag(Gnew)%*%Nt)
+      
+      Nt <- rnorm(pmax, Nmean, sig.p)
+      
+      Npredoos[t,] <- Nt
+      
+    }
+    
+    # prediction evaluation metrics
+    for(t in 1:5) {
+      rmseTotOut[t,i] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,]) # cumulative rmse
+      biasOut[t,i] <- biasfunc(pred=Npredoos[t,], obs=Noos[t,]) # bias
+      denseOut[t,i] <- densefunc(pred=Npredoos[t,], obs=Noos[t,], sig_o=sig.o) # density
+    }
+    
+  }
+  # save
+  if(i %in% seq(1000,Niter, by = 1000)) {
+    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_topoClim_v2_c1.RData")
   }
   
 }

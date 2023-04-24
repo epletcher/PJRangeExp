@@ -8,7 +8,7 @@ source("R:/Shriver_Lab/PJspread/PJ_spread_repo/SamplerFunctions.R")
 library("splus2R")
 library('LaplacesDemon')
 ###Data####
-N # observed data, assumed to be a matrix that is year by pixel
+# N # observed data, assumed to be a matrix that is year by pixel
 Noos <- N[31:36,] # out of sample data
 tmax<-dim(N)[1]-5 # leave off last 5 years so that we can evaluate out of sample predictions
 pmax<-dim(N)[2]
@@ -153,7 +153,7 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
   }
   
   ## out of sample prediction
-  if(i %in% seq(burnin,Niter,1)) {
+  if(i %in% seq(burnin+1,Niter,1)) {
     
     # withheld years
     Nt <- Nlat[31,] # set initial cover value as actual latent value
@@ -175,13 +175,12 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
       rmseTotOut[t,i] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,]) # cumulative rmse
       biasOut[t,i] <- biasfunc(pred=Npredoos[t,], obs=Noos[t,]) # bias
       denseOut[t,i] <- densefunc(pred=Npredoos[t,], obs=Noos[t,], sig_o=sig.o) # density
+      }
     }
-    
-  }
     
   # save
   if(i %in% seq(1000,Niter, by = 1000)) {
-    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v4_c2.RData")
+    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v4_c1.RData")
   } 
 }
 

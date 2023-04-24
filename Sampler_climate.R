@@ -211,9 +211,9 @@ for (i in 1:Niter){
     
     for (t in 1:5){
       
-      G<-exp((alpha0+X[t+31,,1]*alpha1+X[t+31,,2]*alpha2)+beta0*Nt)
+      Gnew<-exp((alpha0+X[t+31,,1]*alpha1+X[t+31,,2]*alpha2)+beta0*Nt)
       
-      Nmean <-M%*%(diag(G)%*%Nt)
+      Nmean <-M%*%(diag(Gnew)%*%Nt)
       
       Nt <- rnorm(pmax, Nmean, sig.p)
       

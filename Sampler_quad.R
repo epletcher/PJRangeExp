@@ -1,12 +1,18 @@
+## version of the sampler with a quadratic term for population growth 
+
 #.libPaths("C:/Rpackages/R/win-library/4.1") # (elise setting package library location)
 
-# version of the sampler with a quadratic term for population growth 
+# load sampler functions script
+source("R:/Shriver_Lab/PJspread/PJ_spread_repo/SamplerFunctions.R")
+
+# load 'dataprepped' workspace
 
 library("splus2R")
 library('LaplacesDemon')
+
 ###Data####
-N<-N[1:31,] # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here)
-tmax<-dim(N)[1] 
+# N # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here)
+tmax<-dim(N)[1]-5 # leave off last 5 years so that we can evaluate out of sample predictions
 pmax<-dim(N)[2]
 D<-Dsq
 #X<-if you have covariates this is where they go
@@ -18,9 +24,9 @@ bmax<-3 #length(X[1,]) number of covariates
 
 ###Starting Values###
 Nlat<-N #Starting values for latent states is the observed data
-beta0<-.019 ###Give beta some starting values based on what we know
-beta1<--0.001
-beta2 <- -.0001 
+beta0<--.019 ###Give beta some starting values based on what we know
+beta1<-0.004
+beta2 <- -.0002 
 tau<-.033###Give tau a reasonable starting value. 
 sig.p<-1.3##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values
@@ -39,7 +45,8 @@ for (t in 2:tmax){
   Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
 }
 
-Niter<-20000 ###Number of interations. Keep in mind this will need to be more than you needed for stan  
+Niter<-40000 ###Number of iterations. Based off initial run 
+burnin<-Niter*0.5
 checkpoint=Niter*0.01
 
 ###Containers####
@@ -48,8 +55,12 @@ betaOut<-matrix(NA,Niter,bmax)
 NlatOut<-array(NA,c(tmax,pmax,Niter/10)) # change to all pixels, but only every 10th iteration
 NlatOutLast<-matrix(NA,pmax,Niter)
 #rep.pix <- c(115:145, 910:940, 1865:1895) # representative pixels (high,med,low density)
-tenIter <- seq(10,20000, by = 10) # vector of every 10th iteration
+tenIter <- seq(10,Niter, by = 10) # vector of every 10th iteration
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
+
+# out of sample prediction evaluation
+rmseTotOut<-biasOut<-denseOut<-matrix(NA,5,burnin) # evaluation metrics
+Npredoos <- matrix(NA,5,pmax) # out of sample predictions
 
 accept.beta2=accept.beta1=accept.beta0=accept.tau=0
 #beta.tune=diag(c(.000001,.000001))
@@ -168,14 +179,37 @@ for (i in 1:Niter){ # edit starting iteration if start/stopping
     if(accept.tau/i<0.35) tau.tune=tau.tune*.9
     if(accept.tau/i>0.45) tau.tune=tau.tune*1.1
   }
+  
+  ## out of sample prediction
+  if(i %in% seq(burnin+1,Niter,1)) {
     
-  if(i %in% seq(1000,20000, by = 1000)) {
-    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_quad.RData")
+    # withheld years
+    Nt <- Nlat[31,] # set initial cover value as actual latent value
+    
+    for (t in 1:5){
+      
+      Gnew<-exp(beta0+beta1*Nt+beta2*(Nt^2))
+      
+      Nmean <-M%*%(diag(Gnew)%*%Nt)
+      
+      Nt <- rnorm(pmax, Nmean, sig.p)
+      
+      Npredoos[t,] <- Nt
+      
+    }
+    
+    # prediction evaluation metrics
+    for(t in 1:5) {
+      rmseTotOut[t,i] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,]) # cumulative rmse
+      biasOut[t,i] <- biasfunc(pred=Npredoos[t,], obs=Noos[t,]) # bias
+      denseOut[t,i] <- densefunc(pred=Npredoos[t,], obs=Noos[t,], sig_o=sig.o) # density
+    }
+  }
+  
+  # save  
+  if(i %in% seq(1000,Niter, by = 1000)) {
+    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_quad_v2_c1.RData")
   }
   
 }
-
-#save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_quad.RData")
-
-
 

@@ -57,7 +57,7 @@ betaOut<-matrix(NA,Niter,bmax)
 NlatOut<-array(NA,c(tmax,pmax,Niter/10)) # change to all pixels, but only every 10th iteration
 NlatOutLast<-matrix(NA,pmax,Niter)
 #rep.pix <- c(115:145, 910:940, 1865:1895) # representative pixels (high,med,low density)
-tenIter <- seq(10,20000, by = 10) # vector of every 10th iteration
+tenIter <- seq(10,Niter, by = 10) # vector of every 10th iteration
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
 # out of sample prediction evaluation

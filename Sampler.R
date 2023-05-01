@@ -9,7 +9,7 @@ library("splus2R")
 library('LaplacesDemon')
 ###Data####
 # N # observed data, assumed to be a matrix that is year by pixel
-Noos <- N[31:36,] # out of sample data
+Noos <- N[32:36,] # out of sample data
 tmax<-dim(N)[1]-5 # leave off last 5 years so that we can evaluate out of sample predictions
 pmax<-dim(N)[2]
 D<-Dsq

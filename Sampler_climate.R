@@ -10,7 +10,7 @@ library('LaplacesDemon')
 
 ###Data####
 # N # observed data, assumed to be a matrix that is year by pixel
-Noos <- N[31:36,] # out of sample data
+Noos <- N[32:36,] # out of sample data
 tmax<-dim(N)[1]-5 
 pmax<-dim(N)[2]
 D<-Dsq
@@ -71,7 +71,7 @@ alpha2.tune=.01
 beta0.tune=.001
 tau.tune=.001
 
-for (i in 1:Niter){
+for (i in 15001:Niter){
   
   #alpha 0
   alpha0.star=rnorm(1,alpha0,alpha0.tune)
@@ -184,7 +184,6 @@ for (i in 1:Niter){
   
   NlatOutLast[,i]<-Nlat[tmax,]
   
-  print(i)
   #tuning
   if(i%%checkpoint==0){
     if(accept.alpha0/i<0.35) alpha0.tune=alpha0.tune*.9
@@ -223,9 +222,9 @@ for (i in 1:Niter){
     
     # prediction evaluation metrics
     for(t in 1:5) {
-      rmseTotOut[t,i] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,]) # cumulative rmse
-      biasOut[t,i] <- biasfunc(pred=Npredoos[t,], obs=Noos[t,]) # bias
-      denseOut[t,i] <- densefunc(pred=Npredoos[t,], obs=Noos[t,], sig_o=sig.o) # density
+      rmseTotOut[t,i-burnin] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,]) # cumulative rmse
+      biasOut[t,i-burnin] <- biasfunc(pred=Npredoos[t,], obs=Noos[t,]) # bias
+      denseOut[t,i-burnin] <- densefunc(pred=Npredoos[t,], obs=Noos[t,], sig_o=sig.o) # density
     }
     
   }
@@ -234,7 +233,7 @@ for (i in 1:Niter){
   if(i %in% seq(1000,Niter, by = 1000)) {
     save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_clim_v4_c1.RData")
   }
-  
+  print(i)
 }
 
 

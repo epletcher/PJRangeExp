@@ -8,7 +8,8 @@ library('LaplacesDemon')
 
 ###Data####
 # N<-N # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here, to test forecast)
-tmax<-dim(N)[1]-5 
+Noos <- N[32:36,] # out of sample data
+tmax<-dim(N)[1]-5 # reserve last 5 years for out of sample prediction
 pmax<-dim(N)[2]
 D<-Dsq
 X<-enviro.var[1:tmax,,-3] # all covariates except vpdmax; this is where covars go (1 = ppt, 2 = tmean, 3 = vpdmax, 4 = heatload, 5 = elev)
@@ -261,8 +262,6 @@ for (i in 1:Niter){
   
   NlatOutLast[,i]<-Nlat[tmax,]
   
-  print(i)
-  
   if(i%%checkpoint==0){
     if(accept.alpha0/i<0.35) alpha0.tune=alpha0.tune*.9
     if(accept.alpha0/i>0.45) alpha0.tune=alpha0.tune*1.1
@@ -312,9 +311,9 @@ for (i in 1:Niter){
     
     # prediction evaluation metrics
     for(t in 1:5) {
-      rmseTotOut[t,i] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,]) # cumulative rmse
-      biasOut[t,i] <- biasfunc(pred=Npredoos[t,], obs=Noos[t,]) # bias
-      denseOut[t,i] <- densefunc(pred=Npredoos[t,], obs=Noos[t,], sig_o=sig.o) # density
+      rmseTotOut[t,i-burnin] <- rmsefunc(pred=Npredoos[t,], obs=Noos[t,]) # cumulative rmse
+      biasOut[t,i-burnin] <- biasfunc(pred=Npredoos[t,], obs=Noos[t,]) # bias
+      denseOut[t,i-burnin] <- densefunc(pred=Npredoos[t,], obs=Noos[t,], sig_o=sig.o) # density
     }
     
   }
@@ -322,7 +321,7 @@ for (i in 1:Niter){
   if(i %in% seq(1000,Niter, by = 1000)) {
     save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_topoClim_v2_c1.RData")
   }
-  
+  print(i)
 }
 
 

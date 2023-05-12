@@ -104,11 +104,11 @@ return(list(Npred=Npred,G=G))
 
 }
 
-UpdateBetaQuad<-function(tmax,a0,b0,b1,Nlat,M,p){ # add X and C to list of arguments
+UpdateBetaQuad<-function(tmax,b0,b1,b2,Nlat,M,p){ # add X and C to list of arguments
   Npred<-matrix(NA,tmax,p)
   G<-matrix(NA,tmax,p)
   for (t in 2:tmax){
-    G[t,]<-exp(a0+b0*Nlat[t-1,]+b1*(Nlat[t-1,]^2))
+    G[t,]<-exp(b0+b1*Nlat[t-1,]+b2*(Nlat[t-1,]^2))
     Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
     
     

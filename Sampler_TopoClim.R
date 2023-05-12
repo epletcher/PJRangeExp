@@ -1,10 +1,12 @@
 #.libPaths("C:/Rpackages/R/win-library/4.1") # (elise setting package library location)
-
-# load workspacefile with prepped data: 
-# load("G:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Scripts/data_prepped.RData")
-
 library("splus2R")
 library('LaplacesDemon')
+
+# load workspacefile with prepped data: 
+load("R:/Shriver_Lab/PJspread/data_prepped.RData")
+
+# load sampler functions script
+source("R:/Shriver_Lab/PJspread/PJ_spread_repo/SamplerFunctions.R")
 
 ###Data####
 # N<-N # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here, to test forecast)

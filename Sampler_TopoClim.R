@@ -14,7 +14,7 @@ Noos <- N[32:36,] # out of sample data
 tmax<-dim(N)[1]-5 # reserve last 5 years for out of sample prediction
 pmax<-dim(N)[2]
 D<-Dsq
-X<-enviro.var[1:tmax,,-3] # all covariates except vpdmax; this is where covars go (1 = ppt, 2 = tmean, 3 = vpdmax, 4 = heatload, 5 = elev)
+X<-enviro.var[,,-3] # all covariates except vpdmax; this is where covars go (1 = ppt, 2 = tmean, 3 = vpdmax, 4 = heatload, 5 = elev)
 amax<-5
 bmax<-3 # number of covariates 
 
@@ -31,7 +31,7 @@ alpha3<-0.001 # regression coef for heatload
 alpha4<-0.01 # regresstion coef for elev
 beta0<-0.0009
 beta1<-0 # regression coef for heatload
-beta2<--0.--1 # regresstion coef for elev
+beta2<-0 # regresstion coef for elev
 tau<-.033###Give tau a reasonable starting value. 
 sig.p<-1.3##give sig.p reasonable starting values
 o1<-sig.o<-1##give sig.o reasonable starting values # could try 1.5 or 2

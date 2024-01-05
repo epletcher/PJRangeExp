@@ -279,16 +279,86 @@ plot_pix_gg(159, N)
 
 ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/single_pixel_pred_mid_cover_5yr_avg_init.png", plot = last_plot(), dpi = 400)
 
-
+# ------- PLOT OBSERVED COVER OVER TIME FOR ANY PIXEL -----
 # test out different pixels to plot based on 36-yr trends
-N3 %>% as.data.frame() %>% rownames_to_column("year") %>% 
-  pivot_longer(!year, values_to = "obs", names_to = "pixel") %>% 
-  filter(pixel == "2309") %>% 
-  mutate(year = as.numeric(year)) %>% 
-  ggplot(aes(x = year, y = obs)) + 
-  geom_point(aes(x = year, y = obs)) + 
-  geom_line(aes(x = year, y = obs), lty = 2) + 
-  scale_y_continuous(limits = c(0, 40)) 
+
+(obs.plot <- N %>% as.data.frame() %>% rownames_to_column("year") %>% 
+   pivot_longer(!year, values_to = "obs", names_to = "pixel") %>% 
+   filter(pixel == "740") %>% # any pixel between 1-2352
+   mutate(year = as.numeric(year)) %>% 
+   ggplot(aes(x = year, y = obs)) + 
+   geom_point(aes(x = year, y = obs)) + 
+   geom_line(aes(x = year, y = obs), lty = 2) + 
+   scale_y_continuous(limits = c(0, 40)) +
+   labs(y = "% TREE COVER", x = "YEARS OUT") +
+   theme_bw())
+
+# ------- PLOT LATENT COVER ON OBSERVED COVER OVER TIME ------
+# test out ploting observed cover and latent cover
+#med.lat.base <- apply(mod1$Nlat, MARGIN = c(1,2), FUN = median)
+#up.lat.base <- apply(mod1$Nlat, MARGIN = c(1,2), FUN = quantile, 0.95)
+#low.lat.base <- apply(mod1$Nlat, MARGIN = c(1,2), FUN = quantile, 0.05)
+
+#
+
+plot_lat_gg <- function(pix) {
+  
+  px <- as.character(pix)
+  pxv <- paste("V",as.character(pix), sep = "")
+  
+  ## re-organize latent cover data
+  
+  #median values
+  lat.med <- med.lat.base %>% as.data.frame() %>% 
+    rownames_to_column("year") %>%
+    pivot_longer(!year, values_to = "lat.med", names_to = "pixel") %>% 
+    filter(pixel == pxv) %>% 
+    select(!pixel) %>%
+    mutate(year = as.numeric(year))
+  
+  # lower ci values
+  lat.low <- low.lat.base %>% as.data.frame() %>% 
+    rownames_to_column("year") %>%
+    pivot_longer(!year, values_to = "lat.low", names_to = "pixel") %>% 
+    filter(pixel == pxv) %>% 
+    select(!pixel) %>%
+    mutate(year = as.numeric(year))
+  
+  # upper ci values
+  lat.up <- up.lat.base %>% as.data.frame() %>% 
+    rownames_to_column("year") %>%
+    pivot_longer(!year, values_to = "lat.up", names_to = "pixel") %>% 
+    filter(pixel == pxv) %>% 
+    select(!pixel) %>%
+    mutate(year = as.numeric(year))
+  
+  # observed 
+  Ndat <- N %>% as.data.frame() %>% 
+    rownames_to_column("year") %>% 
+    pivot_longer(!year, values_to = "obs", names_to = "pixel") %>% 
+    filter(pixel == px) %>% 
+    mutate(year = as.numeric(year)) %>% 
+    select(!pixel) %>%
+    filter(year <= 31) # only training data
+  
+  # combine predictions and observations into one dataframe
+  plot.dat <- left_join(Ndat, lat.med) %>% left_join(.,lat.low) %>% left_join(.,lat.up)
+  
+  # plot
+  (test <- plot.dat %>% 
+      ggplot(aes(x = year, y = obs)) + 
+      geom_point(aes(x = year, y = obs)) + 
+      geom_line(aes(x = year, y = obs), lty = 2) + 
+      geom_ribbon(aes(ymin = lat.low, ymax = lat.up), 
+                  alpha=0.4, fill = "coral") + 
+      geom_line(aes(x = year, y = lat.med), col = "coral")  +
+      scale_y_continuous(limits = c(-2, 30)) + 
+      labs(x = "YEARS OUT", y = "TREE COVER (%)") + 
+      theme(legend.position="none", text = element_text(size=25)) +
+      theme_classic())
+}
+
+plot_lat_gg(171)
 
 # Good representative pixels
 # N

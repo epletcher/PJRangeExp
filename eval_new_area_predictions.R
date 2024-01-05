@@ -295,13 +295,15 @@ ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/
 
 # ------- PLOT LATENT COVER ON OBSERVED COVER OVER TIME ------
 # test out ploting observed cover and latent cover
-#med.lat.base <- apply(mod1$Nlat, MARGIN = c(1,2), FUN = median)
-#up.lat.base <- apply(mod1$Nlat, MARGIN = c(1,2), FUN = quantile, 0.95)
-#low.lat.base <- apply(mod1$Nlat, MARGIN = c(1,2), FUN = quantile, 0.05)
+med.lat <- apply(mod3$Nlat, MARGIN = c(1,2), FUN = median)
+up.lat <- apply(mod3$Nlat, MARGIN = c(1,2), FUN = quantile, 0.95)
+low.lat <- apply(mod3$Nlat, MARGIN = c(1,2), FUN = quantile, 0.05)
 
 #
 
 plot_lat_gg <- function(pix) {
+  
+  pix = 171
   
   px <- as.character(pix)
   pxv <- paste("V",as.character(pix), sep = "")
@@ -309,28 +311,56 @@ plot_lat_gg <- function(pix) {
   ## re-organize latent cover data
   
   #median values
-  lat.med <- med.lat.base %>% as.data.frame() %>% 
+  lat.med <- med.lat %>% as.data.frame() %>% 
     rownames_to_column("year") %>%
     pivot_longer(!year, values_to = "lat.med", names_to = "pixel") %>% 
     filter(pixel == pxv) %>% 
     select(!pixel) %>%
     mutate(year = as.numeric(year))
   
-  # lower ci values
-  lat.low <- low.lat.base %>% as.data.frame() %>% 
+  # lat lower ci values
+  lat.low <- low.lat %>% as.data.frame() %>% 
     rownames_to_column("year") %>%
     pivot_longer(!year, values_to = "lat.low", names_to = "pixel") %>% 
     filter(pixel == pxv) %>% 
     select(!pixel) %>%
     mutate(year = as.numeric(year))
   
-  # upper ci values
-  lat.up <- up.lat.base %>% as.data.frame() %>% 
+  # lat upper ci values
+  lat.up <- up.lat %>% as.data.frame() %>% 
     rownames_to_column("year") %>%
     pivot_longer(!year, values_to = "lat.up", names_to = "pixel") %>% 
     filter(pixel == pxv) %>% 
     select(!pixel) %>%
     mutate(year = as.numeric(year))
+  
+  ## re-organize predicted cover data
+  
+  # median predicted values
+  med.pred <- med.pred.clim %>% as.data.frame() %>% 
+    rownames_to_column("year") %>%
+    pivot_longer(!year, values_to = "med.pred", names_to = "pixel") %>% 
+    filter(pixel == pxv) %>% 
+    select(!pixel) %>%
+    mutate(year = as.numeric(year)) %>%
+    filter(year !=1 )  # remove first year (true value, not part of the forecast)
+  
+  # low ci prediction
+  low.pred <- low.pred.clim %>% as.data.frame() %>% 
+    rownames_to_column("year") %>%
+    pivot_longer(!year, values_to = "low.pred", names_to = "pixel") %>% 
+    filter(pixel == pxv) %>% 
+    select(!pixel) %>%
+    mutate(year = as.numeric(year)) %>%
+    filter(year !=1 )  # remove first year (true value, not part of the forecast)
+  
+  up.pred <- up.pred.clim %>% as.data.frame() %>% 
+    rownames_to_column("year") %>%
+    pivot_longer(!year, values_to = "up.pred", names_to = "pixel") %>% 
+    filter(pixel == pxv) %>% 
+    select(!pixel) %>%
+    mutate(year = as.numeric(year)) %>%
+    filter(year !=1 )  # remove first year (true value, not part of the forecast)
   
   # observed 
   Ndat <- N %>% as.data.frame() %>% 
@@ -338,11 +368,13 @@ plot_lat_gg <- function(pix) {
     pivot_longer(!year, values_to = "obs", names_to = "pixel") %>% 
     filter(pixel == px) %>% 
     mutate(year = as.numeric(year)) %>% 
-    select(!pixel) %>%
-    filter(year <= 31) # only training data
+    select(!pixel)
   
   # combine predictions and observations into one dataframe
-  plot.dat <- left_join(Ndat, lat.med) %>% left_join(.,lat.low) %>% left_join(.,lat.up)
+  plot.dat <- left_join(Ndat, lat.med) %>% 
+    left_join(.,lat.low) %>% left_join(.,lat.up) %>% 
+    left_join(.,med.pred) %>% left_join(.,low.pred) %>% 
+    left_join(.,up.pred)
   
   # plot
   (test <- plot.dat %>% 
@@ -351,7 +383,10 @@ plot_lat_gg <- function(pix) {
       geom_line(aes(x = year, y = obs), lty = 2) + 
       geom_ribbon(aes(ymin = lat.low, ymax = lat.up), 
                   alpha=0.4, fill = "coral") + 
-      geom_line(aes(x = year, y = lat.med), col = "coral")  +
+      geom_line(aes(x = year, y = lat.med), col = "coral") +
+      geom_ribbon(aes(ymin = low.pred, ymax = up.pred), 
+                  alpha=0.4, fill = "#00BFC4") +
+      geom_line(aes(x = year, y = med.pred), lwd = 1.5, col = "#00BFC4") + 
       scale_y_continuous(limits = c(-2, 30)) + 
       labs(x = "YEARS OUT", y = "TREE COVER (%)") + 
       theme(legend.position="none", text = element_text(size=25)) +

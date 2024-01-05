@@ -14,17 +14,17 @@ normalized_rmse <- function(rmsedat, N) {
 # calculate RMSE in 5-yr chunks
 # choose a set of predictions for a specific study area
 
-# # N
-# BASE = for.base.N$rmseTotOut
-# TOPO = for.topo.N$rmseTotOut
-# CLIM = for.clim.N$rmseTotOut
-# TOPOCLIM = for.topoclim.N$rmseTotOut
+# N
+BASE = for.base.N$rmseTotOut
+TOPO = for.topo.N$rmseTotOut
+CLIM = for.clim.N$rmseTotOut
+TOPOCLIM = for.topoclim.N$rmseTotOut
 
-# N2
-BASE = for.base.N2$rmseTotOut
-TOPO = for.topo.N2$rmseTotOut
-CLIM = for.clim.N2$rmseTotOut
-TOPOCLIM = for.topoclim.N2$rmseTotOut
+# # N2
+# BASE = for.base.N2$rmseTotOut
+# TOPO = for.topo.N2$rmseTotOut
+# CLIM = for.clim.N2$rmseTotOut
+# TOPOCLIM = for.topoclim.N2$rmseTotOut
 
 # # N3
 # BASE = for.base.N3$rmseTotOut
@@ -140,11 +140,11 @@ dat %>%
 ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmse_5yr_chunks_5y_avg_init_reletavized.png", plot = last_plot(), width = 4, height = 4, dpi = 400)
 
 # ------------------ Predicted median and credible intervals ------------
-# # N
-# base.pred = for.base.N$predOut
-# topo.pred = for.topo.N$predOut
-# clim.pred = for.clim.N$predOut
-# topoclim.pred = for.topoclim.N$predOut
+# N
+base.pred = for.base.N$predOut
+topo.pred = for.topo.N$predOut
+clim.pred = for.clim.N$predOut
+topoclim.pred = for.topoclim.N$predOut
 
 # # N2
 # base.pred = for.base.N2$predOut
@@ -159,21 +159,21 @@ ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/
 # topoclim.pred = for.topoclim.N3$predOut
 
 ## save median predictions and calculate crediable intervals
-med.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = median)
-up.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
-low.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
+# med.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = median)
+# low.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
+# up.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 
 med.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = median)
-up.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
-low.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
+low.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
+up.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 
 # med.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = median)
-# up.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
-# low.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
+# low.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
+# up.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 # 
 # med.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = median)
-# up.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
-# low.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
+# low.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
+# up.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 
 # ------------------ Predicted vs. Observed plots -----------------------
 # pred vs. observed change in cover over entire forecast period
@@ -303,8 +303,6 @@ low.lat <- apply(mod3$Nlat, MARGIN = c(1,2), FUN = quantile, 0.05)
 
 plot_lat_gg <- function(pix) {
   
-  pix = 171
-  
   px <- as.character(pix)
   pxv <- paste("V",as.character(pix), sep = "")
   
@@ -374,7 +372,7 @@ plot_lat_gg <- function(pix) {
   plot.dat <- left_join(Ndat, lat.med) %>% 
     left_join(.,lat.low) %>% left_join(.,lat.up) %>% 
     left_join(.,med.pred) %>% left_join(.,low.pred) %>% 
-    left_join(.,up.pred)
+    left_join(.,up.pred) %>% mutate(year = year+1985)
   
   # plot
   (test <- plot.dat %>% 
@@ -382,20 +380,23 @@ plot_lat_gg <- function(pix) {
       geom_point(aes(x = year, y = obs)) + 
       geom_line(aes(x = year, y = obs), lty = 2) + 
       geom_ribbon(aes(ymin = lat.low, ymax = lat.up), 
-                  alpha=0.4, fill = "coral") + 
-      geom_line(aes(x = year, y = lat.med), col = "coral") +
+                  alpha=0.5, fill = "darkgrey") + 
+      geom_line(aes(x = year, y = lat.med), col = "darkgrey") +
       geom_ribbon(aes(ymin = low.pred, ymax = up.pred), 
-                  alpha=0.4, fill = "#00BFC4") +
-      geom_line(aes(x = year, y = med.pred), lwd = 1.5, col = "#00BFC4") + 
-      scale_y_continuous(limits = c(-2, 30)) + 
-      labs(x = "YEARS OUT", y = "TREE COVER (%)") + 
+                  alpha=0.3, fill = "#00BFC4") +
+      geom_line(aes(x = year, y = med.pred), col = "#00BFC4") + 
+      scale_y_continuous(limits = c(-2, 20)) + 
+      labs(x = "YEAR", y = "TREE COVER (%)") + 
       theme(legend.position="none", text = element_text(size=25)) +
       theme_classic())
 }
 
-plot_lat_gg(171)
+plot_lat_gg(774)
+
+ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/single_pixel_774_pred_5yr_avg_init_w_latent.png", plot = last_plot(), dpi = 400)
 
 # Good representative pixels
 # N
+# 171
 # N2
 # 608 - low cover, increasing

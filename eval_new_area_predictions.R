@@ -382,18 +382,17 @@ plot_lat_gg <- function(pix) {
       geom_ribbon(aes(ymin = lat.low, ymax = lat.up), 
                   alpha=0.5, fill = "darkgrey") + 
       geom_line(aes(x = year, y = lat.med), col = "darkgrey") +
-      geom_ribbon(aes(ymin = low.pred, ymax = up.pred), 
-                  alpha=0.3, fill = "#00BFC4") +
+      geom_ribbon(aes(ymin = low.pred, ymax = up.pred), alpha=0.3, fill = "#00BFC4") +
       geom_line(aes(x = year, y = med.pred), col = "#00BFC4") + 
       scale_y_continuous(limits = c(-2, 20)) + 
       labs(x = "YEAR", y = "TREE COVER (%)") + 
-      theme(legend.position="none", text = element_text(size=25)) +
+      theme(legend.position="none", text = element_text(size=5)) +
       theme_classic())
 }
 
 plot_lat_gg(774)
 
-ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/single_pixel_774_pred_5yr_avg_init_w_latent.png", plot = last_plot(), dpi = 400)
+ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/single_pixel_774_pred_5yr_avg_init_w_latent.png", plot = last_plot(), width = 6, height = 4, dpi = 400)
 
 # Good representative pixels
 # N

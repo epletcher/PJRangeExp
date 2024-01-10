@@ -209,6 +209,9 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
     Nt <- colMeans(obs[1:5,])# set initial cover value to average cover for first 5 years
     # Nt <- obs[1,] # set initial cover value as actual observed cover
     
+    # ** going through each year one by one here **
+    G.check <- matrix(NA, years, pixels)
+    
     for(t in 2:years) {
       
       if(mod=='base') {
@@ -221,6 +224,8 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
       
       if(mod=='topo') {
         G <- growthTopo(a0=pars$alpha0[i],a1=pars$alpha1[i],a2=pars$alpha2[i],b0=pars$beta0[i],b1=pars$beta1[i],b2=pars$beta2[i],X=covars[t,,],nt=as.vector(Nt))
+        
+        G.check[t,] <- G
       }
       
       if(mod=='topoclim') {

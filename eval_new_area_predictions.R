@@ -56,8 +56,8 @@ plot_rmse <- function(dat,N) {
 }
 
 # models that work
-plot_rmse(BASE, N3)
-plot_rmse(CLIM, N3)
+plot_rmse(BASE, N)
+plot_rmse(CLIM, N)
 # models that don't (for all areas)
 plot_rmse(TOPOCLIM, N)
 plot_rmse(TOPO, N)
@@ -130,7 +130,7 @@ group.cols <- c("#F8766D","#00BFC4","#C77Cff","#7CAE00")
 
 dat %>% 
   ggplot(aes(x = year_int, y = rmse, col = model), col = cols) + 
-  geom_boxplot(outlier.shape = NA) +
+  geom_boxplot(outlier.shape = NA) + 
   labs(y = 'RMSE', x = "5 year chunks out") +
   scale_y_continuous(limits = c(0, 0.6)) +
   scale_color_manual(values=group.cols) +
@@ -163,14 +163,14 @@ topoclim.pred = for.topoclim.N$predOut
 # low.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
 # up.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 
-med.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = median)
-low.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
-up.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
+# med.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = median)
+# low.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
+# up.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 
 # med.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = median)
 # low.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
 # up.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
-# 
+
 # med.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = median)
 # low.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
 # up.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)

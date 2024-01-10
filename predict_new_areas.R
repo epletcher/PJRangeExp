@@ -12,6 +12,9 @@ library(cowplot)
 # load functions
 source("forecastFunctions.R")
 
+# setwd 
+setwd("R:/Shriver_Lab/PJspread/evaluate_out_of_sample")
+
 # convert rasters to dataframes
 raster2df <- function(raster, na.rm = T){
   vals <- data.frame(raster::getValues(raster))
@@ -105,6 +108,23 @@ elev <- N3.topo %>% dplyr::select(c(cellnum, year, elev)) %>% pivot_wider(names_
 #stack
 enviro.var.N3 <- abind(ppt, tmean, heatload, elev, along = 3)
 
+# ** test plotting variation in environmental covariates for each study area **
+par(mfrow = c(2,2))
+matplot(enviro.var[,,1], type = 'l') # ppt
+matplot(enviro.var[,,2], type = 'l') # tmean
+matplot(enviro.var[,,4], type = 'l') # heatload
+matplot(enviro.var[,,5], type = 'l') # elev
+
+matplot(enviro.var.N2[,,1], type = 'l') # ppt
+matplot(enviro.var.N2[,,2], type = 'l') # tmean
+matplot(enviro.var.N2[,,3], type = 'l') # heatload
+matplot(enviro.var.N2[,,4], type = 'l') # elev
+
+matplot(enviro.var.N3[,,1], type = 'l') # ppt
+matplot(enviro.var.N3[,,2], type = 'l') # tmean
+matplot(enviro.var.N3[,,3], type = 'l') # heatload
+matplot(enviro.var.N3[,,4], type = 'l') # elev
+
 #------------- Build distance matrix ---------------
 
 # create empty rasters w same extent as each study area
@@ -143,9 +163,19 @@ mod3 <- readRDS(file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects
 mod4 <- readRDS(file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/topoclim_model.rds") # topoclim
 
 # ----------------- Forecast across new locations -------------------
+
+# ** testing to see where the topo and topoclim models are failing for the out of sample areas (N2 first) **
+
 # fixed/single origin forecast
 # allow error to propagate through time
 forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
+  
+  # ** checking inside of function for errors
+  obs = N2
+  pars = mod2$pars
+  covars = enviro.var.N2
+  Dsq = Dsq2
+  mod = 'topo'
   
   pars <- as.data.frame(pars)
   
@@ -154,7 +184,7 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
   
   # empty array to fill
   predOut <- array(NA, c(years, pixels, length(pars$tauOut))) 
-  predst <- abind(list(replicate(length(pars$tauOut), t(as.matrix(obs[1,]))))) 
+  predst <- abind(list(replicate(length(pars$tauOut), t(as.matrix(colMeans(obs[1:5,])))))) 
   predOut[1,,] <- predst[1,,]
   
   # evaluation
@@ -164,7 +194,11 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
   M1 <- matrix(NA, pixels, pixels)
   
   # calculate predicted values
-  for(i in 1:length(pars$tauOut)) {
+  for(i in 1:length(pars$tauOut)) { 
+    
+    # breaks after one prediction, so start here for testing
+    
+    i = 1
     
     M <- dispersal(Dsq, pars$tauOut[i]) 
     
@@ -223,6 +257,8 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
     
   if(i %in% seq(1, length(pars$tauOut), 100)) {print(i)} 
   }
+  
+  
   to_return <- list()
   to_return$predOut <- predOut
   to_return$rmseTotOut <- rmseTotOut
@@ -231,6 +267,19 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
   
   return(to_return)
 }
+
+# ** plot predOut to see what is going on **
+n2.xy <- read.csv("RAPtreecoverData_oos1.csv") %>% dplyr::filter(year==1986) %>% dplyr::select(c(x,y))
+par(mfrow = c(3,4))
+for (i in 18:29) {
+  weirdyear <- predOut[i,,1]
+  test <- cbind(n2.xy, weirdyear)
+  plot(main = as.character(i), df2raster(test), zlim = c(-20, 30))
+}
+
+# plot elevation or heatload (already standardized)
+N2.topo %>% dplyr::filter(year == 1986) %>% dplyr::select(c(x,y,elev)) %>% df2raster(.) %>% plot()
+N2.topo %>% dplyr::filter(year == 1986) %>% dplyr::select(c(x,y,heatload)) %>% df2raster(.) %>% plot()
 
 ## Build forecasts for each area with each model 
 # (save predictions as a workspace file

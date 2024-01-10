@@ -176,6 +176,9 @@ up.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 # up.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 
 # ------------------ Predicted vs. Observed plots -----------------------
+
+# ** these plots had an error and are not currently used to generate any results **
+
 # pred vs. observed change in cover over entire forecast period
 obs = N
 

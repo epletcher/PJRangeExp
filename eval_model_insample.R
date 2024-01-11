@@ -4,8 +4,6 @@
 # ** script takes a while to run, load 'eval_model_in_sample_5y.RData' for model predictions and rmse's **
 # In R:/Shriver_Lab/PJspread/evaluate_in_sample
 
-setwd("R:/Shriver_Lab/PJspread")
-
 # load packages
 library(tidyverse)
 library(abind) # arrays
@@ -35,6 +33,11 @@ df2raster <- function(df) { # df should be x, y, vals only
   r <- raster::raster(spg, values = TRUE) # coerce to raster
   return(r)
 }
+
+## set working dir
+setwd("R:/Shriver_Lab/PJspread")
+
+# ---- Load model outputs from file ----
 
 # Pull parameter and latent state estimates based on model version, base, topo, clim or topoclim
 retrieve_mod <- function(model) {
@@ -188,6 +191,8 @@ forecast_new_loc <- function(obs, mod, covars, Dsq, mod.name) {
       Nmean <-M1%*%(diag(G)%*%Nt)
       
       Nt <- rnorm(pixels, Nmean, pars$sig.pOut[i])
+      
+      Nt <- replace(Nt, Nt<0, 0) # convert negative values to zeroes
       
       predOut[t,,i] <- Nt
       

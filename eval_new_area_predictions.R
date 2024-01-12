@@ -159,21 +159,21 @@ topoclim.pred = for.topoclim.N$predOut
 # topoclim.pred = for.topoclim.N3$predOut
 
 ## save median predictions and calculate crediable intervals
-# med.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = median)
-# low.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
-# up.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
+med.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = median)
+low.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
+up.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 
-# med.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = median)
-# low.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
-# up.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
+med.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = median)
+low.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
+up.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 
 # med.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = median)
 # low.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
 # up.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 
-# med.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = median)
-# low.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
-# up.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
+med.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = median)
+low.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
+up.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 
 # ------------------ Predicted vs. Observed plots -----------------------
 
@@ -278,7 +278,9 @@ plot_pix_gg <- function(pix, obs) {
     theme_bw())
 }
 
-plot_pix_gg(159, N)
+plot_pix_gg(152, N)
+
+# N=159, increasing trend pixel, N = 703 increasing trend pixel with high var, N = 707, low cover, increasing.
 
 ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/single_pixel_pred_mid_cover_5yr_avg_init.png", plot = last_plot(), dpi = 400)
 
@@ -297,10 +299,10 @@ ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/
    theme_bw())
 
 # ------- PLOT LATENT COVER ON OBSERVED COVER OVER TIME ------
-# test out ploting observed cover and latent cover
-med.lat <- apply(mod3$Nlat, MARGIN = c(1,2), FUN = median)
-up.lat <- apply(mod3$Nlat, MARGIN = c(1,2), FUN = quantile, 0.95)
-low.lat <- apply(mod3$Nlat, MARGIN = c(1,2), FUN = quantile, 0.05)
+# test out ploting observed cover and latent cover (latent cover for base model)
+med.lat <- apply(mod1$Nlat, MARGIN = c(1,2), FUN = median)
+up.lat <- apply(mod1$Nlat, MARGIN = c(1,2), FUN = quantile, 0.95)
+low.lat <- apply(mod1$Nlat, MARGIN = c(1,2), FUN = quantile, 0.05)
 
 #
 
@@ -316,7 +318,7 @@ plot_lat_gg <- function(pix) {
     rownames_to_column("year") %>%
     pivot_longer(!year, values_to = "lat.med", names_to = "pixel") %>% 
     filter(pixel == pxv) %>% 
-    select(!pixel) %>%
+    dplyr::select(!pixel) %>%
     mutate(year = as.numeric(year))
   
   # lat lower ci values
@@ -324,7 +326,7 @@ plot_lat_gg <- function(pix) {
     rownames_to_column("year") %>%
     pivot_longer(!year, values_to = "lat.low", names_to = "pixel") %>% 
     filter(pixel == pxv) %>% 
-    select(!pixel) %>%
+    dplyr::select(!pixel) %>%
     mutate(year = as.numeric(year))
   
   # lat upper ci values
@@ -332,50 +334,51 @@ plot_lat_gg <- function(pix) {
     rownames_to_column("year") %>%
     pivot_longer(!year, values_to = "lat.up", names_to = "pixel") %>% 
     filter(pixel == pxv) %>% 
-    select(!pixel) %>%
+    dplyr::select(!pixel) %>%
     mutate(year = as.numeric(year))
   
   ## re-organize predicted cover data
   
-  # median predicted values
-  med.pred <- med.pred.clim %>% as.data.frame() %>% 
-    rownames_to_column("year") %>%
-    pivot_longer(!year, values_to = "med.pred", names_to = "pixel") %>% 
-    filter(pixel == pxv) %>% 
-    select(!pixel) %>%
-    mutate(year = as.numeric(year)) %>%
-    filter(year !=1 )  # remove first year (true value, not part of the forecast)
-  
-  # low ci prediction
-  low.pred <- low.pred.clim %>% as.data.frame() %>% 
-    rownames_to_column("year") %>%
-    pivot_longer(!year, values_to = "low.pred", names_to = "pixel") %>% 
-    filter(pixel == pxv) %>% 
-    select(!pixel) %>%
-    mutate(year = as.numeric(year)) %>%
-    filter(year !=1 )  # remove first year (true value, not part of the forecast)
-  
-  up.pred <- up.pred.clim %>% as.data.frame() %>% 
-    rownames_to_column("year") %>%
-    pivot_longer(!year, values_to = "up.pred", names_to = "pixel") %>% 
-    filter(pixel == pxv) %>% 
-    select(!pixel) %>%
-    mutate(year = as.numeric(year)) %>%
-    filter(year !=1 )  # remove first year (true value, not part of the forecast)
-  
+  # # median predicted values
+  # med.pred <- med.pred.clim %>% as.data.frame() %>% 
+  #   rownames_to_column("year") %>%
+  #   pivot_longer(!year, values_to = "med.pred", names_to = "pixel") %>% 
+  #   filter(pixel == pxv) %>% 
+  #   select(!pixel) %>%
+  #   mutate(year = as.numeric(year)) %>%
+  #   filter(year !=1 )  # remove first year (true value, not part of the forecast)
+  # 
+  # # low ci prediction
+  # low.pred <- low.pred.clim %>% as.data.frame() %>% 
+  #   rownames_to_column("year") %>%
+  #   pivot_longer(!year, values_to = "low.pred", names_to = "pixel") %>% 
+  #   filter(pixel == pxv) %>% 
+  #   select(!pixel) %>%
+  #   mutate(year = as.numeric(year)) %>%
+  #   filter(year !=1 )  # remove first year (true value, not part of the forecast)
+  # 
+  # up.pred <- up.pred.clim %>% as.data.frame() %>% 
+  #   rownames_to_column("year") %>%
+  #   pivot_longer(!year, values_to = "up.pred", names_to = "pixel") %>% 
+  #   filter(pixel == pxv) %>% 
+  #   select(!pixel) %>%
+  #   mutate(year = as.numeric(year)) %>%
+  #   filter(year !=1 )  # remove first year (true value, not part of the forecast)
+  # 
   # observed 
   Ndat <- N %>% as.data.frame() %>% 
     rownames_to_column("year") %>% 
     pivot_longer(!year, values_to = "obs", names_to = "pixel") %>% 
     filter(pixel == px) %>% 
     mutate(year = as.numeric(year)) %>% 
-    select(!pixel)
+    filter(year <= 31) %>%
+    dplyr::select(!pixel)
   
   # combine predictions and observations into one dataframe
   plot.dat <- left_join(Ndat, lat.med) %>% 
     left_join(.,lat.low) %>% left_join(.,lat.up) %>% 
-    left_join(.,med.pred) %>% left_join(.,low.pred) %>% 
-    left_join(.,up.pred) %>% mutate(year = year+1985)
+    #left_join(.,med.pred) %>% left_join(.,low.pred) %>% left_join(.,up.pred) %>% # not plotting predicted data
+    mutate(year = year+1985)
   
   # plot
   (test <- plot.dat %>% 
@@ -383,19 +386,20 @@ plot_lat_gg <- function(pix) {
       geom_point(aes(x = year, y = obs)) + 
       geom_line(aes(x = year, y = obs), lty = 2) + 
       geom_ribbon(aes(ymin = lat.low, ymax = lat.up), 
-                  alpha=0.5, fill = "darkgrey") + 
-      geom_line(aes(x = year, y = lat.med), col = "darkgrey") +
-      geom_ribbon(aes(ymin = low.pred, ymax = up.pred), alpha=0.3, fill = "#00BFC4") +
-      geom_line(aes(x = year, y = med.pred), col = "#00BFC4") + 
-      scale_y_continuous(limits = c(-2, 20)) + 
+                  alpha=0.4, fill = "darkgrey") + 
+      geom_line(aes(x = year, y = lat.med), col = "darkgrey", lwd = 1.1) +
+      #geom_ribbon(aes(ymin = low.pred, ymax = up.pred), alpha=0.3, fill = "#00BFC4") +
+      #geom_line(aes(x = year, y = med.pred), col = "#00BFC4") + 
+      scale_y_continuous(limits = c(-2, 25)) + 
       labs(x = "YEAR", y = "TREE COVER (%)") + 
       theme(legend.position="none", text = element_text(size=5)) +
       theme_classic())
 }
 
-plot_lat_gg(774)
+plot_lat_gg(159)
 
-ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/single_pixel_774_pred_5yr_avg_init_w_latent.png", plot = last_plot(), width = 6, height = 4, dpi = 400)
+
+ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/single_pixel_555_base_latent_w_obs.png", plot = last_plot(), width = 6, height = 4, dpi = 400)
 
 # Good representative pixels
 # N

@@ -276,7 +276,7 @@ rmsedat %>% pivot_longer(everything(), names_to = "model", values_to = "rmse") %
   ggplot(aes(x = model, y = rmse, col = model)) + 
   geom_boxplot(outlier.shape = NA, lwd = 1.2) + 
   scale_color_manual(values=group.cols) +
-  labs(x = "MODEL", y = "RMSE") + 
+  labs(x = "MODEL", y = "NORMALIZED RMSE") + 
   theme_bw() + 
   theme(legend.position="none", text = element_text(size=20))
 
@@ -289,24 +289,22 @@ ggsave("G:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/co
 ## ---- Calculate median and 95% Credible interval ----
 
 med.pred.base <- apply(for.base.N$predOut, MARGIN = c(1,2), FUN = median)
-# write.csv(med.pred.base, "insample_predictions/medpredpixel_base.csv")
+write.csv(med.pred.base, "R:/Shriver_Lab/PJspread/evaluate_in_sample/insample_predictions/medpredpixel_base.csv")
 up.pred.base <- apply(for.base.N$predOut, MARGIN = c(1,2), FUN = quantile, 0.95)
 low.pred.base <- apply(for.base.N$predOut, MARGIN = c(1,2), FUN = quantile, 0.05)
 
 med.pred.topo <- apply(for.topo.N$predOut, MARGIN = c(1,2), FUN = median)
 up.pred.topo <- apply(for.topo.N$predOut, MARGIN = c(1,2), FUN = quantile, 0.95)
 low.pred.topo <- apply(for.topo.N$predOut, MARGIN = c(1,2), FUN = quantile, 0.05)
-# write.csv(med.pred.topo, "insample_predictions/medpredpixel_topo.csv")
+write.csv(med.pred.topo, "R:/Shriver_Lab/PJspread/evaluate_in_sample/insample_predictions/medpredpixel_topo.csv")
 
 med.pred.clim <- apply(for.clim.N$predOut, MARGIN = c(1,2), FUN = median)
 low.pred.clim <- apply(for.clim.N$predOut, MARGIN = c(1,2), FUN = quantile, 0.05)
 up.pred.clim <- apply(for.clim.N$predOut, MARGIN = c(1,2), FUN = quantile, 0.95)
-
-
-write.csv(med.pred.clim, "insample_predictions/medpredpixel_clim.csv")
+write.csv(med.pred.clim, "R:/Shriver_Lab/PJspread/evaluate_in_sample/insample_predictions/medpredpixel_clim.csv")
 
 med.pred.topoclim <- apply(for.topoclim.N$predOut, MARGIN = c(1,2), FUN = median)
-write.csv(med.pred.topoclim, "insample_predictions/medpredpixel_topoclim.csv")
+write.csv(med.pred.topoclim, "R:/Shriver_Lab/PJspread/evaluate_in_sample/insample_predictions/medpredpixel_topoclim.csv")
 up.pred.topoclim <- apply(for.topoclim.N$predOut, MARGIN = c(1,2), FUN = quantile, 0.95) 
 low.pred.topoclim <- apply(for.topoclim.N$predOut, MARGIN = c(1,2), FUN = quantile, 0.05)
 

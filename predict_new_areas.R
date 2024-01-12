@@ -170,13 +170,6 @@ mod4 <- readRDS(file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects
 # allow error to propagate through time
 forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
   
-  # ** checking inside of function for errors
-  obs = N2
-  pars = mod2$pars
-  covars = enviro.var.N2
-  Dsq = Dsq2
-  mod = 'topo'
-  
   pars <- as.data.frame(pars)
   
   pixels = length(obs[1,])
@@ -196,10 +189,6 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
   # calculate predicted values
   for(i in 1:length(pars$tauOut)) { 
     
-    # breaks after one prediction, so start here for testing
-    
-    i = 1
-    
     M <- dispersal(Dsq, pars$tauOut[i]) 
     
     for(p in 1:pixels){
@@ -208,9 +197,6 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
     
     Nt <- colMeans(obs[1:5,])# set initial cover value to average cover for first 5 years
     # Nt <- obs[1,] # set initial cover value as actual observed cover
-    
-    # ** going through each year one by one here **
-    G.check <- matrix(NA, years, pixels)
     
     for(t in 2:years) {
       
@@ -225,7 +211,6 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
       if(mod=='topo') {
         G <- growthTopo(a0=pars$alpha0[i],a1=pars$alpha1[i],a2=pars$alpha2[i],b0=pars$beta0[i],b1=pars$beta1[i],b2=pars$beta2[i],X=covars[t,,],nt=as.vector(Nt))
         
-        G.check[t,] <- G
       }
       
       if(mod=='topoclim') {
@@ -252,6 +237,8 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
       
       Nt <- rnorm(pixels, Nmean, pars$sig.pOut[i])
       
+      Nt <- replace(Nt, Nt<0, 0) # convert negative values to zeroes
+      
       predOut[t,,i] <- Nt
       
       rmseTotOut[t,i] <- rmsefunc(pred=Nt, obs=obs[t,])
@@ -273,29 +260,25 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
   return(to_return)
 }
 
-# ** plot predOut to see what is going on **
-n2.xy <- read.csv("RAPtreecoverData_oos1.csv") %>% dplyr::filter(year==1986) %>% dplyr::select(c(x,y))
-par(mfrow = c(3,4))
-for (i in 18:29) {
-  weirdyear <- predOut[i,,1]
-  test <- cbind(n2.xy, weirdyear)
-  plot(main = as.character(i), df2raster(test), zlim = c(-20, 30))
-}
+# # ** plot predOut to see what is going on with models breaking down **
+# n2.xy <- read.csv("RAPtreecoverData_oos1.csv") %>% dplyr::filter(year==1986) %>% dplyr::select(c(x,y))
+# par(mfrow = c(3,4))
+# for (i in 18:29) {
+#   weirdyear <- predOut[i,,1]
+#   test <- cbind(n2.xy, weirdyear)
+#   plot(main = as.character(i), df2raster(test), zlim = c(-20, 30))
+# }
 
-# plot elevation or heatload (already standardized)
-N2.topo %>% dplyr::filter(year == 1986) %>% dplyr::select(c(x,y,elev)) %>% df2raster(.) %>% plot()
-N2.topo %>% dplyr::filter(year == 1986) %>% dplyr::select(c(x,y,heatload)) %>% df2raster(.) %>% plot()
-
-## Build forecasts for each area with each model 
+## ----- Build forecasts for each area with each model ----
 # (save predictions as a workspace file
 
-# # N
-# for.base.N <- forecast_new_loc(obs = N, pars = mod1$pars, Dsq = Dsq, mod = 'base')
-# for.topo.N <- forecast_new_loc(obs = N, pars = mod2$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'topo')
-# for.clim.N <- forecast_new_loc(obs = N, pars = mod3$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'clim')
-# for.topoclim.N <- forecast_new_loc(obs = N, pars = mod4$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'topoclim')
-# 
-# save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/35y_insample_predictions_5y_average_initial.RData")
+# N
+for.base.N <- forecast_new_loc(obs = N, pars = mod1$pars, Dsq = Dsq, mod = 'base')
+for.topo.N <- forecast_new_loc(obs = N, pars = mod2$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'topo')
+for.clim.N <- forecast_new_loc(obs = N, pars = mod3$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'clim')
+for.topoclim.N <- forecast_new_loc(obs = N, pars = mod4$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'topoclim')
+
+save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/35y_insample_predictions_5y_average_initial_rm_z.RData")
 
 # # N2
 # for.base.N2 <- forecast_new_loc(obs = N2, pars = mod1$pars, Dsq = Dsq2, mod = 'base')
@@ -303,7 +286,7 @@ N2.topo %>% dplyr::filter(year == 1986) %>% dplyr::select(c(x,y,heatload)) %>% d
 # for.clim.N2 <- forecast_new_loc(obs = N2, pars = mod3$pars, covars = enviro.var.N2, Dsq = Dsq2, mod = 'clim')
 # for.topoclim.N2 <- forecast_new_loc(obs = N2, pars = mod4$pars, covars = enviro.var.N2, Dsq = Dsq2, mod = 'topoclim')
 # 
-# save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/35y_OOS_1_near_predictions_5y_average_initial.RData")
+# save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/35y_OOS_1_near_predictions_5y_average_initial_rm_z.RData")
 
 # # N3
 # for.base.N3 <- forecast_new_loc(obs = N3, pars = mod1$pars, Dsq = Dsq3, mod = 'base')
@@ -311,4 +294,4 @@ N2.topo %>% dplyr::filter(year == 1986) %>% dplyr::select(c(x,y,heatload)) %>% d
 # for.clim.N3 <- forecast_new_loc(obs = N3, pars = mod3$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'clim')
 # for.topoclim.N3 <- forecast_new_loc(obs = N3, pars = mod4$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'topoclim')
 # 
-# save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/35y_OOS_2_far_predictions_5y_average_initial.RData")
+# save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/35y_OOS_2_far_predictions_5y_average_initial_rm_z.RData")

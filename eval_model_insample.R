@@ -12,7 +12,7 @@ library(raster)
 library(cowplot)
 
 # --------- functions -----------
-source("evaluate_out_of_sample/forecastFunctions.R")
+source("forecastFunctions.R")
 
 # convert rasters to dataframes
 raster2df <- function(raster, na.rm = T){
@@ -35,7 +35,7 @@ df2raster <- function(df) { # df should be x, y, vals only
 }
 
 ## set working dir
-setwd("R:/Shriver_Lab/PJspread")
+setwd("R:/Shriver_Lab/PJspread/sampleroutput")
 
 # ---- Load model outputs from file ----
 
@@ -115,17 +115,17 @@ mod2 <- retrieve_mod("topo")
 mod3 <- retrieve_mod("clim")
 mod4 <- retrieve_mod("topoClim")
 
-# save model objects as RDS for out of sample forecasts
-saveRDS(mod1, file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/base_model.rds")
-saveRDS(mod2, file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/topo_model.rds")
-saveRDS(mod3, file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/clim_model.rds")
-saveRDS(mod4, file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/topoclim_model.rds")
+# # save model objects as RDS for out of sample forecasts
+# saveRDS(mod1, file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/base_model.rds")
+# saveRDS(mod2, file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/topo_model.rds")
+# saveRDS(mod3, file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/clim_model.rds")
+# saveRDS(mod4, file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/topoclim_model.rds")
 
 # ----------------- Forecast across withheld years -------------------
 # fixed/single origin forecast
 # allow error to propagate through time, starting at year 31, through 36
 
-forecast_new_loc <- function(obs, mod, covars, Dsq, mod.name) {
+forecast_is_loc <- function(obs, mod, covars, Dsq, mod.name) {
   
   pars <- as.data.frame(mod$pars)
   
@@ -134,14 +134,14 @@ forecast_new_loc <- function(obs, mod, covars, Dsq, mod.name) {
   
   # empty array to fill
   predOut <- array(NA, c(years, pixels, length(pars$tauOut))) 
-  # predst <- abind(list(replicate(length(pars$tauOut), t(as.matrix(obs[1,]))))) 
-  # predOut[1,,] <- predst[1,,]
-  # 
+  
   # evaluation
   rmseTotOut<-biasOut<-denseOut<-rep(0,length(pars$tauOut)) # evaluation metrics
   
   # empty matrix for dispersal matrix
   M1 <- matrix(NA, pixels, pixels)
+  
+  no.z.Nlat <- replace(mod$Nlat, mod$Nlat<0, 0) # replace negative latent values with zero
   
   # calculate predicted values
   for(i in 1:length(pars$tauOut)) { 
@@ -152,7 +152,7 @@ forecast_new_loc <- function(obs, mod, covars, Dsq, mod.name) {
       M1[,p]=M[,p]/sum(M[,p])
     }
     
-    Nt <- mod$Nlat[31,,i] # set initial cover value as actual latent value for the last year of model fit
+    Nt <- no.z.Nlat[31,,i] # set initial cover value as actual latent value for the last year of model fit
     
     for(t in 1:years) {
       
@@ -216,11 +216,12 @@ forecast_new_loc <- function(obs, mod, covars, Dsq, mod.name) {
 # ----------- RUN FORECASTS ----------------------------
 obs <- N[32:36,] # starting at year 31, through 36
 
-for.base.N <- forecast_new_loc(obs = obs, mod = mod1, Dsq = Dsq, mod.name = 'base')
-for.topo.N <- forecast_new_loc(obs = obs, mod = mod2, covars = enviro.var[,,-3], Dsq = Dsq, mod.name = 'topo')
-for.clim.N <- forecast_new_loc(obs = obs, mod = mod3, covars = enviro.var[,,-3], Dsq = Dsq, mod.name = 'clim')
-for.topoclim.N <- forecast_new_loc(obs = obs, mod = mod4, covars = enviro.var[,,-3], Dsq = Dsq, mod.name = 'topoclim')
+for.base.N <- forecast_is_loc(obs = obs, mod = mod1, Dsq = Dsq, mod.name = 'base')
+for.topo.N <- forecast_is_loc(obs = obs, mod = mod2, covars = enviro.var[,,-3], Dsq = Dsq, mod.name = 'topo')
+for.clim.N <- forecast_is_loc(obs = obs, mod = mod3, covars = enviro.var[,,-3], Dsq = Dsq, mod.name = 'clim')
+for.topoclim.N <- forecast_is_loc(obs = obs, mod = mod4, covars = enviro.var[,,-3], Dsq = Dsq, mod.name = 'topoclim')
 
+save.image(file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/eval_model_insample_5y_rm_z.RData")
 # ---------- SUMMARIZE AND PLOT RMSE ------------------
 # average rmse functions
 average_rmse <- function(mod) {

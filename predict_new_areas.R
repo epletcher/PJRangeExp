@@ -108,22 +108,22 @@ elev <- N3.topo %>% dplyr::select(c(cellnum, year, elev)) %>% pivot_wider(names_
 #stack
 enviro.var.N3 <- abind(ppt, tmean, heatload, elev, along = 3)
 
-# ** test plotting variation in environmental covariates for each study area **
-par(mfrow = c(2,2))
-matplot(enviro.var[,,1], type = 'l') # ppt
-matplot(enviro.var[,,2], type = 'l') # tmean
-matplot(enviro.var[,,4], type = 'l') # heatload
-matplot(enviro.var[,,5], type = 'l') # elev
-
-matplot(enviro.var.N2[,,1], type = 'l') # ppt
-matplot(enviro.var.N2[,,2], type = 'l') # tmean
-matplot(enviro.var.N2[,,3], type = 'l') # heatload
-matplot(enviro.var.N2[,,4], type = 'l') # elev
-
-matplot(enviro.var.N3[,,1], type = 'l') # ppt
-matplot(enviro.var.N3[,,2], type = 'l') # tmean
-matplot(enviro.var.N3[,,3], type = 'l') # heatload
-matplot(enviro.var.N3[,,4], type = 'l') # elev
+# # ** test plotting variation in environmental covariates for each study area **
+# par(mfrow = c(2,2))
+# matplot(enviro.var[,,1], type = 'l') # ppt
+# matplot(enviro.var[,,2], type = 'l') # tmean
+# matplot(enviro.var[,,4], type = 'l') # heatload
+# matplot(enviro.var[,,5], type = 'l') # elev
+# 
+# matplot(enviro.var.N2[,,1], type = 'l') # ppt
+# matplot(enviro.var.N2[,,2], type = 'l') # tmean
+# matplot(enviro.var.N2[,,3], type = 'l') # heatload
+# matplot(enviro.var.N2[,,4], type = 'l') # elev
+# 
+# matplot(enviro.var.N3[,,1], type = 'l') # ppt
+# matplot(enviro.var.N3[,,2], type = 'l') # tmean
+# matplot(enviro.var.N3[,,3], type = 'l') # heatload
+# matplot(enviro.var.N3[,,4], type = 'l') # elev
 
 #------------- Build distance matrix ---------------
 
@@ -163,8 +163,6 @@ mod3 <- readRDS(file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects
 mod4 <- readRDS(file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/topoclim_model.rds") # topoclim
 
 # ----------------- Forecast across new locations -------------------
-
-# ** testing to see where the topo and topoclim models are failing for the out of sample areas (N2 first) **
 
 # fixed/single origin forecast
 # allow error to propagate through time

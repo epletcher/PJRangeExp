@@ -14,11 +14,11 @@ normalized_rmse <- function(rmsedat, N) {
 # calculate RMSE in 5-yr chunks
 # choose a set of predictions for a specific study area
 
-# N
-BASE = for.base.N$rmseTotOut
-TOPO = for.topo.N$rmseTotOut
-CLIM = for.clim.N$rmseTotOut
-TOPOCLIM = for.topoclim.N$rmseTotOut
+# # N
+# BASE = for.base.N$rmseTotOut
+# TOPO = for.topo.N$rmseTotOut
+# CLIM = for.clim.N$rmseTotOut
+# TOPOCLIM = for.topoclim.N$rmseTotOut
 
 # # N2
 # BASE = for.base.N2$rmseTotOut
@@ -26,13 +26,11 @@ TOPOCLIM = for.topoclim.N$rmseTotOut
 # CLIM = for.clim.N2$rmseTotOut
 # TOPOCLIM = for.topoclim.N2$rmseTotOut
 
-# # N3
-# BASE = for.base.N3$rmseTotOut
-# TOPO = for.topo.N3$rmseTotOut
-# CLIM = for.clim.N3$rmseTotOut
-# TOPOCLIM = for.topoclim.N3$rmseTotOut
-
-# *TOPO and TOPOCLIM models not fitting properly for N2 and N3
+# N3
+BASE = for.base.N3$rmseTotOut
+TOPO = for.topo.N3$rmseTotOut
+CLIM = for.clim.N3$rmseTotOut
+TOPOCLIM = for.topoclim.N3$rmseTotOut
 
 # ------------- PLOT RMSE FOR EACH MODEL -------------
 
@@ -56,15 +54,15 @@ plot_rmse <- function(dat,N) {
 }
 
 # models that work
-plot_rmse(BASE, N)
-plot_rmse(CLIM, N)
+plot_rmse(BASE, N3)
+plot_rmse(CLIM, N3)
 # models that don't (for all areas)
-plot_rmse(TOPOCLIM, N)
-plot_rmse(TOPO, N)
+plot_rmse(TOPOCLIM, N3)
+plot_rmse(TOPO, N3)
 
 # ---------- PLOT RMSE'S ACROSS MODELS TOGETHER ----------
 ## Plot base and climate RMSE's together
-obs = N # study area here
+obs = N3 # study area here
 
 # base dataframe of rmse's
 base <- BASE %>% normalized_rmse(.,obs) %>% as.data.frame() %>% 
@@ -128,29 +126,30 @@ dat <- base %>% full_join(., clim) %>%
 # colors
 group.cols <- c("#F8766D","#00BFC4","#C77Cff","#7CAE00")
 
-dat %>% 
-  ggplot(aes(x = year_int, y = rmse, col = model), col = cols) + 
-  geom_boxplot(outlier.shape = NA) + 
-  labs(y = 'RMSE', x = "5 year chunks out") +
-  scale_y_continuous(limits = c(0, 0.6)) +
-  scale_color_manual(values=group.cols) +
-  theme_bw() # NA's are just the shorter length of one of the models
+(rmse.plot <- dat %>% 
+    ggplot(aes(x = year_int, y = rmse, col = model), col = cols) + 
+    geom_boxplot(outlier.shape = NA) + 
+    labs(y = 'RMSE', x = "5 year chunks out") +
+    scale_y_continuous(limits = c(0, 0.6)) +
+    scale_color_manual(values=group.cols) +
+    theme_bw()) # NA's are just the shorter length of one of the models
 
+saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_z.rds")
 
-ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmse_5yr_chunks_5y_avg_init_reletavized.png", plot = last_plot(), width = 4, height = 4, dpi = 400)
+ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_z.png", plot = last_plot(), width = 4, height = 4, dpi = 400)
 
 # ------------------ Predicted median and credible intervals ------------
-# N
-base.pred = for.base.N$predOut
-topo.pred = for.topo.N$predOut
-clim.pred = for.clim.N$predOut
-topoclim.pred = for.topoclim.N$predOut
+# # N
+# base.pred = for.base.N$predOut
+# topo.pred = for.topo.N$predOut
+# clim.pred = for.clim.N$predOut
+# topoclim.pred = for.topoclim.N$predOut
 
-# # N2
-# base.pred = for.base.N2$predOut
-# topo.pred = for.topo.N2$predOut
-# clim.pred = for.clim.N2$predOut
-# topoclim.pred = for.topoclim.N2$predOut
+# N2
+base.pred = for.base.N2$predOut
+topo.pred = for.topo.N2$predOut
+clim.pred = for.clim.N2$predOut
+topoclim.pred = for.topoclim.N2$predOut
 
 # # N3
 # base.pred = for.base.N3$predOut
@@ -163,13 +162,13 @@ med.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = median)
 low.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
 up.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 
-med.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = median)
-low.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
-up.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
+# med.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = median)
+# low.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
+# up.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 
-# med.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = median)
-# low.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
-# up.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
+med.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = median)
+low.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
+up.pred.topo <- apply(topo.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 
 med.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = median)
 low.pred.topoclim <- apply(topoclim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low

@@ -270,13 +270,13 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
 ## ----- Build forecasts for each area with each model ----
 # (save predictions as a workspace file
 
-# N
-for.base.N <- forecast_new_loc(obs = N, pars = mod1$pars, Dsq = Dsq, mod = 'base')
-for.topo.N <- forecast_new_loc(obs = N, pars = mod2$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'topo')
-for.clim.N <- forecast_new_loc(obs = N, pars = mod3$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'clim')
-for.topoclim.N <- forecast_new_loc(obs = N, pars = mod4$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'topoclim')
-
-save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/35y_insample_predictions_5y_average_initial_rm_z.RData")
+# # N
+# for.base.N <- forecast_new_loc(obs = N, pars = mod1$pars, Dsq = Dsq, mod = 'base')
+# for.topo.N <- forecast_new_loc(obs = N, pars = mod2$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'topo')
+# for.clim.N <- forecast_new_loc(obs = N, pars = mod3$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'clim')
+# for.topoclim.N <- forecast_new_loc(obs = N, pars = mod4$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'topoclim')
+# 
+# save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/35y_insample_predictions_5y_average_initial_rm_z.RData")
 
 # # N2
 # for.base.N2 <- forecast_new_loc(obs = N2, pars = mod1$pars, Dsq = Dsq2, mod = 'base')
@@ -286,10 +286,10 @@ save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_p
 # 
 # save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/35y_OOS_1_near_predictions_5y_average_initial_rm_z.RData")
 
-# # N3
-# for.base.N3 <- forecast_new_loc(obs = N3, pars = mod1$pars, Dsq = Dsq3, mod = 'base')
-# for.topo.N3 <- forecast_new_loc(obs = N3, pars = mod2$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'topo')
-# for.clim.N3 <- forecast_new_loc(obs = N3, pars = mod3$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'clim')
-# for.topoclim.N3 <- forecast_new_loc(obs = N3, pars = mod4$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'topoclim')
-# 
-# save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/35y_OOS_2_far_predictions_5y_average_initial_rm_z.RData")
+# N3
+for.base.N3 <- forecast_new_loc(obs = N3, pars = mod1$pars, Dsq = Dsq3, mod = 'base')
+for.topo.N3 <- forecast_new_loc(obs = N3, pars = mod2$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'topo')
+for.clim.N3 <- forecast_new_loc(obs = N3, pars = mod3$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'clim')
+for.topoclim.N3 <- forecast_new_loc(obs = N3, pars = mod4$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'topoclim')
+
+save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/35y_OOS_2_far_predictions_5y_average_initial_rm_z.RData")

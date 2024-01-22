@@ -272,16 +272,16 @@ rmsedat <- data.frame(BASE, TOPO, CLIM,TOPOCLIM)
 group.cols <- c("#F8766D","#00BFC4","#C77Cff","#7CAE00")
 
 rmsedat %>% pivot_longer(everything(), names_to = "model", values_to = "rmse") %>% 
-  mutate(rmse = rmse/max(N)) %>% # normalize rmse values by range of observed data
+  #mutate(rmse = rmse/max(N)) %>% # normalize rmse values by range of observed data (rmse/max(N)) or leave un normalized
   ggplot(aes(x = model, y = rmse, col = model)) + 
   geom_boxplot(outlier.shape = NA, lwd = 1.2) + 
   scale_color_manual(values=group.cols) +
-  labs(x = "MODEL", y = "NORMALIZED RMSE") + 
+  labs(x = "MODEL", y = "RMSE") + 
   theme_bw() + 
   theme(legend.position="none", text = element_text(size=20))
 
 # save to server
-ggsave("R:/Shriver_Lab/PJspread/figures/rmse-plot_insample_5year_forecast_normalized.png", plot = last_plot(), dpi = 400)
+ggsave("R:/Shriver_Lab/PJspread/figures/rmse-plot_insample_5year_forecast.png", plot = last_plot(), dpi = 400)
 
 # save to Google drive project folder
 ggsave("G:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Figures/Final_model_run/rmse-plot_insample_5year_forecast_normalized.png", plot = last_plot(), dpi = 400)

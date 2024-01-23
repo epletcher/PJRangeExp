@@ -162,14 +162,14 @@ med.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = median)
 low.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
 up.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
 
-# # save mediam pixel-year predicted cover
-# write.csv(med.pred.base, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_median.csv")
-# 
-# # save  pixel-year predicted cover
-# write.csv(low.pred.base, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_90_credible_lower.csv")
-# 
-# # save mediam pixel-year predicted cover
-# write.csv(up.pred.base, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_90_credible_upper.csv")
+# save mediam pixel-year predicted cover
+write.csv(med.pred.base, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_median_5y_avg_init.csv")
+
+# save  pixel-year predicted cover
+write.csv(low.pred.base, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_90_credible_lower_5y_avg_init.csv")
+
+# save mediam pixel-year predicted cover
+write.csv(up.pred.base, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_90_credible_upper_5y_avg_init.csv")
 
 med.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = median)
 low.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low

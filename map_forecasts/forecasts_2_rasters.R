@@ -31,13 +31,19 @@ df2raster <- function(df) { # df should be x, y, vals only
 }
 
 # ------------ load data -------------------
-# 1.) load model workspace to extract latent state (LOAD CORRECT MODEL VERSION)
+# 1.) load model workspace to extract latent state for N
+# load model objects generated from:
+# 'eval_model_insample.R'
+# Latent states and parameter estimates are post burnin and thinning 
+
+mod1 <- readRDS(file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/base_model.rds") # base
+med.lat.cover <- apply(mod1$Nlat, MARGIN = c(1,2), FUN = median)
 
 # 2.) Forecasted cover for each pixel (TABULAR). Columns are pixel number, rows are year
-pp <- read.csv("D:/chapter1/OOS_model_predictions/insample_predictions/medpredpixel_35y_base.csv") # model version here
+pp <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_median_5y_avg_init.csv") # model version here
 
 # 3.) Observed time series data (TABULAR)
-tru.cover.dat <- read.csv("RAPtreecoverData.csv")
+tru.cover.dat <- read.csv("G:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data/RAPtreecoverData.csv")
 
 # 4.) Observed spatial tree cover data 1986-2021 (RASTER)
 # load list (all RAP rasters)
@@ -48,8 +54,12 @@ RAP.list <- list.files("G:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm
   truthstack <- raster::stack(tru.rasters)
 
 # convert RAP rasters to df
-tree.df <- raster2df(truthstack) %>% pivot_longer(cols = !c("cellnum", "x", "y"), names_to = "years", values_to = "cover") %>%
-  separate(years, c("name", "year"), sep = "r_") %>% dplyr::select(-"name") %>% pivot_wider(names_from = year, values_from = cover)
+tree.df <- raster2df(truthstack) %>% 
+  pivot_longer(cols = !c("cellnum", "x", "y"), names_to = "years", values_to = "cover") %>%
+  separate(years, c("name", "year"), sep = "E.") %>% 
+  dplyr::select(-"name") %>% 
+  dplyr::mutate('year' = as.numeric(year)+1985) %>%
+  pivot_wider(names_from = year, values_from = cover)
 
 # Extract values for 1986 and xy data to join with forecasted values
 start.xy <- tree.df %>% dplyr::select(c("cellnum", "x", "y", "1986")) 
@@ -64,7 +74,7 @@ oldnames <- t.pp %>% as.data.frame() %>% colnames()
 tree.for <- t.pp %>% as.data.frame() %>% rename_with(~ as.character(1986:2021)[which(oldnames == .x)], .cols = oldnames)
 
 # join
-forecast.dat <- cbind(start.xy, tree.for) %>% dplyr::select(-c("1986", "cellnum"))
+forecast.dat <- cbind(start.xy, tree.for) %>% dplyr::select(-c("1986","cellnum"))
 forecast.dat.cells <- cbind(start.xy, tree.for) %>% dplyr::select(-c("1986"))
 
 # Create an array where each row is pixel, retain x,y, and year columns, 3rd dimension is year
@@ -84,11 +94,6 @@ for(t in 1:36) {
 forecast.stack <- raster::stack(for.rasters)
 
 # --------------- Recover latent XY data ----------------
-# Median of param estimates
-burninone=burnin/10+1
-ten=Niter/10
-med.lat.cover <- apply(NlatOut[,,burninone:ten], MARGIN = c(1,2), FUN = median)
-
 # Reformat forecasted cover data and join w/ start.xy dataframe to recover x,y data
 t.lat <- t(med.lat.cover) # row = pixel, column = year (transpose matrix)
 
@@ -116,16 +121,16 @@ for(t in 1:31) {
 lat.stack <- raster::stack(lat.rasters)
 
 # -------- Plot true timeseries of cover --------------
-# animate(truthstack, pause=0.5, n = 1, main = "observed change in cover", col = brewer.pal(9,"YlGn")) # plays tree cover each year as a loop
+animate(truthstack, pause=0.5, n = 1, main = "observed change in cover", col = brewer.pal(9,"YlGn")) # plays tree cover each year as a loop
 
 cols <- colorRampPalette(brewer.pal(9,"YlGn"))
 # levelplot(truthstack, col.regions=cols, names.attr = as.character(1986:2021)) # add names with names.attr
 
 # subset and plot only 1990, 2000, 2010, 2020
-subras <- c(5,15,25,35)
+subras <- c(5,15,25,36)
 
 # plot in grid
-levelplot(truthstack[[subras]], col.regions=cols, names.attr = as.character(c(1990,2000,2010,2020)), scales = list(draw=F))
+levelplot(truthstack[[subras]], col.regions=colorRampPalette(brewer.pal(9,"YlGn")), names.attr = as.character(c(1990,2000,2010,2020)), scales = list(draw=F))
 
 # ---------- plot latent timeseries of cover ----------
 sublat <- c(5,15,25)
@@ -133,17 +138,21 @@ levelplot(lat.stack[[sublat]], col.regions=cols, names.attr = as.character(c(199
 
 # -------- Plot sequential cover Forecast -------------
 # plot forecast
-levelplot(forecast.stack, col.regions=cols, names.attr = as.character(1986:2021))
+levelplot(forecast.stack, col.regions=colorRampPalette(brewer.pal(9,"YlGn")), names.attr = as.character(1986:2021))
 
 # subset and plot only 1990, 2000, 2010, 2020
-levelplot(subset(raster::stack(truthstack[[subras]],forecast.stack[[subras]]), c(1,5,2,6,3,7,4,8)), # reorder rasters
-          col.regions = cols, xlab = "Longitude", ylab = "Latitude", 
-          main = "Observed    Predicted      ", 
-          names.attr = as.character(c(1990,1990,2000,2000,2010,2010,2020,2020)), 
-          scales = list(draw = F))
+# this plot works best if you make plot window tall and skinny
+levelplot(
+    subset(raster::stack(truthstack[[subras]],forecast.stack[[subras]]), c(1,5,2,6,3,7,4,8)), #reorder rasters
+    col.regions = colorRampPalette(brewer.pal(9,"YlGn")), 
+    xlab = "Longitude", ylab = "Latitude", 
+    main = "Observed    Predicted      ", 
+    zlim = c(0,30),
+    names.attr = as.character(c(1990,1990,2000,2000,2010,2010,2021,2021)), 
+    scales = list(draw = F))
 
 # #animate
-# raster::animate(forecast.stack, pause=0.5, n = 1, main = "tree cover forecast", col = brewer.pal(9,"YlGn")) # plays tree cover each year as a loop
+raster::animate(forecast.stack, pause=0.5, n = 1, main = "tree cover forecast", col = brewer.pal(9,"YlGn"), zlim = c(0,25)) # plays tree cover each year as a loop
 
 # --------- Plot forecasted change in cover -------------
 # forecasted change in cover based of first year
@@ -153,31 +162,59 @@ latchangestack <- lat.stack-truthstack[[1]]
 # plot forecast
 cols2 <- c(rev(brewer.pal(9,"Blues")), "white", brewer.pal(9,"Reds"))
 
+#
+#
+#
+#***** try with out level plot!!! ******
+par(mfrow = c(1,4))
+plot(obschangestack[[4]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
+plot(obschangestack[[14]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
+plot(obschangestack[[24]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
+plot(obschangestack[[34]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
+
+par(mfrow = c(1,4))
+plot(predchangestack[[4]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
+plot(predchangestack[[14]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
+plot(predchangestack[[24]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
+plot(predchangestack[[34]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
+
+#
+#
+#
+#
 breakpoints <- c(seq(-20,-1,1), 0, seq(1,20,1))
 
 # subset and plot only 1990, 2000, 2010, 2020
-levelplot(subset(raster::stack(obschangestack[[subras]],predchangestack[[subras]]), c(1,5,2,6,3,7,4,8)), col.regions=cols2, breaks = breakpoints,main = "Observed    Predicted      ",names.attr = as.character(c(1990,1990,2000,2000,2010,2010,2020,2020)), xlab = "Longitude", ylab = "Latitude", scales = list(draw = F))
+levelplot(subset(raster::stack(obschangestack[[subras]],predchangestack[[subras]]), c(1,5,2,6,3,7,4,8)), col.regions=cols2, zlim = c(-10,10), main = "Observed    Predicted      ",names.attr = as.character(c(1990,1990,2000,2000,2010,2010,2020,2020)), xlab = "Longitude", ylab = "Latitude", scales = list(draw = F))
+
+## #animate
+raster::animate(predchangestack, pause=0.5, n = 1, col = rev(brewer.pal(7,"RdBu"))) # plays tree cover each year as a loop
+
 
 # -------- plot Bias in cover forecast ------
 # error based on latent state
 #biastack <- (forecast.stack[[1:31]] - lat.stack[[1:31]]) # bias based on latent
 biastack <- (forecast.stack[[1:36]] - truthstack[[1:36]]) # bias based on observed
 
-#subd <- sublat # for including latent
+## #animate
+raster::animate(biastack, pause=0.5, n = 1, main = "forecast bias", col = rev(brewer.pal(7,"RdBu"))) # plays tree cover each year as a loop
+
+
+subd <- sublat # for including latent
 #subd <- subras # subset for w/o latent
-subd <- c(15,25,35)
+#subd <- c(15,25,35) # only 3 years
 
 
 cols3 <- colorRampPalette(rev(brewer.pal(9,"RdBu")))
 breakp <- seq(-15,15,1)
 levelplot(biastack[[subd]], col.regions=cols3, breaks = breakp, names.attr = as.character(c(1990,2000,2010)))
 
-# plot all maps of cover change together (without latent)
-# subset and plot only 1990, 2000, 2010, 2020 
-levelplot(subset(raster::stack(obschangestack[[subd]],predchangestack[[subd]],biastack[[subd]]), c(1,5,9,2,6,10,3,7,11,4,8,12)), col.regions=cols2, breaks = breakpoints,names.attr = as.character(c(1990,1990,1990,2000,2000,2000,2010,2010,2010,2020,2020,2020)), xlab = "Longitude", ylab = "Latitude", scales = list(draw = F))
+# # plot all maps of cover change together (without latent)
+# # subset and plot only 1990, 2000, 2010, 2020 
+# levelplot(subset(raster::stack(obschangestack[[subd]],predchangestack[[subd]],biastack[[subd]]), c(1,5,9,2,6,10,3,7,11,4,8,12)), col.regions=cols2, breaks = breakpoints,names.attr = as.character(c(1990,1990,1990,2000,2000,2000,2010,2010,2010,2020,2020,2020)), xlab = "Longitude", ylab = "Latitude", scales = list(draw = F))
 
-# plot all maps of cover change together (without latent) ONLY 2000,2010,2020
-(mapped_cover <- levelplot(subset(raster::stack(obschangestack[[subd]],predchangestack[[subd]],biastack[[subd]]), c(1,4,7,2,5,8,3,6,9)), col.regions=cols2, breaks = breakpoints,names.attr = as.character(c(2000,2000,2000,2010,2010,2010,2020,2020,2020)), xlab = "Longitude", ylab = "Latitude", scales = list(draw = F)))
+# # plot all maps of cover change together (without latent) ONLY 2000,2010,2020
+# (mapped_cover <- levelplot(subset(raster::stack(obschangestack[[subd]],predchangestack[[subd]],biastack[[subd]]), c(1,4,7,2,5,8,3,6,9)), col.regions=cols2, breaks = breakpoints,names.attr = as.character(c(2000,2000,2000,2010,2010,2010,2020,2020,2020)), xlab = "Longitude", ylab = "Latitude", scales = list(draw = F)))
 
 # plot all maps of cover change together (with latent)
 # subset and plot only 1990, 2000, 2010 

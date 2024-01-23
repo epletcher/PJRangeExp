@@ -121,7 +121,17 @@ for(t in 1:31) {
 lat.stack <- raster::stack(lat.rasters)
 
 # -------- Plot true timeseries of cover --------------
-animate(truthstack, pause=0.5, n = 1, main = "observed change in cover", col = brewer.pal(9,"YlGn")) # plays tree cover each year as a loop
+animate(truthstack, pause=0.5, n = 1, main = "observed change in cover", col = brewer.pal(9,"YlGn")) 
+
+av_capture_graphics(
+  animate(truthstack, n = 1,
+          main = rep("observed changes in cover", 36), 
+          col = brewer.pal(9,"YlGn"),
+          zlim= c(0,30)),
+  
+  output = file.path("R:/Shriver_Lab/PJspread/figures","obs_change.mp4"), 
+  framerate = 3,
+  width = 480, height = 480)
 
 cols <- colorRampPalette(brewer.pal(9,"YlGn"))
 # levelplot(truthstack, col.regions=cols, names.attr = as.character(1986:2021)) # add names with names.attr
@@ -134,14 +144,14 @@ levelplot(truthstack[[subras]], col.regions=colorRampPalette(brewer.pal(9,"YlGn"
 
 # ---------- plot latent timeseries of cover ----------
 sublat <- c(5,15,25)
-levelplot(lat.stack[[sublat]], col.regions=cols, names.attr = as.character(c(1990,2000,2010)))
+levelplot(lat.stack[[sublat]], col.regions=colorRampPalette(brewer.pal(9,"YlGn")), names.attr = as.character(c(1990,2000,2010)))
 
 # -------- Plot sequential cover Forecast -------------
 # plot forecast
 levelplot(forecast.stack, col.regions=colorRampPalette(brewer.pal(9,"YlGn")), names.attr = as.character(1986:2021))
 
 # subset and plot only 1990, 2000, 2010, 2020
-# this plot works best if you make plot window tall and skinny
+# this plot works best if you make plot window TALL and SKINNY
 levelplot(
     subset(raster::stack(truthstack[[subras]],forecast.stack[[subras]]), c(1,5,2,6,3,7,4,8)), #reorder rasters
     col.regions = colorRampPalette(brewer.pal(9,"YlGn")), 
@@ -151,7 +161,31 @@ levelplot(
     names.attr = as.character(c(1990,1990,2000,2000,2010,2010,2021,2021)), 
     scales = list(draw = F))
 
-# #animate
+# this plot works best if you make plot window SHORT and WIDE
+(mapped_pred_vs_obs <- levelplot(
+  subset(raster::stack(truthstack[[subras]],forecast.stack[[subras]]), c(1,2,3,4,5,6,7,8)), #reorder rasters
+  col.regions = colorRampPalette(brewer.pal(9,"YlGn")), 
+  xlab = "", ylab = "predicted            observed", 
+  names.attr = as.character(
+    c(1990,2000,2010,2021,1990,2000,2010,2021)), 
+  scales = list(draw = F)))
+
+# save to file
+ggsave(filename = "R:/Shriver_Lab/PJspread/figures/pred_v_obs_mapped_base.jpeg", plot = mapped_pred_vs_obs, dpi = 600, width = 6, height = 3, units = "in")
+
+# #animate (with obs)
+# save as mp4
+av_capture_graphics(
+      animate(forecast.stack, n = 1,
+            main = rep("predicted changes in cover", 36), 
+            col = brewer.pal(9,"YlGn"),
+            zlim= c(0,30)),
+    
+    output = file.path("R:/Shriver_Lab/PJspread/figures","pred_change.mp4"), 
+    framerate = 3,
+    width = 480, height = 480)
+  
+  
 raster::animate(forecast.stack, pause=0.5, n = 1, main = "tree cover forecast", col = brewer.pal(9,"YlGn"), zlim = c(0,25)) # plays tree cover each year as a loop
 
 # --------- Plot forecasted change in cover -------------
@@ -166,17 +200,16 @@ cols2 <- c(rev(brewer.pal(9,"Blues")), "white", brewer.pal(9,"Reds"))
 #
 #
 #***** try with out level plot!!! ******
-par(mfrow = c(1,4))
-plot(obschangestack[[4]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
-plot(obschangestack[[14]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
-plot(obschangestack[[24]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
-plot(obschangestack[[34]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
+par(mfrow = c(2,4))
+plot(obschangestack[[5]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-10, 10))
+plot(obschangestack[[15]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-10, 10))
+plot(obschangestack[[25]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-10, 10))
+plot(obschangestack[[36]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-10, 10))
 
-par(mfrow = c(1,4))
-plot(predchangestack[[4]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
-plot(predchangestack[[14]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
-plot(predchangestack[[24]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
-plot(predchangestack[[34]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
+plot(predchangestack[[5]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-10, 10))
+plot(predchangestack[[15]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-10, 10))
+plot(predchangestack[[25]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-10, 10))
+plot(predchangestack[[36]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-10, 10))
 
 #
 #
@@ -184,11 +217,11 @@ plot(predchangestack[[34]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-15, 15))
 #
 breakpoints <- c(seq(-20,-1,1), 0, seq(1,20,1))
 
-# subset and plot only 1990, 2000, 2010, 2020
+# subset and plot only 1990, 2000, 2010, 2021
 levelplot(subset(raster::stack(obschangestack[[subras]],predchangestack[[subras]]), c(1,5,2,6,3,7,4,8)), col.regions=cols2, zlim = c(-10,10), main = "Observed    Predicted      ",names.attr = as.character(c(1990,1990,2000,2000,2010,2010,2020,2020)), xlab = "Longitude", ylab = "Latitude", scales = list(draw = F))
 
-## #animate
-raster::animate(predchangestack, pause=0.5, n = 1, col = rev(brewer.pal(7,"RdBu"))) # plays tree cover each year as a loop
+# ## #animate
+# raster::animate(predchangestack, pause=0.5, n = 1, col = rev(brewer.pal(7,"RdBu"))) # plays tree cover each year as a loop
 
 
 # -------- plot Bias in cover forecast ------
@@ -196,8 +229,16 @@ raster::animate(predchangestack, pause=0.5, n = 1, col = rev(brewer.pal(7,"RdBu"
 #biastack <- (forecast.stack[[1:31]] - lat.stack[[1:31]]) # bias based on latent
 biastack <- (forecast.stack[[1:36]] - truthstack[[1:36]]) # bias based on observed
 
-## #animate
-raster::animate(biastack, pause=0.5, n = 1, main = "forecast bias", col = rev(brewer.pal(7,"RdBu"))) # plays tree cover each year as a loop
+# base plot
+par(mfrow = c(1,4),mai = c(1,0.1,0.1,0.1))
+plot(biastack[[5]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-11, 11), xaxt = "n", yaxt = "n", legend = F)
+plot(biastack[[15]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-11, 11), xaxt = "n", yaxt = "n", legend = F)
+plot(biastack[[25]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-11, 11), xaxt = "n", yaxt = "n", legend = F)
+plot(biastack[[36]], col = rev(brewer.pal(7,"RdBu")), zlim = c(-11, 11), xaxt = "n", yaxt = "n")
+
+
+# ## #animate
+# raster::animate(biastack, pause=0.5, n = 1, main = "forecast bias", col = rev(brewer.pal(7,"RdBu"))) # plays tree cover each year as a loop
 
 
 subd <- sublat # for including latent
@@ -207,7 +248,8 @@ subd <- sublat # for including latent
 
 cols3 <- colorRampPalette(rev(brewer.pal(9,"RdBu")))
 breakp <- seq(-15,15,1)
-levelplot(biastack[[subd]], col.regions=cols3, breaks = breakp, names.attr = as.character(c(1990,2000,2010)))
+levelplot(biastack[[subras]], col.regions=cols3, breaks = breakp, names.attr = as.character(c(1990,2000,2010,2021)),
+          scales = list(draw = F))
 
 # # plot all maps of cover change together (without latent)
 # # subset and plot only 1990, 2000, 2010, 2020 
@@ -219,6 +261,18 @@ levelplot(biastack[[subd]], col.regions=cols3, breaks = breakp, names.attr = as.
 # plot all maps of cover change together (with latent)
 # subset and plot only 1990, 2000, 2010 
 levelplot(subset(raster::stack(obschangestack[[sublat]],latchangestack[[sublat]],predchangestack[[sublat]],biastack[[sublat]]), c(1,4,7,10,2,5,8,11,3,6,9,12)), col.regions=cols2, breaks = breakpoints,main = "Obs.          Latent        Pred.       Error   ",names.attr = as.character(c(1990,1990,1990,1990,2000,2000,2000,2000,2010,2010,2010,2010)), xlab = "Longitude", ylab = "Latitude", scales = list(draw = F))
+
+# plot observed, predicted, and error
+levelplot(subset(raster::stack(truthstack[[subras]],  
+        forecast.stack[[subras]],
+        biastack[[subras]]), 
+        c(1,5,9,2,6,10,3,7,11,4,8,12)), 
+        col.regions=cols2, breaks = breakpoints,
+        main = "Obs.       Pred.       Error   ",names.attr = as.character(c(1990,1990,1990,2000,2000,2000,2010,2010,2010,2021,2021,2021)), 
+        xlab = "Longitude", 
+        ylab = "Latitude", 
+        scales = list(draw = F))
+
 
 ggsave(filename = "G:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Figures/change_in_cover_mapped_base_NOLATENT.jpeg", plot = mapped_cover, dpi = 600, width = 8, height = 6, units = "in")
 # ---------- Save forecasts and cover change in raster format

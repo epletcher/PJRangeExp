@@ -40,7 +40,7 @@ mod1 <- readRDS(file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects
 med.lat.cover <- apply(mod1$Nlat, MARGIN = c(1,2), FUN = median)
 
 # 2.) Forecasted cover for each pixel (TABULAR). Columns are pixel number, rows are year
-pp <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_median_5y_avg_init.csv") # model version here
+pp <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_median_5y_avg_init_rm_neg.csv") # model version here
 
 # 3.) Observed time series data (TABULAR)
 tru.cover.dat <- read.csv("G:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data/RAPtreecoverData.csv")

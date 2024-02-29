@@ -39,7 +39,7 @@ setwd("R:/Shriver_Lab/PJspread/sampleroutput")
 
 # ---- Load model outputs from file ----
 
-# Pull parameter and latent state estimates based on model version, base, topo, clim or topoclim
+## Pull parameter and latent state estimates based on model version, base, topo, clim or topoclim
 retrieve_mod <- function(model) {
   if(model=="topo") {model="topo_"}
   if(model=="base") {model="base_v"}
@@ -110,16 +110,23 @@ retrieve_mod <- function(model) {
   return(to_return)
 }
 
-mod1 <- retrieve_mod("base") # model type here
-mod2 <- retrieve_mod("topo")
-mod3 <- retrieve_mod("clim")
-mod4 <- retrieve_mod("topoClim")
+## retrieve model estimats for all four models:
+# mod1 <- retrieve_mod("base") # model type here
+# mod2 <- retrieve_mod("topo")
+# mod3 <- retrieve_mod("clim")
+# mod4 <- retrieve_mod("topoClim")
 
 # # save model objects as RDS for out of sample forecasts
 # saveRDS(mod1, file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/base_model.rds")
 # saveRDS(mod2, file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/topo_model.rds")
 # saveRDS(mod3, file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/clim_model.rds")
 # saveRDS(mod4, file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/topoclim_model.rds")
+
+## load saved model objects as RDS
+mod1 <- readRDS(file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/base_model.rds") # base
+mod2 <- readRDS(file= "R:/Shriver_lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/topo_model.rds")
+mod3 <- readRDS(file= "R:/Shriver_lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/clim_model.rds")
+mod4 <- readRDS(file= "R:/Shriver_lab/PJspread/evaluate_in_sample/model_objects_for_forecasting/topoclim_model.rds")
 
 # ----------------- Forecast across withheld years -------------------
 # fixed/single origin forecast
@@ -141,8 +148,6 @@ forecast_is_loc <- function(obs, mod, covars, Dsq, mod.name) {
   # empty matrix for dispersal matrix
   M1 <- matrix(NA, pixels, pixels)
   
-  no.z.Nlat <- replace(mod$Nlat, mod$Nlat<0, 0) # replace negative latent values with zero
-  
   # calculate predicted values
   for(i in 1:length(pars$tauOut)) { 
     
@@ -152,7 +157,7 @@ forecast_is_loc <- function(obs, mod, covars, Dsq, mod.name) {
       M1[,p]=M[,p]/sum(M[,p])
     }
     
-    Nt <- no.z.Nlat[31,,i] # set initial cover value as actual latent value for the last year of model fit
+    Nt <- mod$Nlat[31,,i] # set initial cover value as actual latent value for the last year of model fit
     
     for(t in 1:years) {
       
@@ -221,7 +226,7 @@ for.topo.N <- forecast_is_loc(obs = obs, mod = mod2, covars = enviro.var[,,-3], 
 for.clim.N <- forecast_is_loc(obs = obs, mod = mod3, covars = enviro.var[,,-3], Dsq = Dsq, mod.name = 'clim')
 for.topoclim.N <- forecast_is_loc(obs = obs, mod = mod4, covars = enviro.var[,,-3], Dsq = Dsq, mod.name = 'topoclim')
 
-save.image(file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/eval_model_insample_5y_rm_z.RData")
+save.image(file = "R:/Shriver_Lab/PJspread/evaluate_in_sample/eval_model_insample_5y_v2.RData")
 # ---------- SUMMARIZE AND PLOT RMSE ------------------
 # average rmse functions
 average_rmse <- function(mod) {
@@ -272,16 +277,16 @@ rmsedat <- data.frame(BASE, TOPO, CLIM,TOPOCLIM)
 group.cols <- c("#F8766D","#00BFC4","#C77Cff","#7CAE00")
 
 rmsedat %>% pivot_longer(everything(), names_to = "model", values_to = "rmse") %>% 
-  #mutate(rmse = rmse/max(N)) %>% # normalize rmse values by range of observed data (rmse/max(N)) or leave un normalized
+  mutate(rmse = rmse/max(N)) %>% # normalize rmse values by range of observed data (rmse/max(N)) or leave un normalized
   ggplot(aes(x = model, y = rmse, col = model)) + 
   geom_boxplot(outlier.shape = NA, lwd = 1.2) + 
   scale_color_manual(values=group.cols) +
-  labs(x = "MODEL", y = "RMSE") + 
+  labs(x = "MODEL", y = "NRMSE") + 
   theme_bw() + 
-  theme(legend.position="none", text = element_text(size=20))
+  theme(legend.position="none", text = element_text(size=16))
 
 # save to server
-ggsave("R:/Shriver_Lab/PJspread/figures/rmse-plot_insample_5year_forecast.png", plot = last_plot(), dpi = 400)
+ggsave("R:/Shriver_Lab/PJspread/figures/rmse-plot_insample_5year_forecast_normalized.png", plot = last_plot(), dpi = 400)
 
 # save to Google drive project folder
 ggsave("G:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Figures/Final_model_run/rmse-plot_insample_5year_forecast_normalized.png", plot = last_plot(), dpi = 400)

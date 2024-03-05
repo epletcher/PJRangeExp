@@ -140,8 +140,17 @@ saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_nea
 
 #ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_z.png", plot = last_plot(), width = 4, height = 4, dpi = 400)
 
-## Create table of all rmse values
+## **** Create table of all rmse values
+rmse.35y <- dat %>% 
+  #group_by(model,year_int) %>%
+  group_by(model) %>%
+  summarise(median = median(rmse, na.rm = T), lower_ci = quantile(rmse, na.rm = T, 0.05), upper_ci = quantile(rmse, na.rm = T, 0.95))
 
+## save correct study areas to file
+
+write.csv(rmse.35y,"R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmses_for_model_studyarea_comparisons/in_sample_35y_nrmse_avg_allyears.csv")
+
+# write.csv(rmse.35y,"R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmses_for_model_studyarea_comparisons/in_sample_35y_nrmse_yearchunks.csv")
 
 # ------------------ Predicted median and credible intervals ------------
 # N
@@ -335,6 +344,10 @@ plot_grid(plot_pix_gg(707, N),
 
 ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/single_pixel_low_mid_high_cover_5yr_avg_init.png", plot = last_plot(), dpi = 400)
 
+saveRDS(
+  plot_grid(plot_pix_gg(707, N), 
+            plot_pix_gg(152, N) + theme(legend.position = "none") + labs(y = ''), 
+            plot_pix_gg(120, N) + theme(legend.position = "none") + labs(y = ''), ncol = 3), "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/single_pixel_low_mid_high_cover_5yr_avg_init.rds")
 # ------- PLOT OBSERVED COVER OVER TIME FOR ANY PIXEL -----
 # test out different pixels to plot based on 36-yr trends
 

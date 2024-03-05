@@ -14,11 +14,11 @@ normalized_rmse <- function(rmsedat, N) {
 # calculate RMSE in 5-yr chunks
 # choose a set of predictions for a specific study area
 
-# N
-BASE = for.base.N$rmseTotOut
-TOPO = for.topo.N$rmseTotOut
-CLIM = for.clim.N$rmseTotOut
-TOPOCLIM = for.topoclim.N$rmseTotOut
+# # N
+# BASE = for.base.N$rmseTotOut
+# TOPO = for.topo.N$rmseTotOut
+# CLIM = for.clim.N$rmseTotOut
+# TOPOCLIM = for.topoclim.N$rmseTotOut
 
 # # N2
 # BASE = for.base.N2$rmseTotOut
@@ -26,11 +26,11 @@ TOPOCLIM = for.topoclim.N$rmseTotOut
 # CLIM = for.clim.N2$rmseTotOut
 # TOPOCLIM = for.topoclim.N2$rmseTotOut
 
-# # N3
-# BASE = for.base.N3$rmseTotOut
-# TOPO = for.topo.N3$rmseTotOut
-# CLIM = for.clim.N3$rmseTotOut
-# TOPOCLIM = for.topoclim.N3$rmseTotOut
+# N3
+BASE = for.base.N3$rmseTotOut
+TOPO = for.topo.N3$rmseTotOut
+CLIM = for.clim.N3$rmseTotOut
+TOPOCLIM = for.topoclim.N3$rmseTotOut
 
 # ------------- PLOT RMSE FOR EACH MODEL -------------
 
@@ -54,15 +54,15 @@ plot_rmse <- function(dat,N) {
 }
 
 # models that work
-plot_rmse(BASE, N)
-plot_rmse(CLIM, N)
+plot_rmse(BASE, N2)
+plot_rmse(CLIM, N2)
 # models that don't (for all areas)
-plot_rmse(TOPOCLIM, N)
-plot_rmse(TOPO, N)
+plot_rmse(TOPOCLIM, N2)
+plot_rmse(TOPO, N2)
 
 # ---------- PLOT RMSE'S ACROSS MODELS TOGETHER ----------
 ## Plot base and climate RMSE's together
-obs = N # study area here
+obs = N3 # study area here
 
 # base dataframe of rmse's
 base <- BASE %>% normalized_rmse(.,obs) %>% as.data.frame() %>% 
@@ -75,6 +75,8 @@ base <- BASE %>% normalized_rmse(.,obs) %>% as.data.frame() %>%
                                             if_else(year<22, 4,
                                                     if_else(year<27, 5,
                                                             if_else(year<32, 6, 7)))))))
+
+# *** for year_int, if any 'topo' or 'base'<100 >100
 
 # climate dataframe of rmse
 clim <- CLIM %>% normalized_rmse(.,obs) %>% as.data.frame() %>% 
@@ -125,8 +127,10 @@ dat <- base %>% full_join(., clim) %>%
 
 # colors
 group.cols <- c("#F8766D","#00BFC4","#C77Cff","#7CAE00")
+group.cols <- c("#C77Cff","#7CAE00")
 
 (rmse.plot <- dat %>% 
+    filter(model=='topo'|model=='topoclim') %>%
     ggplot(aes(x = year_int, y = rmse, col = model), col = cols) + 
     geom_boxplot(outlier.shape = NA) + 
     labs(y = 'NRMSE', x = "5 year chunks out") +
@@ -134,9 +138,11 @@ group.cols <- c("#F8766D","#00BFC4","#C77Cff","#7CAE00")
     scale_color_manual(values=group.cols) +
     theme_bw()) # NA's are just the shorter length of one of the models
 
-saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmse_5yr_chunks_5y_avg_init_reletavized.rds")
-saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/rmse_5yr_chunks_5y_avg_init_reletavized.rds")
-#saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmse_5yr_chunks_5y_avg_init_reletavized.rds")
+#saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmse_5yr_chunks_5y_avg_init_reletavized.rds")
+
+# saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_negatives_topos_only.rds")
+
+saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_negatives_topos_only.rds")
 
 #ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_z.png", plot = last_plot(), width = 4, height = 4, dpi = 400)
 

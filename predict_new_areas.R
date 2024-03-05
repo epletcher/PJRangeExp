@@ -235,7 +235,7 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
       
       Nt <- rnorm(pixels, Nmean, pars$sig.pOut[i])
       
-      Nt <- replace(Nt, Nt<0, 0) # convert negative values to zeroes
+      # Nt <- replace(Nt, Nt<0, 0) # convert negative values to zeroes
       
       predOut[t,,i] <- Nt
       
@@ -276,7 +276,7 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
 # for.clim.N <- forecast_new_loc(obs = N, pars = mod3$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'clim')
 # for.topoclim.N <- forecast_new_loc(obs = N, pars = mod4$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'topoclim')
 # 
-# save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/35y_insample_predictions_5y_average_initial_rm_z.RData")
+# save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/35y_insample_predictions_5y_average_initial.RData")
 
 # # N2
 # for.base.N2 <- forecast_new_loc(obs = N2, pars = mod1$pars, Dsq = Dsq2, mod = 'base')
@@ -284,7 +284,7 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
 # for.clim.N2 <- forecast_new_loc(obs = N2, pars = mod3$pars, covars = enviro.var.N2, Dsq = Dsq2, mod = 'clim')
 # for.topoclim.N2 <- forecast_new_loc(obs = N2, pars = mod4$pars, covars = enviro.var.N2, Dsq = Dsq2, mod = 'topoclim')
 # 
-# save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/35y_OOS_1_near_predictions_5y_average_initial_rm_z.RData")
+# save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/35y_OOS_1_near_predictions_5y_average_initial.RData")
 
 # N3
 for.base.N3 <- forecast_new_loc(obs = N3, pars = mod1$pars, Dsq = Dsq3, mod = 'base')
@@ -292,4 +292,4 @@ for.topo.N3 <- forecast_new_loc(obs = N3, pars = mod2$pars, covars = enviro.var.
 for.clim.N3 <- forecast_new_loc(obs = N3, pars = mod3$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'clim')
 for.topoclim.N3 <- forecast_new_loc(obs = N3, pars = mod4$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'topoclim')
 
-save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/35y_OOS_2_far_predictions_5y_average_initial_rm_z.RData")
+save.image(file = "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/35y_OOS_2_far_predictions_5y_average_initial.RData")

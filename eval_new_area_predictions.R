@@ -20,17 +20,17 @@ normalized_rmse <- function(rmsedat, N) {
 # CLIM = for.clim.N$rmseTotOut
 # TOPOCLIM = for.topoclim.N$rmseTotOut
 
-# # N2
-# BASE = for.base.N2$rmseTotOut
-# TOPO = for.topo.N2$rmseTotOut
-# CLIM = for.clim.N2$rmseTotOut
-# TOPOCLIM = for.topoclim.N2$rmseTotOut
+# N2
+BASE = for.base.N2$rmseTotOut
+TOPO = for.topo.N2$rmseTotOut
+CLIM = for.clim.N2$rmseTotOut
+TOPOCLIM = for.topoclim.N2$rmseTotOut
 
-# N3
-BASE = for.base.N3$rmseTotOut
-TOPO = for.topo.N3$rmseTotOut
-CLIM = for.clim.N3$rmseTotOut
-TOPOCLIM = for.topoclim.N3$rmseTotOut
+# # N3
+# BASE = for.base.N3$rmseTotOut
+# TOPO = for.topo.N3$rmseTotOut
+# CLIM = for.clim.N3$rmseTotOut
+# TOPOCLIM = for.topoclim.N3$rmseTotOut
 
 # ------------- PLOT RMSE FOR EACH MODEL -------------
 
@@ -127,10 +127,10 @@ dat <- base %>% full_join(., clim) %>%
 
 # colors
 group.cols <- c("#F8766D","#00BFC4","#C77Cff","#7CAE00")
-group.cols <- c("#C77Cff","#7CAE00")
+#group.cols <- c("#C77Cff","#7CAE00") # for plotting topos only
 
 (rmse.plot <- dat %>% 
-    filter(model=='topo'|model=='topoclim') %>%
+    #filter(model=='topo'|model=='topoclim') %>% # for plotting topos only
     ggplot(aes(x = year_int, y = rmse, col = model), col = cols) + 
     geom_boxplot(outlier.shape = NA) + 
     labs(y = 'NRMSE', x = "5 year chunks out") +
@@ -140,9 +140,9 @@ group.cols <- c("#C77Cff","#7CAE00")
 
 #saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmse_5yr_chunks_5y_avg_init_reletavized.rds")
 
-# saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_negatives_topos_only.rds")
+saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_NaNs.rds")
 
-saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_negatives_topos_only.rds")
+# saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_negatives_topos_only.rds")
 
 #ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_z.png", plot = last_plot(), width = 4, height = 4, dpi = 400)
 

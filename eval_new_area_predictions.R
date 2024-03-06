@@ -62,7 +62,7 @@ plot_rmse(TOPO, N2)
 
 # ---------- PLOT RMSE'S ACROSS MODELS TOGETHER ----------
 ## Plot base and climate RMSE's together
-obs = N3 # study area here
+obs = N2 # study area here
 
 # base dataframe of rmse's
 base <- BASE %>% normalized_rmse(.,obs) %>% as.data.frame() %>% 
@@ -75,8 +75,13 @@ base <- BASE %>% normalized_rmse(.,obs) %>% as.data.frame() %>%
                                             if_else(year<22, 4,
                                                     if_else(year<27, 5,
                                                             if_else(year<32, 6, 7)))))))
+  
+  # for year_int, if any 'base'<-500 & >500 
+  to.remove <- base %>% filter(base > 500) %>% 
+      select(year_int) %>% pull() %>% unique()
 
-# *** for year_int, if any 'topo' or 'base'<100 >100
+  # filter(year_int %in% 
+  base <- base %>% filter(!year_int %in% to.remove)
 
 # climate dataframe of rmse
 clim <- CLIM %>% normalized_rmse(.,obs) %>% as.data.frame() %>% 
@@ -88,7 +93,15 @@ clim <- CLIM %>% normalized_rmse(.,obs) %>% as.data.frame() %>%
                                     if_else(year<17, 3,
                                             if_else(year<22, 4,
                                                     if_else(year<27, 5,
-                                                            if_else(year<32, 6, 7)))))))
+                                                            if_else(year<32, 6, 7))))))) 
+  
+  # for year_int, if any 'clim'<-500 & >500 
+  to.remove <- clim %>% filter(clim > 500) %>% 
+      select(year_int) %>% pull() %>% unique()
+
+  # filter(year_int %in% 
+  clim <- clim %>% filter(!year_int %in% to.remove)
+
 
 # topo dataframe of rmse
 topo <- TOPO %>% normalized_rmse(.,obs) %>% as.data.frame() %>% 
@@ -100,9 +113,17 @@ topo <- TOPO %>% normalized_rmse(.,obs) %>% as.data.frame() %>%
                                     if_else(year<17, 3,
                                             if_else(year<22, 4,
                                                     if_else(year<27, 5,
-                                                            if_else(year<32, 6, 7)))))))
+                                                            if_else(year<32, 6, 7))))))) 
 
-# topo dataframe of rmse
+  # for year_int, if any 'topo'<-500 & >500 
+  to.remove <- topo %>% filter(topo > 500) %>% 
+  select(year_int) %>% pull() %>% unique()
+
+  # filter(year_int %in% 
+  topo <- topo %>% filter(!year_int %in% to.remove)
+
+
+# topoclim dataframe of rmse
 topoclim <- TOPOCLIM %>% normalized_rmse(.,obs) %>% as.data.frame() %>% 
   mutate('year' = seq(1,36,1)) %>% 
   pivot_longer(starts_with('V'), values_to = 'topoclim', names_to = 'iteration') %>%
@@ -113,6 +134,13 @@ topoclim <- TOPOCLIM %>% normalized_rmse(.,obs) %>% as.data.frame() %>%
                                             if_else(year<22, 4,
                                                     if_else(year<27, 5,
                                                             if_else(year<32, 6, 7)))))))
+  
+  # for year_int, if any 'topoclim'<-500 & >500 
+  to.remove <- topoclim %>% filter(topoclim > 500) %>% 
+    select(year_int) %>% pull() %>% unique()
+
+  # filter(year_int %in% 
+  topoclim <- topoclim %>% filter(!year_int %in% to.remove)
 
 # combine rmse dataframes
 dat <- base %>% full_join(., clim) %>% 
@@ -136,7 +164,7 @@ group.cols <- c("#F8766D","#00BFC4","#C77Cff","#7CAE00")
     labs(y = 'NRMSE', x = "5 year chunks out") +
     scale_y_continuous(limits = c(0, 0.6)) +
     scale_color_manual(values=group.cols) +
-    theme_bw()) # NA's are just the shorter length of one of the models
+    theme_bw()) # NA's are the shorter length of iterations for 2 of the models
 
 #saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmse_5yr_chunks_5y_avg_init_reletavized.rds")
 
@@ -154,7 +182,7 @@ rmse.35y <- dat %>%
 
 ## save correct study areas to file
 
-write.csv(rmse.35y,"R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmses_for_model_studyarea_comparisons/in_sample_35y_nrmse_avg_allyears.csv")
+# write.csv(rmse.35y,"R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmses_for_model_studyarea_comparisons/in_sample_35y_nrmse_avg_allyears.csv")
 
 # write.csv(rmse.35y,"R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmses_for_model_studyarea_comparisons/in_sample_35y_nrmse_yearchunks.csv")
 

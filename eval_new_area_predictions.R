@@ -62,7 +62,7 @@ plot_rmse(TOPO, N2)
 
 # ---------- PLOT RMSE'S ACROSS MODELS TOGETHER ----------
 ## Plot base and climate RMSE's together
-obs = N2 # study area here
+obs = N3 # study area here
 
 # base dataframe of rmse's
 base <- BASE %>% normalized_rmse(.,obs) %>% as.data.frame() %>% 
@@ -78,7 +78,7 @@ base <- BASE %>% normalized_rmse(.,obs) %>% as.data.frame() %>%
   
   # for year_int, if any 'base'<-500 & >500 
   to.remove <- base %>% filter(base > 500) %>% 
-      select(year_int) %>% pull() %>% unique()
+      dplyr::select(year_int) %>% pull() %>% unique()
 
   # filter(year_int %in% 
   base <- base %>% filter(!year_int %in% to.remove)
@@ -97,7 +97,7 @@ clim <- CLIM %>% normalized_rmse(.,obs) %>% as.data.frame() %>%
   
   # for year_int, if any 'clim'<-500 & >500 
   to.remove <- clim %>% filter(clim > 500) %>% 
-      select(year_int) %>% pull() %>% unique()
+      dplyr::select(year_int) %>% pull() %>% unique()
 
   # filter(year_int %in% 
   clim <- clim %>% filter(!year_int %in% to.remove)
@@ -117,7 +117,7 @@ topo <- TOPO %>% normalized_rmse(.,obs) %>% as.data.frame() %>%
 
   # for year_int, if any 'topo'<-500 & >500 
   to.remove <- topo %>% filter(topo > 500) %>% 
-  select(year_int) %>% pull() %>% unique()
+  dplyr::select(year_int) %>% pull() %>% unique()
 
   # filter(year_int %in% 
   topo <- topo %>% filter(!year_int %in% to.remove)
@@ -137,7 +137,7 @@ topoclim <- TOPOCLIM %>% normalized_rmse(.,obs) %>% as.data.frame() %>%
   
   # for year_int, if any 'topoclim'<-500 & >500 
   to.remove <- topoclim %>% filter(topoclim > 500) %>% 
-    select(year_int) %>% pull() %>% unique()
+    dplyr::select(year_int) %>% pull() %>% unique()
 
   # filter(year_int %in% 
   topoclim <- topoclim %>% filter(!year_int %in% to.remove)
@@ -168,7 +168,9 @@ group.cols <- c("#F8766D","#00BFC4","#C77Cff","#7CAE00")
 
 #saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmse_5yr_chunks_5y_avg_init_reletavized.rds")
 
-saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_NaNs.rds")
+# saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_NaNs.rds")
+
+# saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_NaNs.rds")
 
 # saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_negatives_topos_only.rds")
 
@@ -187,11 +189,11 @@ rmse.35y <- dat %>%
 # write.csv(rmse.35y,"R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmses_for_model_studyarea_comparisons/in_sample_35y_nrmse_yearchunks.csv")
 
 # ------------------ Predicted median and credible intervals ------------
-# N
-base.pred = for.base.N$predOut
-topo.pred = for.topo.N$predOut
-clim.pred = for.clim.N$predOut
-topoclim.pred = for.topoclim.N$predOut
+# # N
+# base.pred = for.base.N$predOut
+# topo.pred = for.topo.N$predOut
+# clim.pred = for.clim.N$predOut
+# topoclim.pred = for.topoclim.N$predOut
 
 # # N2
 # base.pred = for.base.N2$predOut
@@ -199,20 +201,20 @@ topoclim.pred = for.topoclim.N$predOut
 # clim.pred = for.clim.N2$predOut
 # topoclim.pred = for.topoclim.N2$predOut
 
-# # N3
-# base.pred = for.base.N3$predOut
-# topo.pred = for.topo.N3$predOut
-# clim.pred = for.clim.N3$predOut
-# topoclim.pred = for.topoclim.N3$predOut
+# N3
+base.pred = for.base.N3$predOut
+topo.pred = for.topo.N3$predOut
+clim.pred = for.clim.N3$predOut
+topoclim.pred = for.topoclim.N3$predOut
 
 # ## save median predictions and calculate crediable intervals
-# med.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = median)
-# low.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
-# up.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
-# 
+med.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = median)
+low.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
+up.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = quantile, 0.95)
+
 # # save mediam pixel-year predicted cover
-# write.csv(med.pred.base, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_median_5y_avg_init.csv")
-# 
+# write.csv(med.pred.base, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/median_predictions_for_mapping/in_sample_35y_base_median_5y_avg_init.csv")
+
 # # save lower CI pixel-year predicted cover
 # write.csv(low.pred.base, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_90_credible_lower_5y_avg_init.csv")
 # 
@@ -221,14 +223,14 @@ topoclim.pred = for.topoclim.N$predOut
 
 ## LOAD predictions for the base model
 
-# base median
-med.pred.base <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_median_5y_avg_init.csv")
-
-# base lower CI
-low.pred.base <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_90_credible_lower_5y_avg_init.csv")
-
-# base upper CI
-up.pred.base <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_90_credible_upper_5y_avg_init.csv")
+# # base median
+# med.pred.base <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_median_5y_avg_init.csv")
+# 
+# # base lower CI
+# low.pred.base <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_90_credible_lower_5y_avg_init.csv")
+# 
+# # base upper CI
+# up.pred.base <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_90_credible_upper_5y_avg_init.csv")
 
 med.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = median)
 low.pred.clim <- apply(clim.pred, MARGIN = c(1,2), FUN = quantile, 0.05) # low
@@ -344,7 +346,9 @@ plot_pix_gg <- function(pix, obs) {
     geom_line(aes(x = year, y = med.pred.base, col = "base"), lwd = 1.5) + 
     geom_line(aes(x = year, y = med.pred.clim, col = "climate-only"), lwd = 1.5) +
     
-    scale_y_continuous(limits = c(-5, 30)) + 
+    # scale_y_continuous(limits = c(-5, 45)) + # good scale for N2
+    scale_y_continuous(limits = c(-5, 65)) + # good scale for N3
+    # scale_y_continuous(limits = c(-5, 35)) + # good scale for N 
     scale_color_manual(name = '', values = cols) +
     scale_fill_manual(name = '', values = cols) +
     scale_shape_manual(name = '', values = 21, labels = 'observations') +
@@ -353,7 +357,7 @@ plot_pix_gg <- function(pix, obs) {
     
     theme(
       legend.justification = c("right", "top"),
-      legend.position = c(.99, .99),
+      legend.position = c(.6, .99),
       legend.title=element_blank(),
       legend.spacing.y = unit(-.2, 'cm'),
       legend.box.margin = margin(4,4,4,4),
@@ -367,21 +371,42 @@ plot_pix_gg <- function(pix, obs) {
 }
 
 # test plot function for a given pixel
-plot_pix_gg(707, N)
+plot_pix_gg(711, N2)
 
-# plot low, medium, and high cover all-together
-plot_grid(plot_pix_gg(707, N), 
-          plot_pix_gg(152, N) + theme(legend.position = "none") + labs(y = ''), 
-          plot_pix_gg(120, N) + theme(legend.position = "none") + labs(y = ''), ncol = 3)
+## plot low, medium, and high cover all-together
+
+# N
+(three.panel <- plot_grid(plot_pix_gg(707, N) + labs(x = '', y = ''), 
+          plot_pix_gg(152, N) + theme(legend.position = "none") + labs(x = '', y = ''), 
+          plot_pix_gg(120, N) + theme(legend.position = "none") + labs(x = '', y = ''), ncol = 3))
 
 # N=159 or 152, increasing trend pixel, N = 703 increasing trend pixel with high var, N = 707, low cover, increasing.
 
-ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/single_pixel_low_mid_high_cover_5yr_avg_init.png", plot = last_plot(), dpi = 400)
+# N2
+(three.panel <- plot_grid(plot_pix_gg(711, N2) + theme(legend.position = "none") + labs(x = ''), 
+                          plot_pix_gg(22, N2) + theme(legend.position = "none") + labs(x = '', y = ''), 
+                          plot_pix_gg(2050, N2) + theme(legend.position = "none") + labs(y = '', x = ''), ncol = 3))
 
-saveRDS(
-  plot_grid(plot_pix_gg(707, N), 
-            plot_pix_gg(152, N) + theme(legend.position = "none") + labs(y = ''), 
-            plot_pix_gg(120, N) + theme(legend.position = "none") + labs(y = ''), ncol = 3), "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/single_pixel_low_mid_high_cover_5yr_avg_init.rds")
+# N2=22,100 low cover, modest increase; N2 = 160 moderate cover tiny increase; 
+# N2 =220 moderate cover, no increase; N2 = 425, moderate, increasing
+
+# N3
+(three.panel <- plot_grid(plot_pix_gg(483, N3) + theme(legend.position = "none") + labs(x = '', y = ''), 
+          plot_pix_gg(485, N3) + theme(legend.position = "none") + labs(y = ''), 
+          plot_pix_gg(488, N3) + theme(legend.position = "none") + labs(x = '', y = ''), ncol = 3))
+
+# N3 = 160 or 215 very low cover, minimal increase; N3 = 1035 low-moderate cover increasing; 
+# N3 = 707 moderate cover, small increasing trend; N3 = 700 moderate cover, increasing cover trend;
+# N3 = 332,333,336 nearly the highest cover, increasing at first, then levels off
+# N3 = 219, 276 climate model did really well
+# see N3 = 427-433 for a set of pixels in the same 'row' spanning the 'range margin'
+# Also see N = 483,485,488 for a set of pixels in the same 'row' spanning the 'range margin'
+# N3 = 2313, both models under-predict cover (climate usually over predicts)
+
+# ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/single_pixel_low_mid_high_cover_5yr_avg_init.png", plot = last_plot(), dpi = 400)
+
+# save as rds to put into a plot later
+saveRDS(three.panel, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/single_pixel_low_mid_high_cover_5yr_avg_init.rds")
 # ------- PLOT OBSERVED COVER OVER TIME FOR ANY PIXEL -----
 # test out different pixels to plot based on 36-yr trends
 
@@ -447,7 +472,7 @@ plot_lat_gg <- function(pix) {
   #   rownames_to_column("year") %>%
   #   pivot_longer(!year, values_to = "med.pred", names_to = "pixel") %>% 
   #   filter(pixel == pxv) %>% 
-  #   select(!pixel) %>%
+  #   dplyr::select(!pixel) %>%
   #   mutate(year = as.numeric(year)) %>%
   #   filter(year !=1 )  # remove first year (true value, not part of the forecast)
   # 
@@ -456,7 +481,7 @@ plot_lat_gg <- function(pix) {
   #   rownames_to_column("year") %>%
   #   pivot_longer(!year, values_to = "low.pred", names_to = "pixel") %>% 
   #   filter(pixel == pxv) %>% 
-  #   select(!pixel) %>%
+  #   dplyr::select(!pixel) %>%
   #   mutate(year = as.numeric(year)) %>%
   #   filter(year !=1 )  # remove first year (true value, not part of the forecast)
   # 
@@ -464,7 +489,7 @@ plot_lat_gg <- function(pix) {
   #   rownames_to_column("year") %>%
   #   pivot_longer(!year, values_to = "up.pred", names_to = "pixel") %>% 
   #   filter(pixel == pxv) %>% 
-  #   select(!pixel) %>%
+  #   dplyr::select(!pixel) %>%
   #   mutate(year = as.numeric(year)) %>%
   #   filter(year !=1 )  # remove first year (true value, not part of the forecast)
   # 

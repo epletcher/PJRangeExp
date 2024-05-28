@@ -2,16 +2,29 @@
 library(abind)
 library(tidyverse)
 
-# ---covariate data----
+## set working directory to PJ_photo
 
-## ----- N -----
+# functions
+
+# Function to re-rasterize dataframe
+df2raster <- function(df) { # df should be x, y, vals only
+  val <- names(df)[3]
+  spg <- df %>% rename(values = val)
+  sp::coordinates(spg) <- ~ x + y
+  sp::gridded(spg) <- TRUE # coerce to SpatialPixelsDataFrame
+  r <- raster::raster(spg, values = TRUE) # coerce to raster
+  return(r)
+}
+
+
+# --- load covariate data----
 
 # clim data (read in and standardize)
-climdat <- read.csv("R:/Shriver_Lab/PJspread/data_prepping/PrismClimateDataV3.csv") 
+climdat <- read.csv("cover_spread/Data/PrismClimateDataV3.csv") 
 #%>% plyr::mutate(across(c("ppt", "tmean", "vpdmax"), scale))
 
 # topo data (read in and standardize)
-topodat <- read.csv("R:/Shriver_Lab/PJspread/data_prepping/topographic_data.csv") 
+topodat <- read.csv("cover_spread/Data/topography_data/topographic_data.csv") 
 #%>% dplyr::mutate(across(c("heatload", "elev"), scale))
 
 # 3-dimensional array of environmental covariates by cellnum, year, and variable
@@ -43,12 +56,12 @@ elev <- topodat %>% dplyr::select(c(cellnum, year, elev)) %>%
 #stack
 enviro.var <- abind(ppt, tmean, vpdmax, heatload, elev, along = 3)
 
-# in-sample un-standardized covariates
-N.clim <- read.csv("R:/Shriver_Lab/PJspread/data_prepping/PrismClimateDataV3.csv")
-N.topo <- read.csv("R:/Shriver_Lab/PJspread/data_prepping/topographic_data.csv")
+# # in-sample un-standardized covariates
+# N.clim <- read.csv("R:/Shriver_Lab/PJspread/data_prepping/PrismClimateDataV3.csv")
+# N.topo <- read.csv("R:/Shriver_Lab/PJspread/data_prepping/topographic_data.csv")
 
 ## ----- N2 -----
-N2.clim <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/PrismClimateDataV3_oos1.csv") #%>% 
+N2.clim <- read.csv("cover_spread/Data/out_of_sample/PrismClimateDataV3_oos1.csv") #%>% 
   
   # #standardize covariates based on mean and sd from in-sample data
   # dplyr::mutate(ppt = (ppt-mean(N.clim$ppt))/sd(N.clim$ppt)) %>%
@@ -57,7 +70,7 @@ N2.clim <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/PrismClimate
   # 
   # dplyr::mutate(vpdmax = (vpdmax-mean(N.clim$vpdmax))/sd(N.clim$vpdmax))
 
-N2.topo <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/topographic_data_oos1.csv") #%>% 
+N2.topo <- read.csv("cover_spread/Data/out_of_sample/topographic_data_oos1.csv") #%>% 
   
   # #standardize covariates based on mean and sd from in-sample data
   # dplyr::mutate(heatload = (heatload-mean(N.topo$heatload))/sd(N.topo$heatload)) %>%
@@ -77,7 +90,7 @@ elev <- N2.topo %>% dplyr::select(c(cellnum, year, elev)) %>% pivot_wider(names_
 enviro.var.N2 <- abind(ppt, tmean, heatload, elev, along = 3)
 
 # ## N3
-N3.clim <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/PrismClimateDataV3_oos2.csv") #%>%
+N3.clim <- read.csv("cover_spread/Data/out_of_sample/PrismClimateDataV3_oos2.csv") #%>%
   
   # #standardize covariates based on mean and sd from in-sample data
   # dplyr::mutate(ppt = (ppt-mean(N.clim$ppt))/sd(N.clim$ppt)) %>%
@@ -86,7 +99,7 @@ N3.clim <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/PrismClimate
   # 
   # dplyr::mutate(vpdmax = (vpdmax-mean(N.clim$vpdmax))/sd(N.clim$vpdmax))
 
-N3.topo <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/topographic_data_oos2.csv") #%>%
+N3.topo <- read.csv("cover_spread/Data/out_of_sample/topographic_data_oos2.csv") #%>%
   
   # #standardize covariates based on mean and sd from in-sample data
   # dplyr::mutate(heatload = (heatload-mean(N.topo$heatload))/sd(N.topo$heatload)) %>%
@@ -105,28 +118,78 @@ elev <- N3.topo %>% dplyr::select(c(cellnum, year, elev)) %>% pivot_wider(names_
 #stack
 enviro.var.N3 <- abind(ppt, tmean, heatload, elev, along = 3)
 
+
+## ----- plot climate covariates ----
+
+## ppt
+
+# cols
+linecols <- c("in sample" = "#4793AF", "oos (nearby)" = "#FFC470", "oos (far away)" = "#8B322C")
+
 # median ppt
-ppt_N <- apply(enviro.var[,,1], MARGIN = 1, FUN = mean)
-ppt_N2 <- apply(enviro.var.N2[,,1], MARGIN = 1, FUN = mean)
-ppt_N3 <- apply(enviro.var.N3[,,1], MARGIN = 1, FUN = mean)
+ppt_N <-  data.frame("annppt" = apply(enviro.var[,,1], MARGIN = 1, FUN = mean), 
+                     "year" = seq(1,36,1)) %>% dplyr::mutate(year = year+1985)
+ppt_N2 <- data.frame("annppt" = apply(enviro.var.N2[,,1], MARGIN = 1, FUN = mean), 
+                     "year" = seq(1,36,1)) %>% dplyr::mutate(year = year+1985)
+ppt_N3 <- data.frame("annppt" = apply(enviro.var.N3[,,1], MARGIN = 1, FUN = mean), 
+                     "year" = seq(1,36,1)) %>% dplyr::mutate(year = year+1985)
 
-plot(ppt_N, type = 'l', col = 'red', ylim = c(50,550), lwd = 1.5, ylab = "Annual Precipitation (mm)")
-lines(ppt_N2, col = '#00B0F0', lwd = 1.5)
-lines(ppt_N3, col = 'purple', lwd = 1.5)
+(ppt.plot <- ppt_N %>% ggplot(aes(x = year, y = annppt)) + 
+    geom_point(aes(col = "in sample"),size = 2.5) + 
+    geom_line(aes(col = "in sample"),lwd = 1.1) + 
+    geom_line(aes(col = "oos (nearby)"), data = ppt_N2, col = "#FFC470", lwd = 1.25) + 
+    geom_point(aes(col = "oos (nearby)"), data = ppt_N2, col = "#FFC470", size = 2.5) +
+    geom_line(aes(col = "oos (far away)"), data = ppt_N3, col = "#8B322C", lwd = 1.25) +
+    geom_point(aes(col = "oos (far away)"), data = ppt_N3, col = "#8B322C", size = 2.5) +
+    scale_color_manual(name = "landscape", values = linecols) +
+    ylab("Annual Precipitation (mm)") +
+    xlab("YEAR") +
+    theme_classic())
 
-# mean tmean
-tmean_N <- apply(enviro.var[,,2], MARGIN = 1, FUN = mean)
-tmean_N2 <- apply(enviro.var.N2[,,2], MARGIN = 1, FUN = mean)
-tmean_N3 <- apply(enviro.var.N3[,,2], MARGIN = 1, FUN = mean)
 
-plot(tmean_N, type = 'l', col = 'red', ylim = c(4,9), lwd = 1.6, ylab = "Mean Temp (c)")
-lines(tmean_N2, col = '#00B0F0', lwd = 1.6)
-lines(tmean_N3, col = 'purple', lwd = 1.6)
+## mean tmean
+tmean_N <-  data.frame("tmean" = apply(enviro.var[,,2], MARGIN = 1, FUN = mean), 
+                       "year" = seq(1,36,1)) %>% dplyr::mutate(year = year+1985)
+tmean_N2 <- data.frame("tmean" = apply(enviro.var.N2[,,2], MARGIN = 1, FUN = mean), 
+                       "year" = seq(1,36,1)) %>% dplyr::mutate(year = year+1985)
+tmean_N3 <- data.frame("tmean" = apply(enviro.var.N3[,,2], MARGIN = 1, FUN = mean), 
+                       "year" = seq(1,36,1)) %>% dplyr::mutate(year = year+1985)
 
-# mean heatload
-mean(enviro.var[,,4]) # n
-mean(enviro.var.N2[,,3]) # n2
-mean(enviro.var.N3[,,3]) # n3
+(tmean.plot <- tmean_N %>% ggplot(aes(x = year, y = tmean)) + 
+    geom_point(aes(col = "in sample"),size = 2.5) + 
+    geom_line(aes(col = "in sample"),lwd = 1.1) + 
+    geom_line(aes(col = "oos (nearby)"), data = tmean_N2, col = "#FFC470", lwd = 1.25) + 
+    geom_point(aes(col = "oos (nearby)"), data = tmean_N2, col = "#FFC470", size = 2.5) +
+    geom_line(aes(col = "oos (far away)"), data = tmean_N3, col = "#8B322C", lwd = 1.25) +
+    geom_point(aes(col = "oos (far away)"), data = tmean_N3, col = "#8B322C", size = 2.5) +
+    scale_color_manual(name = "landscape", values = linecols) +
+    ylab("Annual Precipitation (mm)") +
+    xlab("YEAR") +
+    theme_classic())
+
+##  heatload
+
+# map
+par(mfrow = c(1,3))
+
+topodat %>% dplyr::select(c(x,y,heatload)) %>% df2raster(.) %>% plot(., zlim = c(-12,12))
+N2.topo %>% dplyr::select(c(x,y,heatload)) %>% df2raster(.) %>% plot(., zlim = c(-12,12))
+N3.topo %>% dplyr::select(c(x,y,heatload)) %>% df2raster(.) %>% plot(., zlim = c(-12,12))
+
+# mean
+mean(enviro.var[1,,4]) # n
+mean(enviro.var.N2[1,,3]) # n2
+mean(enviro.var.N3[1,,3]) # n3
+
+## elevation
+
+# map 
+par(mfrow = c(1,3))
+
+topodat %>% dplyr::select(c(x,y,elev)) %>% df2raster(.) %>% plot(., zlim = c(-12,12))
+N2.topo %>% dplyr::select(c(x,y,elev)) %>% df2raster(.) %>% plot(., zlim = c(-12,12))
+N3.topo %>% dplyr::select(c(x,y,elev)) %>% df2raster(.) %>% plot(., zlim = c(-12,12))
+
 
 # mean elev
 mean(enviro.var[,,5]) # n
@@ -135,6 +198,7 @@ mean(enviro.var.N2[,,4]) # n2
 sd(enviro.var.N2[,,4])
 mean(enviro.var.N3[,,4]) # n3
 sd(enviro.var.N3[,,4])
+
 
 # ** test plotting variation in environmental covariates for each study area **
 par(mfrow = c(2,2))
@@ -153,5 +217,3 @@ matplot(enviro.var.N3[,,2], type = 'l') # tmean
 matplot(enviro.var.N3[,,3], type = 'l') # heatload
 matplot(enviro.var.N3[,,4], type = 'l') # elev
 
-# median precipitation for each area
-med.precip

@@ -48,32 +48,34 @@ N3.rast <- raster("out_of_sample/oos_raster_data/RAP_treeCover_oos2_1986.tif") %
 
 
 ## plot average cover over time
-tiff("C:/Users/elise/OneDrive/Documents/UNR_Gr/chapter1/figures/study_areas_figure/landscapes_diagram.tif",width = 8,height=5.25,units="in", res=300)
+tiff("C:/Users/elise/OneDrive/Documents/UNR_Gr/chapter1/figures/study_areas_figure/landscapes_diagram.tif",width = 8,height=5.5,units="in", res=300)
 
 # ggplot version
 N.avg <- data.frame("avgcover" = rowMeans(N), "year" = seq(1,36,1)) %>% dplyr::mutate(year = year+1985)
 N2.avg <- data.frame("avgcover" = rowMeans(N2), "year" = seq(1,36,1)) %>% dplyr::mutate(year = year+1985)
 N3.avg <- data.frame("avgcover" = rowMeans(N3), "year" = seq(1,36,1)) %>% dplyr::mutate(year = year+1985)
 
-(b <- N.avg %>% ggplot(aes(x = year, y = avgcover)) + 
-  geom_point(col = "#4793AF", size = 2.5) + 
-  geom_line(col = "#4793AF",lwd = 1.1) + 
-  geom_line(data = N2.avg, col = "#FFC470", lwd = 1.25) + 
-  geom_point(data = N2.avg, col = "#FFC470", size = 2.5) +
-  geom_line(data = N3.avg, col = "#8B322C", lwd = 1.25) +
-  geom_point(data = N3.avg, col = "#8B322C", size = 2.5) +
-  ylab("AVG. % TREE COVER") +
-  xlab("YEAR") +
-  theme_classic())
+linecols <- c("in sample" = "#4793AF", "oos (nearby)" = "#FFC470", "oos (far away)" = "#8B322C")
 
+(b <- N.avg %>% ggplot(aes(x = year, y = avgcover)) + 
+    geom_point(aes(col = "in sample"),size = 2.5) + 
+    geom_line(aes(col = "in sample"),lwd = 1.1) + 
+    geom_line(aes(col = "oos (nearby)"), data = N2.avg, col = "#FFC470", lwd = 1.25) + 
+    geom_point(aes(col = "oos (nearby)"), data = N2.avg, col = "#FFC470", size = 2.5) +
+    geom_line(aes(col = "oos (far away)"), data = N3.avg, col = "#8B322C", lwd = 1.25) +
+    geom_point(aes(col = "oos (far away)"), data = N3.avg, col = "#8B322C", size = 2.5) +
+    scale_color_manual(name = "landscape", values = linecols) +
+    ylab("AVG. % TREE COVER") +
+    xlab("YEAR") +
+    theme_classic())
 ## plot mapped cover for 1986
 
 cols <- colorRampPalette(brewer.pal(9,"YlGn"), bias = 1.75)(50)
 
 # panel
 a.1 <- levelplot(N.rast, col.regions = cols, scales = list(draw=F), margin = F, ylab = "", 
-            xlab = "", colorkey = list(width = 0.75), at=seq(0,50), main = "In sample", 
-            sub = expression("        Species:", italic("J. occidentalis           ")))
+            xlab = "", colorkey = list(width = 0.75), at=seq(0,50), 
+            main = "In sample")
 
 a.1$par.settings$layout.heights[
   c( 'bottom.padding',
@@ -86,7 +88,8 @@ a.1$aspect.fill <- TRUE
 
 
 a.2 <- levelplot(N2.rast, col.regions = cols, scales = list(draw=F), margin = F, ylab = "", 
-            xlab = "", colorkey = list(width = 0.75), at=seq(0,50), main = "Out of sample (nearby)", sub = expression("        Species:", italic("J. occidentalis           ")))
+            xlab = "", colorkey = list(width = 0.75), at=seq(0,50), 
+            main = "Out of sample (nearby)")
 
 a.2$par.settings$layout.heights[
   c( 'bottom.padding',
@@ -98,7 +101,8 @@ a.2$par.settings$layout.heights[
 a.2$aspect.fill <- TRUE
 
 a.3 <- levelplot(N3.rast, col.regions = cols, scales = list(draw=F), margin = F, ylab = "", 
-            xlab = "", at=seq(0,50), colorkey = list(width = 0.75), main = "Out of sample (far away)", sub = expression("        Species:", italic("P. monphylla           ")))
+            xlab = "", at=seq(0,50), colorkey = list(width = 0.75), 
+            main = "Out of sample (far away)")
 
 a.3$par.settings$layout.heights[
   c( 'bottom.padding',
@@ -111,6 +115,11 @@ a.3$aspect.fill <- TRUE
   
 (a <- plot_grid(a.1,a.2,a.3, rel_widths = c(1,1,1), ncol = 3))
 
-plot_grid(a,b, nrow = 2)
+(c <- ggplot() + theme_void())
+
+b.c <- (plot_grid(b, c, ncol = 2, rel_widths = c(3.5,1)))
+
+plot_grid(a,b.c, nrow = 2)
  
 dev.off()
+

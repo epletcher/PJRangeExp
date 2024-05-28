@@ -1,7 +1,7 @@
 # load packages
 library(abind)
 library(tidyverse)
-
+library(raster)
 ## set working directory to PJ_photo
 
 # functions
@@ -135,17 +135,16 @@ ppt_N3 <- data.frame("annppt" = apply(enviro.var.N3[,,1], MARGIN = 1, FUN = mean
                      "year" = seq(1,36,1)) %>% dplyr::mutate(year = year+1985)
 
 (ppt.plot <- ppt_N %>% ggplot(aes(x = year, y = annppt)) + 
-    geom_point(aes(col = "in sample"),size = 2.5) + 
-    geom_line(aes(col = "in sample"),lwd = 1.1) + 
-    geom_line(aes(col = "oos (nearby)"), data = ppt_N2, col = "#FFC470", lwd = 1.25) + 
-    geom_point(aes(col = "oos (nearby)"), data = ppt_N2, col = "#FFC470", size = 2.5) +
-    geom_line(aes(col = "oos (far away)"), data = ppt_N3, col = "#8B322C", lwd = 1.25) +
-    geom_point(aes(col = "oos (far away)"), data = ppt_N3, col = "#8B322C", size = 2.5) +
+    geom_point(aes(col = "in sample"),size = 2) + 
+    geom_line(aes(col = "in sample")) + 
+    geom_line(aes(col = "oos (nearby)"), data = ppt_N2, col = "#FFC470") + 
+    geom_point(aes(col = "oos (nearby)"), data = ppt_N2, col = "#FFC470", size = 2) +
+    geom_line(aes(col = "oos (far away)"), data = ppt_N3, col = "#8B322C") +
+    geom_point(aes(col = "oos (far away)"), data = ppt_N3, col = "#8B322C", size = 2) +
     scale_color_manual(name = "landscape", values = linecols) +
     ylab("Annual Precipitation (mm)") +
-    xlab("YEAR") +
+    xlab("Year") +
     theme_classic())
-
 
 ## mean tmean
 tmean_N <-  data.frame("tmean" = apply(enviro.var[,,2], MARGIN = 1, FUN = mean), 
@@ -156,15 +155,15 @@ tmean_N3 <- data.frame("tmean" = apply(enviro.var.N3[,,2], MARGIN = 1, FUN = mea
                        "year" = seq(1,36,1)) %>% dplyr::mutate(year = year+1985)
 
 (tmean.plot <- tmean_N %>% ggplot(aes(x = year, y = tmean)) + 
-    geom_point(aes(col = "in sample"),size = 2.5) + 
-    geom_line(aes(col = "in sample"),lwd = 1.1) + 
-    geom_line(aes(col = "oos (nearby)"), data = tmean_N2, col = "#FFC470", lwd = 1.25) + 
-    geom_point(aes(col = "oos (nearby)"), data = tmean_N2, col = "#FFC470", size = 2.5) +
-    geom_line(aes(col = "oos (far away)"), data = tmean_N3, col = "#8B322C", lwd = 1.25) +
-    geom_point(aes(col = "oos (far away)"), data = tmean_N3, col = "#8B322C", size = 2.5) +
+    geom_point(aes(col = "in sample"),size = 2) + 
+    geom_line(aes(col = "in sample")) + 
+    geom_line(aes(col = "oos (nearby)"), data = tmean_N2, col = "#FFC470") + 
+    geom_point(aes(col = "oos (nearby)"), data = tmean_N2, col = "#FFC470", size = 2) +
+    geom_line(aes(col = "oos (far away)"), data = tmean_N3, col = "#8B322C") +
+    geom_point(aes(col = "oos (far away)"), data = tmean_N3, col = "#8B322C", size = 2) +
     scale_color_manual(name = "landscape", values = linecols) +
-    ylab("Annual Precipitation (mm)") +
-    xlab("YEAR") +
+    ylab("Mean Temperature (c)") +
+    xlab("Year") +
     theme_classic())
 
 ##  heatload
@@ -172,30 +171,40 @@ tmean_N3 <- data.frame("tmean" = apply(enviro.var.N3[,,2], MARGIN = 1, FUN = mea
 # map
 par(mfrow = c(1,3))
 
-topodat %>% dplyr::select(c(x,y,heatload)) %>% df2raster(.) %>% plot(., zlim = c(-12,12))
-N2.topo %>% dplyr::select(c(x,y,heatload)) %>% df2raster(.) %>% plot(., zlim = c(-12,12))
-N3.topo %>% dplyr::select(c(x,y,heatload)) %>% df2raster(.) %>% plot(., zlim = c(-12,12))
+topodat %>% dplyr::select(c(x,y,heatload)) %>% 
+   df2raster(.) %>% raster::plot(., zlim = c(0.3,1), col.axis="white", tck = 0)
+N2.topo %>% dplyr::select(c(x,y,heatload)) %>% 
+  df2raster(.) %>% raster::plot(., zlim = c(0.3,1), col.axis="white", tck = 0)
+N3.topo %>% dplyr::select(c(x,y,heatload)) %>% 
+  df2raster(.) %>% raster::plot(., zlim = c(0.3,1), col.axis="white", tck = 0)
 
 # mean
 mean(enviro.var[1,,4]) # n
+sd(enviro.var[1,,4])
+
 mean(enviro.var.N2[1,,3]) # n2
+sd(enviro.var.N2[1,,3])
+
 mean(enviro.var.N3[1,,3]) # n3
+sd(enviro.var.N3[1,,3])
 
 ## elevation
 
 # map 
 par(mfrow = c(1,3))
 
-topodat %>% dplyr::select(c(x,y,elev)) %>% df2raster(.) %>% plot(., zlim = c(-12,12))
-N2.topo %>% dplyr::select(c(x,y,elev)) %>% df2raster(.) %>% plot(., zlim = c(-12,12))
-N3.topo %>% dplyr::select(c(x,y,elev)) %>% df2raster(.) %>% plot(., zlim = c(-12,12))
+topodat %>% dplyr::select(c(x,y,elev)) %>% df2raster(.) %>% raster::plot(., zlim = c(1200,1600), col.axis="white", tck = 0)
+N2.topo %>% dplyr::select(c(x,y,elev)) %>% df2raster(.) %>% raster::plot(., zlim = c(1200,1600), col.axis="white", tck = 0)
+N3.topo %>% dplyr::select(c(x,y,elev)) %>% df2raster(.) %>% raster::plot(., zlim = c(2100,2500), col.axis="white", tck = 0)
 
 
 # mean elev
 mean(enviro.var[,,5]) # n
 sd(enviro.var[,,5])
+
 mean(enviro.var.N2[,,4]) # n2
 sd(enviro.var.N2[,,4])
+
 mean(enviro.var.N3[,,4]) # n3
 sd(enviro.var.N3[,,4])
 

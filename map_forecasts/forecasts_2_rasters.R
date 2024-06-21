@@ -1,5 +1,4 @@
-# This script use outputs predicted outputs from different Samplers to map predicted shifts in cover in raster format. Outputs are saved as TIFFs in the "RangeExp_model_predictions" folder.
-# edited 8/1/2023
+# This script use outputs predicted outputs from different Samplers (models) to map predicted shifts in cover in raster format. Latent, observed, and predicted changes in cover can be mapped for the in sample landscape with this script.
 
 # load packages
 library(raster)

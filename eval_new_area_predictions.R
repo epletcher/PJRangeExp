@@ -14,23 +14,24 @@ normalized_rmse <- function(rmsedat, N) {
 # calculate RMSE in 5-yr chunks
 # choose a set of predictions for a specific study area
 
-# # N
-# BASE = for.base.N$rmseTotOut
-# TOPO = for.topo.N$rmseTotOut
-# CLIM = for.clim.N$rmseTotOut
-# TOPOCLIM = for.topoclim.N$rmseTotOut
+# N
+BASE = for.base.N$rmseTotOut
+TOPO = for.topo.N$rmseTotOut
+CLIM = for.clim.N$rmseTotOut
+TOPOCLIM = for.topoclim.N$rmseTotOut
 
-# N2
-BASE = for.base.N2$rmseTotOut
-TOPO = for.topo.N2$rmseTotOut
-CLIM = for.clim.N2$rmseTotOut
-TOPOCLIM = for.topoclim.N2$rmseTotOut
-
+# # N2
+# BASE = for.base.N2$rmseTotOut
+# TOPO = for.topo.N2$rmseTotOut
+# CLIM = for.clim.N2$rmseTotOut
+# TOPOCLIM = for.topoclim.N2$rmseTotOut
+# 
 # # N3
 # BASE = for.base.N3$rmseTotOut
 # TOPO = for.topo.N3$rmseTotOut
 # CLIM = for.clim.N3$rmseTotOut
 # TOPOCLIM = for.topoclim.N3$rmseTotOut
+# #
 
 # ------------- PLOT RMSE FOR EACH MODEL -------------
 
@@ -62,7 +63,7 @@ plot_rmse(TOPO, N2)
 
 # ---------- PLOT RMSE'S ACROSS MODELS TOGETHER ----------
 ## Plot base and climate RMSE's together
-obs = N3 # study area here
+obs = N # study area here
 
 # base dataframe of rmse's
 base <- BASE %>% normalized_rmse(.,obs) %>% as.data.frame() %>% 
@@ -149,8 +150,16 @@ dat <- base %>% full_join(., clim) %>%
   pivot_longer(c(base, clim, topo, topoclim), names_to = 'model',
                values_to = 'rmse') %>%
   # pivot_longer(c(base, clim), names_to = 'model', values_to = 'rmse') %>%
-  mutate(year_int = as.factor(year_int))
-
+  mutate(year_int = if_else(year_int==1,"2 - 6",
+                            if_else(year_int==2,"7 - 11",
+                                    if_else(year_int==3,"12 - 16",
+                                            if_else(year_int==4,"17 - 21",
+                                                    if_else(year_int==5,"22 - 26",
+                                                            if_else(year_int==6,"27 - 31","32 - 36"))))))) %>%
+  mutate(year_int = fct_relevel(year_int, 
+                            "2 - 6", "7 - 11", "12 - 16", 
+                            "17 - 21", "22 - 26", "27 - 31", 
+                            "32 - 36"))
 ## plot
 
 # colors
@@ -161,16 +170,25 @@ group.cols <- c("#F8766D","#00BFC4","#C77Cff","#7CAE00")
     #filter(model=='topo'|model=='topoclim') %>% # for plotting topos only
     ggplot(aes(x = year_int, y = rmse, col = model), col = cols) + 
     geom_boxplot(outlier.shape = NA) + 
-    labs(y = 'NRMSE', x = "5 year chunks out") +
+    labs(y = 'NRMSE', x = "5-year interval") +
     scale_y_continuous(limits = c(0, 0.6)) +
     scale_color_manual(values=group.cols) +
-    theme_bw()) # NA's are the shorter length of iterations for 2 of the models
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      legend.key = element_rect(fill = "white"),
+      panel.background = element_rect(linetype = "solid",fill = NA),
+      panel.border = element_rect(linetype = "solid", fill = NA),
+      panel.grid.major = element_line(colour = "lightgrey", linewidth = .4)
+      )
+    ) # NA's are the shorter length of iterations for 2 of the models
 
-#saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmse_5yr_chunks_5y_avg_init_reletavized.rds")
+# ** change file path to match study landscape here
+
+# saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmse_5yr_chunks_5y_avg_init_reletavized.rds")
 
 # saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_NaNs.rds")
 
-# saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_NaNs.rds")
+saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_NaNs.rds")
 
 # saveRDS(rmse.plot, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmse_5yr_chunks_5y_avg_init_reletavized_rm_negatives_topos_only.rds")
 
@@ -178,22 +196,24 @@ group.cols <- c("#F8766D","#00BFC4","#C77Cff","#7CAE00")
 
 ## **** Create table of all rmse values
 rmse.35y <- dat %>% 
-  #group_by(model,year_int) %>%
-  group_by(model) %>%
+  group_by(model,year_int) %>%
+  #group_by(model) %>%
   summarise(median = median(rmse, na.rm = T), lower_ci = quantile(rmse, na.rm = T, 0.05), upper_ci = quantile(rmse, na.rm = T, 0.95))
 
 ## save correct study areas to file
 
 # write.csv(rmse.35y,"R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmses_for_model_studyarea_comparisons/in_sample_35y_nrmse_avg_allyears.csv")
 
-# write.csv(rmse.35y,"R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/rmses_for_model_studyarea_comparisons/in_sample_35y_nrmse_yearchunks.csv")
+# ** update file path for each study landscape
+
+write.csv(rmse.35y,"R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmses_for_model_studyarea_comparisons/oos2_35y_nrmse_yearchunks.csv")
 
 # ------------------ Predicted median and credible intervals ------------
-# # N
-# base.pred = for.base.N$predOut
-# topo.pred = for.topo.N$predOut
-# clim.pred = for.clim.N$predOut
-# topoclim.pred = for.topoclim.N$predOut
+# N
+base.pred = for.base.N$predOut
+topo.pred = for.topo.N$predOut
+clim.pred = for.clim.N$predOut
+topoclim.pred = for.topoclim.N$predOut
 
 # # N2
 # base.pred = for.base.N2$predOut
@@ -201,11 +221,11 @@ rmse.35y <- dat %>%
 # clim.pred = for.clim.N2$predOut
 # topoclim.pred = for.topoclim.N2$predOut
 
-# N3
-base.pred = for.base.N3$predOut
-topo.pred = for.topo.N3$predOut
-clim.pred = for.clim.N3$predOut
-topoclim.pred = for.topoclim.N3$predOut
+# # N3
+# base.pred = for.base.N3$predOut
+# topo.pred = for.topo.N3$predOut
+# clim.pred = for.clim.N3$predOut
+# topoclim.pred = for.topoclim.N3$predOut
 
 # ## save median predictions and calculate crediable intervals
 med.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = median)
@@ -347,7 +367,7 @@ plot_pix_gg <- function(pix, obs) {
     geom_line(aes(x = year, y = med.pred.clim, col = "climate-only"), lwd = 1.5) +
     
     # scale_y_continuous(limits = c(-5, 45)) + # good scale for N2
-    scale_y_continuous(limits = c(-5, 65)) + # good scale for N3
+    scale_y_continuous(limits = c(-5, 80)) + # good scale for N3
     # scale_y_continuous(limits = c(-5, 35)) + # good scale for N 
     scale_color_manual(name = '', values = cols) +
     scale_fill_manual(name = '', values = cols) +
@@ -391,20 +411,22 @@ plot_pix_gg(711, N2)
 # N2 =220 moderate cover, no increase; N2 = 425, moderate, increasing
 
 # N3
-(three.panel <- plot_grid(plot_pix_gg(483, N3) + theme(legend.position = "none") + labs(x = '', y = ''), 
-          plot_pix_gg(485, N3) + theme(legend.position = "none") + labs(y = ''), 
-          plot_pix_gg(488, N3) + theme(legend.position = "none") + labs(x = '', y = ''), ncol = 3))
+(three.panel <- plot_grid(plot_pix_gg(1203, N3) + theme(legend.position = "none") + labs(x = '', y = ''), 
+          plot_pix_gg(1205, N3) + theme(legend.position = "none") + labs(y = ''), 
+          plot_pix_gg(1213, N3) + theme(legend.position = "none") + labs(x = '', y = ''), ncol = 3))
 
 # N3 = 160 or 215 very low cover, minimal increase; N3 = 1035 low-moderate cover increasing; 
 # N3 = 707 moderate cover, small increasing trend; N3 = 700 moderate cover, increasing cover trend;
 # N3 = 332,333,336 nearly the highest cover, increasing at first, then levels off
 # N3 = 219, 276 climate model did really well
 # see N3 = 427-433 for a set of pixels in the same 'row' spanning the 'range margin'
-# Also see N = 483,485,488 for a set of pixels in the same 'row' spanning the 'range margin'
+# Also see N3 = 483,485,488 for a set of pixels in the same 'row' spanning the 'range margin'
+# 'range margin' N3 = 1203,1205,1213
 # N3 = 2313, both models under-predict cover (climate usually over predicts)
 
 # ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/single_pixel_low_mid_high_cover_5yr_avg_init.png", plot = last_plot(), dpi = 400)
 
+# ** update file path for each study landscape
 # save as rds to put into a plot later
 saveRDS(three.panel, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/single_pixel_low_mid_high_cover_5yr_avg_init.rds")
 # ------- PLOT OBSERVED COVER OVER TIME FOR ANY PIXEL -----

@@ -144,9 +144,18 @@ mapping_bias <- function(obs.name, pred, obs) { # obs is character name of lands
   
   bias <- calc((forecast.stack[[2:36]] - truthstack[[2:36]]), sum)/n # bias based on observed, exclude 1st year
   
-  nrmse <- sqrt(calc(((forecast.stack[[2:36]] - truthstack[[2:36]])^2), sum)/n)/(max(obs)-min(obs))
+  #mae <- calc(abs(forecast.stack[[2:36]] - truthstack[[2:36]]), sum)/n
   
-  eval.raster <- raster::stack(bias, nrmse)
+  #nmae <- calc((abs(forecast.stack[[2:36]] - truthstack[[2:36]])/(max(obs)-min(obs))), sum)/n
+  
+  #nrmse <- sqrt(calc(((forecast.stack[[2:36]] - truthstack[[2:36]])^2), sum)/n)/(max(obs)-min(obs))
+  
+  #nrmse2 <- sqrt(calc((((forecast.stack[[2:36]] - truthstack[[2:36]])^2)/(max(obs)-min(obs))), sum)/n)
+  
+  # error between predicted last year's cover and a 5-yr average
+  avgerr <- forecast.stack[[36]] - calc(truthstack[[31:36]], mean)
+  
+  eval.raster <- raster::stack(bias, avgerr) # choose which metrics to print here
   
   return(eval.raster)
 }
@@ -156,39 +165,30 @@ N.bias <- mapping_bias("N", N.pp, N)
 
 N2.bias <- mapping_bias("N2", N2.pp, N2)
 
-N3.bias <- mapping_bias("N3", N3.pp, N3) # ** could test these are right by summing and calculating nrmse
+N3.bias <- mapping_bias("N3", N3.pp, N3) 
 
 col1 = colorRampPalette(rev(brewer.pal(7,"RdBu")))(50)
 
-# base plot
-par(mfrow = c(1,2))
-plot(N.bias[[1]], col = col1, zlim = c(-15, 15))
-plot(N.bias[[2]], col = col1, zlim = c(-0.5, 0.5))
+# -------- base plot ----------------
+par(mfrow = c(3,2),mai = c(1,0.1,0.1,0.1))
+plot(N.bias[[1]], col = col1, zlim = c(-16, 16), yaxt="n", xaxt="n") # bias
+plot(N.bias[[2]], col = col1, zlim = c(-24, 24), yaxt="n", xaxt="n") # 5-yr average error
 
-plot(N2.bias[[1]], col = col1, zlim = c(-15, 15))
-plot(N2.bias[[2]], col = col1, zlim = c(-0.5, 0.5))
+plot(N2.bias[[1]], col = col1, zlim = c(-16, 16), yaxt="n", xaxt="n")
+plot(N2.bias[[2]], col = col1, zlim = c(-24, 24), yaxt="n", xaxt="n")
 
-plot(N3.bias[[1]], col = col1, zlim = c(-15, 15))
-plot(N3.bias[[2]], col = col1, zlim = c(-0.5, 0.5))
+plot(N3.bias[[1]], col = col1, zlim = c(-16, 16), yaxt="n", xaxt="n")
+plot(N3.bias[[2]], col = col1, zlim = c(-24, 24), yaxt="n", xaxt="n")
 
-par(mfrow = c(3,1),mai = c(1,0.1,0.1,0.1))
-plot(calc(N.bias[[31:36]], median), col = col1, zlim = c(-14, 14))
-plot(calc(N2.bias[[31:36]], median), col = col1, zlim = c(-14, 14))
-plot(calc(N3.bias[[31:36]], median), col = col1, zlim = c(-14, 14))
 
-raster::animate(N.bias, pause=0.5, n = 1, main = "forecast bias", col = col1)
-raster::animate(N2.bias, pause=0.5, n = 1, main = "forecast bias", col = col1)
-raster::animate(N3.bias, pause=0.5, n = 1, main = "forecast bias", col = col1)
-# -------- plot ----------------
+# -------- level plot --------------
 
 # ## plot average cover over time
-# tiff("R:/Shriver_lab/PJspread/figures/mapping_predictions_across_landscapes.tif",width = 8,height=5.5,units="in", res=300)
-
-cols <- colorRampPalette(brewer.pal(9,"YlGn"), bias = 1.75)(50)
+tiff("R:/Shriver_lab/PJspread/figures/mapping_error_across_landscapes.tif",width = 8,height=2.75,units="in", res=300)
 
 # panel
-a.1 <- levelplot(N.rast, col.regions = cols, scales = list(draw=F), margin = F, ylab = "", 
-                 xlab = "", colorkey = list(width = 0.75), at=seq(0,50), 
+a.1 <- levelplot(N.bias[[2]], col.regions = col1, scales = list(draw=F), margin = F, ylab = "", 
+                 xlab = "", colorkey = list(width = 0.75), at=seq(-24,24), 
                  main = "In sample")
 
 a.1$par.settings$layout.heights[
@@ -201,8 +201,8 @@ a.1$par.settings$layout.heights[
 a.1$aspect.fill <- TRUE
 
 
-a.2 <- levelplot(N2.rast, col.regions = cols, scales = list(draw=F), margin = F, ylab = "", 
-                 xlab = "", colorkey = list(width = 0.75), at=seq(0,50), 
+a.2 <- levelplot(N2.bias[[2]], col.regions = col1, scales = list(draw=F), margin = F, ylab = "", 
+                 xlab = "", colorkey = list(width = 0.75), at=seq(-24,24), 
                  main = "Out of sample (nearby)")
 
 a.2$par.settings$layout.heights[
@@ -214,8 +214,8 @@ a.2$par.settings$layout.heights[
      'main.key.padding') ] <- 1
 a.2$aspect.fill <- TRUE
 
-a.3 <- levelplot(N3.rast, col.regions = cols, scales = list(draw=F), margin = F, ylab = "", 
-                 xlab = "", at=seq(0,50), colorkey = list(width = 0.75), 
+a.3 <- levelplot(N3.bias[[2]], col.regions = col1, scales = list(draw=F), margin = F, ylab = "", 
+                 xlab = "", colorkey = list(width = 0.75), at=seq(-24,24),
                  main = "Out of sample (far away)")
 
 a.3$par.settings$layout.heights[
@@ -227,7 +227,8 @@ a.3$par.settings$layout.heights[
      'main.key.padding') ] <- 1
 a.3$aspect.fill <- TRUE
 
-(a <- plot_grid(a.1,a.2,a.3, rel_widths = c(1,1,1), nrow = 3))
+(a <- plot_grid(a.1,a.2,a.3, rel_widths = c(1,1,1), ncol = 3))
 
 
-#dev.off()
+dev.off()
+

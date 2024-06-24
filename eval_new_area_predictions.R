@@ -31,7 +31,7 @@ TOPOCLIM = for.topoclim.N$rmseTotOut
 # TOPO = for.topo.N3$rmseTotOut
 # CLIM = for.clim.N3$rmseTotOut
 # TOPOCLIM = for.topoclim.N3$rmseTotOut
-# #
+#
 
 # ------------- PLOT RMSE FOR EACH MODEL -------------
 
@@ -66,7 +66,9 @@ plot_rmse(TOPO, N2)
 obs = N # study area here
 
 # base dataframe of rmse's
-base <- BASE %>% normalized_rmse(.,obs) %>% as.data.frame() %>% 
+base <- BASE %>% 
+  normalized_rmse(.,obs) %>% 
+  as.data.frame() %>% 
   mutate('year' = seq(1,36,1)) %>% 
   pivot_longer(starts_with('V'), values_to = 'base', names_to = 'iteration') %>%
   filter(year != 1) %>%
@@ -85,7 +87,9 @@ base <- BASE %>% normalized_rmse(.,obs) %>% as.data.frame() %>%
   base <- base %>% filter(!year_int %in% to.remove)
 
 # climate dataframe of rmse
-clim <- CLIM %>% normalized_rmse(.,obs) %>% as.data.frame() %>% 
+clim <- CLIM %>% 
+  normalized_rmse(.,obs) %>% 
+  as.data.frame() %>% 
   mutate('year' = seq(1,36,1)) %>% 
   pivot_longer(starts_with('V'), values_to = 'clim', names_to = 'iteration') %>%
   filter(year != 1) %>%
@@ -105,7 +109,9 @@ clim <- CLIM %>% normalized_rmse(.,obs) %>% as.data.frame() %>%
 
 
 # topo dataframe of rmse
-topo <- TOPO %>% normalized_rmse(.,obs) %>% as.data.frame() %>% 
+topo <- TOPO %>% 
+  normalized_rmse(.,obs) %>% 
+  as.data.frame() %>% 
   mutate('year' = seq(1,36,1)) %>% 
   pivot_longer(starts_with('V'), values_to = 'topo', names_to = 'iteration') %>%
   filter(year != 1) %>%
@@ -125,7 +131,9 @@ topo <- TOPO %>% normalized_rmse(.,obs) %>% as.data.frame() %>%
 
 
 # topoclim dataframe of rmse
-topoclim <- TOPOCLIM %>% normalized_rmse(.,obs) %>% as.data.frame() %>% 
+topoclim <- TOPOCLIM %>% 
+  normalized_rmse(.,obs) %>% 
+  as.data.frame() %>% 
   mutate('year' = seq(1,36,1)) %>% 
   pivot_longer(starts_with('V'), values_to = 'topoclim', names_to = 'iteration') %>%
   filter(year != 1) %>%
@@ -172,6 +180,7 @@ group.cols <- c("#F8766D","#00BFC4","#C77Cff","#7CAE00")
     geom_boxplot(outlier.shape = NA) + 
     labs(y = 'NRMSE', x = "5-year interval") +
     scale_y_continuous(limits = c(0, 0.6)) +
+    #scale_y_continuous(limits = c(0,30)) +
     scale_color_manual(values=group.cols) +
     theme(
       axis.text.x = element_text(angle = 45, hjust = 1),

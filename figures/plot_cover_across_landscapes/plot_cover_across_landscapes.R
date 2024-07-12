@@ -1,5 +1,5 @@
 ## setwd to PJ_Photo/cover_spread/data in G drive
-setwd("G:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data")
+setwd("D:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data")
 
 library(tidyverse)
 library(raster)
@@ -56,14 +56,14 @@ N2.avg <- data.frame("avgcover" = rowMeans(N2), "year" = seq(1,36,1)) %>% dplyr:
 N3.avg <- data.frame("avgcover" = rowMeans(N3), "year" = seq(1,36,1)) %>% dplyr::mutate(year = year+1985)
 
 #linecols <- c("in sample" = "#4793AF", "oos (nearby)" = "#FFC470", "oos (far away)" = "#8B322C")
-linecols <- c("in sample" = "#bec991", "oos (nearby)" = "#907350", "oos (far away)" = "#5f8971")
+linecols <- c("in sample" = "#bec991", "oos (nearby)" = "#907350", "oos (distant)" = "#5f8971")
 (b <- N.avg %>% ggplot(aes(x = year, y = avgcover)) + 
     geom_point(aes(col = "in sample"),size = 2) + 
     geom_line(aes(col = "in sample"),lwd = 1.1) + 
-    geom_line(aes(col = "oos (nearby)"), data = N2.avg, col = "#907350", lwd = 1.1) + 
-    geom_point(aes(col = "oos (nearby)"), data = N2.avg, col = "#907350", size = 2) +
-    geom_line(aes(col = "oos (far away)"), data = N3.avg, col = "#5f8971", lwd = 1.1) +
-    geom_point(aes(col = "oos (far away)"), data = N3.avg, col = "#5f8971", size = 2) +
+    geom_line(aes(col = "oos (nearby)"), data = N2.avg, lwd = 1.1) + 
+    geom_point(aes(col = "oos (nearby)"), data = N2.avg, size = 2) +
+    geom_line(aes(col = "oos (distant)"), data = N3.avg, lwd = 1.1) +
+    geom_point(aes(col = "oos (distant)"), data = N3.avg, size = 2) +
     scale_color_manual(name = "landscape", values = linecols) +
     ylab("AVG. % TREE COVER") +
     xlab("YEAR") +

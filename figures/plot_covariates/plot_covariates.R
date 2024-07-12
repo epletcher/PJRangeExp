@@ -124,7 +124,7 @@ enviro.var.N3 <- abind(ppt, tmean, heatload, elev, along = 3)
 ## ppt
 
 # cols
-linecols <- c("in sample" = "#4793AF", "oos (nearby)" = "#FFC470", "oos (far away)" = "#8B322C")
+linecols <- c("in sample" = "#bec991", "oos (nearby)" = "#907350", "oos (distant)" = "#5f8971")
 
 # median ppt
 ppt_N <-  data.frame("annppt" = apply(enviro.var[,,1], MARGIN = 1, FUN = mean), 
@@ -137,10 +137,10 @@ ppt_N3 <- data.frame("annppt" = apply(enviro.var.N3[,,1], MARGIN = 1, FUN = mean
 (ppt.plot <- ppt_N %>% ggplot(aes(x = year, y = annppt)) + 
     geom_point(aes(col = "in sample"),size = 2) + 
     geom_line(aes(col = "in sample")) + 
-    geom_line(aes(col = "oos (nearby)"), data = ppt_N2, col = "#FFC470") + 
-    geom_point(aes(col = "oos (nearby)"), data = ppt_N2, col = "#FFC470", size = 2) +
-    geom_line(aes(col = "oos (far away)"), data = ppt_N3, col = "#8B322C") +
-    geom_point(aes(col = "oos (far away)"), data = ppt_N3, col = "#8B322C", size = 2) +
+    geom_line(aes(col = "oos (nearby)"), data = ppt_N2) + 
+    geom_point(aes(col = "oos (nearby)"), data = ppt_N2, size = 2) +
+    geom_line(aes(col = "oos (distant)"), data = ppt_N3) +
+    geom_point(aes(col = "oos (distant)"), data = ppt_N3, size = 2) +
     scale_color_manual(name = "landscape", values = linecols) +
     ylab("Annual Precipitation (mm)") +
     xlab("Year") +
@@ -157,10 +157,10 @@ tmean_N3 <- data.frame("tmean" = apply(enviro.var.N3[,,2], MARGIN = 1, FUN = mea
 (tmean.plot <- tmean_N %>% ggplot(aes(x = year, y = tmean)) + 
     geom_point(aes(col = "in sample"),size = 2) + 
     geom_line(aes(col = "in sample")) + 
-    geom_line(aes(col = "oos (nearby)"), data = tmean_N2, col = "#FFC470") + 
-    geom_point(aes(col = "oos (nearby)"), data = tmean_N2, col = "#FFC470", size = 2) +
-    geom_line(aes(col = "oos (far away)"), data = tmean_N3, col = "#8B322C") +
-    geom_point(aes(col = "oos (far away)"), data = tmean_N3, col = "#8B322C", size = 2) +
+    geom_line(aes(col = "oos (nearby)"), data = tmean_N2) + 
+    geom_point(aes(col = "oos (nearby)"), data = tmean_N2, size = 2) +
+    geom_line(aes(col = "oos (distant)"), data = tmean_N3) +
+    geom_point(aes(col = "oos (distant)"), data = tmean_N3, size = 2) +
     scale_color_manual(name = "landscape", values = linecols) +
     ylab("Mean Temperature (c)") +
     xlab("Year") +

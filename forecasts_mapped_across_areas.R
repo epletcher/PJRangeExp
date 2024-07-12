@@ -1,6 +1,4 @@
-# This script is modifying and paring down the 'forecasts_2_rasters' script to plot/map base model predictions across each study area (in addition to initial cover values)
-
-# **** in progress !!!
+## This script is to plot/map errors in base model predictions across each study area
 
 # load packages
 library(raster)
@@ -37,10 +35,10 @@ biasfunc <- function(pred,obs) {
   bias <- (sum(pred-obs))/n
   return(bias)
 }
-# -------- load data ------------
+# -------- LOAD DATA ------------
 
 ## setwd to PJ_Photo/cover_spread/data in G drive
-setwd("E:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data")
+setwd("D:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data")
 
 ## load observed cover for each landscape (tabular)
 N <- read.csv("RAPtreecoverData.csv") %>% dplyr::select(-c(x, y, X)) %>% pivot_wider(names_from = cellnum, values_from = cover) %>% dplyr::select(-year) %>% as.matrix()
@@ -74,24 +72,28 @@ N2.pp <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near
 # N3
 N3.pp <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/median_predictions_for_mapping/in_sample_35y_base_median_5y_avg_init.csv")
 
-# -------- calculate raster time series of bias ----------
-# *** this need to be checked to make sure its working right
+# -------- FUNCTION TO CALCULATE AND MAP VARIOUS METRICS OF ERROR ----------
+
+# obs.name="N"
+# pred=N.pp
+# obs=N
+
 mapping_bias <- function(obs.name, pred, obs) { # obs is character name of landscape, pred is data.frame obect name of loaded predictions
  
   ## 1. set file paths for location of observed raster data for each respective landscape
   if(obs.name=="N") {
     # load list (all RAP rasters)
-    RAP.list <- list.files("E:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data", pattern = 'RAP_treeCover*', full.names = TRUE)
+    RAP.list <- list.files("D:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data", pattern = 'RAP_treeCover*', full.names = TRUE)
   }
   
   if(obs.name=="N2") {
     # load list (all RAP rasters)
-    RAP.list <- list.files("E:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data/out_of_sample/oos_raster_data", pattern = 'RAP_treeCover_oos1_*', full.names = TRUE)
+    RAP.list <- list.files("D:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data/out_of_sample/oos_raster_data", pattern = 'RAP_treeCover_oos1_*', full.names = TRUE)
   }
   
   if(obs.name=="N3") {
     # load list (all RAP rasters)
-    RAP.list <- list.files("E:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data/out_of_sample/oos_raster_data", pattern = 'RAP_treeCover_oos2_*', full.names = TRUE)
+    RAP.list <- list.files("D:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data/out_of_sample/oos_raster_data", pattern = 'RAP_treeCover_oos2_*', full.names = TRUE)
   }
   
   # load observed data rasters 
@@ -142,22 +144,20 @@ mapping_bias <- function(obs.name, pred, obs) { # obs is character name of lands
   ## 4. calculate forecast bias and nrmse for each pixel
   n <- 35 # minus one because remove 1st year
   
-  bias <- calc((forecast.stack[[2:36]] - truthstack[[2:36]]), sum)/n # bias based on observed, exclude 1st year
+  # bias <- calc((forecast.stack[[2:36]] - truthstack[[2:36]]), sum)/n # bias based on observed, exclude 1st year
   
-  #mae <- calc(abs(forecast.stack[[2:36]] - truthstack[[2:36]]), sum)/n
+  # mae <- calc(abs(forecast.stack[[2:36]] - truthstack[[2:36]]), sum)/n
   
-  #nmae <- calc((abs(forecast.stack[[2:36]] - truthstack[[2:36]])/(max(obs)-min(obs))), sum)/n
+  # nmae <- calc((abs(forecast.stack[[2:36]] - truthstack[[2:36]])/(max(obs)-min(obs))), sum)/n
   
-  #nrmse <- sqrt(calc(((forecast.stack[[2:36]] - truthstack[[2:36]])^2), sum)/n)/(max(obs)-min(obs))
+  # nrmse <- sqrt(calc(((forecast.stack[[2:36]] - truthstack[[2:36]])^2), sum)/n)/(max(obs)-min(obs))
   
-  #nrmse2 <- sqrt(calc((((forecast.stack[[2:36]] - truthstack[[2:36]])^2)/(max(obs)-min(obs))), sum)/n)
+  # error between predicted last year's cover and a 5-yr average, normalized by the landscapes max cove
+  avgerr <- (forecast.stack[[36]] - calc(truthstack[[31:36]], mean))/max(obs)
   
-  # error between predicted last year's cover and a 5-yr average
-  avgerr <- forecast.stack[[36]] - calc(truthstack[[31:36]], mean)
+  # eval.raster <- raster::stack(bias, avgerr) 
   
-  eval.raster <- raster::stack(bias, avgerr) # choose which metrics to print here
-  
-  return(eval.raster)
+  return(avgerr) # choose which metrics to return here
 }
 
 # calc mapped bias for each landscape
@@ -167,28 +167,25 @@ N2.bias <- mapping_bias("N2", N2.pp, N2)
 
 N3.bias <- mapping_bias("N3", N3.pp, N3) 
 
-col1 = colorRampPalette(rev(brewer.pal(7,"RdBu")))(50)
+col1 = colorRampPalette(rev(brewer.pal(7,"RdBu")))(100)
 
-# -------- base plot ----------------
+# -------- BASE PLOT ----------------
 par(mfrow = c(3,2),mai = c(1,0.1,0.1,0.1))
-plot(N.bias[[1]], col = col1, zlim = c(-16, 16), yaxt="n", xaxt="n") # bias
-plot(N.bias[[2]], col = col1, zlim = c(-24, 24), yaxt="n", xaxt="n") # 5-yr average error
+plot(N.bias, col = col1, zlim = c(-0.6, 0.6), yaxt="n", xaxt="n") # bias
 
-plot(N2.bias[[1]], col = col1, zlim = c(-16, 16), yaxt="n", xaxt="n")
-plot(N2.bias[[2]], col = col1, zlim = c(-24, 24), yaxt="n", xaxt="n")
+plot(N2.bias, col = col1, zlim = c(-0.6, 0.6), yaxt="n", xaxt="n")
 
-plot(N3.bias[[1]], col = col1, zlim = c(-16, 16), yaxt="n", xaxt="n")
-plot(N3.bias[[2]], col = col1, zlim = c(-24, 24), yaxt="n", xaxt="n")
+plot(N3.bias, col = col1, zlim = c(-0.6, 0.6), yaxt="n", xaxt="n")
 
 
-# -------- level plot --------------
+# -------- LEVEL PLOT --------------
 
 # ## plot average cover over time
-tiff("R:/Shriver_lab/PJspread/figures/mapping_error_across_landscapes.tif",width = 8,height=2.75,units="in", res=300)
+tiff("R:/Shriver_lab/PJspread/figures/mapping_error_across_landscapes_normalized.tif",width = 8,height=2.75,units="in", res=300)
 
 # panel
-a.1 <- levelplot(N.bias[[2]], col.regions = col1, scales = list(draw=F), margin = F, ylab = "", 
-                 xlab = "", colorkey = list(width = 0.75), at=seq(-24,24), 
+a.1 <- levelplot(N.bias, col.regions = col1, scales = list(draw=F), margin = F, ylab = "", 
+                 xlab = "", at=seq(-0.6,0.6,0.02), colorkey = list(width = 0.75),  
                  main = "In sample")
 
 a.1$par.settings$layout.heights[
@@ -201,8 +198,8 @@ a.1$par.settings$layout.heights[
 a.1$aspect.fill <- TRUE
 
 
-a.2 <- levelplot(N2.bias[[2]], col.regions = col1, scales = list(draw=F), margin = F, ylab = "", 
-                 xlab = "", colorkey = list(width = 0.75), at=seq(-24,24), 
+a.2 <- levelplot(N2.bias, col.regions = col1, scales = list(draw=F), margin = F, ylab = "", 
+                 xlab = "", at=seq(-0.6,0.6,0.02), colorkey = list(width = 0.75), 
                  main = "Out of sample (nearby)")
 
 a.2$par.settings$layout.heights[
@@ -214,9 +211,9 @@ a.2$par.settings$layout.heights[
      'main.key.padding') ] <- 1
 a.2$aspect.fill <- TRUE
 
-a.3 <- levelplot(N3.bias[[2]], col.regions = col1, scales = list(draw=F), margin = F, ylab = "", 
-                 xlab = "", colorkey = list(width = 0.75), at=seq(-24,24),
-                 main = "Out of sample (far away)")
+a.3 <- levelplot(N3.bias, col.regions = col1, scales = list(draw=F), margin = F, ylab = "", 
+                 xlab = "", at=seq(-0.6,0.6,0.02), colorkey = list(width = 0.75),
+                 main = "Out of sample (distant)")
 
 a.3$par.settings$layout.heights[
   c( 'bottom.padding',

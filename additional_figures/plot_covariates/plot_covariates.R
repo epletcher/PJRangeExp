@@ -1,3 +1,5 @@
+## Code to generate supplemental figures 
+
 # load packages
 library(abind)
 library(tidyverse)
@@ -20,11 +22,11 @@ df2raster <- function(df) { # df should be x, y, vals only
 # --- load covariate data----
 
 # clim data (read in and standardize)
-climdat <- read.csv("cover_spread/Data/PrismClimateDataV3.csv") 
+climdat <- read.csv("FILEPATH/PrismClimateDataV3.csv") 
 #%>% plyr::mutate(across(c("ppt", "tmean", "vpdmax"), scale))
 
 # topo data (read in and standardize)
-topodat <- read.csv("cover_spread/Data/topography_data/topographic_data.csv") 
+topodat <- read.csv("FILEPATH/topographic_data.csv") 
 #%>% dplyr::mutate(across(c("heatload", "elev"), scale))
 
 # 3-dimensional array of environmental covariates by cellnum, year, and variable
@@ -56,27 +58,11 @@ elev <- topodat %>% dplyr::select(c(cellnum, year, elev)) %>%
 #stack
 enviro.var <- abind(ppt, tmean, vpdmax, heatload, elev, along = 3)
 
-# # in-sample un-standardized covariates
-# N.clim <- read.csv("R:/Shriver_Lab/PJspread/data_prepping/PrismClimateDataV3.csv")
-# N.topo <- read.csv("R:/Shriver_Lab/PJspread/data_prepping/topographic_data.csv")
-
 ## ----- N2 -----
-N2.clim <- read.csv("cover_spread/Data/out_of_sample/PrismClimateDataV3_oos1.csv") #%>% 
+N2.clim <- read.csv("FILEPATH/PrismClimateDataV3_oos1.csv") #%>% 
   
-  # #standardize covariates based on mean and sd from in-sample data
-  # dplyr::mutate(ppt = (ppt-mean(N.clim$ppt))/sd(N.clim$ppt)) %>%
-  # 
-  # dplyr::mutate(tmean = (tmean-mean(N.clim$tmean))/sd(N.clim$tmean)) %>%
-  # 
-  # dplyr::mutate(vpdmax = (vpdmax-mean(N.clim$vpdmax))/sd(N.clim$vpdmax))
-
-N2.topo <- read.csv("cover_spread/Data/out_of_sample/topographic_data_oos1.csv") #%>% 
+N2.topo <- read.csv("FILEPATH/topographic_data_oos1.csv") #%>% 
   
-  # #standardize covariates based on mean and sd from in-sample data
-  # dplyr::mutate(heatload = (heatload-mean(N.topo$heatload))/sd(N.topo$heatload)) %>%
-  # 
-  # dplyr::mutate(elev = (elev-mean(N.topo$elev))/sd(N.topo$elev)) 
-
 # 3-dimensional array of environmental covariates by cellnum, year, and variable
 ppt <- N2.clim %>% dplyr::select(c(cellnum, year, ppt)) %>% pivot_wider(names_from = cellnum, values_from = ppt) %>% dplyr::select(-year) %>% as.matrix()
 
@@ -90,22 +76,10 @@ elev <- N2.topo %>% dplyr::select(c(cellnum, year, elev)) %>% pivot_wider(names_
 enviro.var.N2 <- abind(ppt, tmean, heatload, elev, along = 3)
 
 # ## N3
-N3.clim <- read.csv("cover_spread/Data/out_of_sample/PrismClimateDataV3_oos2.csv") #%>%
+N3.clim <- read.csv("FILEPATH/PrismClimateDataV3_oos2.csv") #%>%
   
-  # #standardize covariates based on mean and sd from in-sample data
-  # dplyr::mutate(ppt = (ppt-mean(N.clim$ppt))/sd(N.clim$ppt)) %>%
-  # 
-  # dplyr::mutate(tmean = (tmean-mean(N.clim$tmean))/sd(N.clim$tmean)) %>%
-  # 
-  # dplyr::mutate(vpdmax = (vpdmax-mean(N.clim$vpdmax))/sd(N.clim$vpdmax))
-
 N3.topo <- read.csv("cover_spread/Data/out_of_sample/topographic_data_oos2.csv") #%>%
   
-  # #standardize covariates based on mean and sd from in-sample data
-  # dplyr::mutate(heatload = (heatload-mean(N.topo$heatload))/sd(N.topo$heatload)) %>%
-  # 
-  # dplyr::mutate(elev = (elev-mean(N.topo$elev))/sd(N.topo$elev))
-
 # 3-dimensional array of environmental covariates by cellnum, year, and variable
 ppt <- N3.clim %>% dplyr::select(c(cellnum, year, ppt)) %>% pivot_wider(names_from = cellnum, values_from = ppt) %>% dplyr::select(-year) %>% as.matrix()
 
@@ -118,8 +92,8 @@ elev <- N3.topo %>% dplyr::select(c(cellnum, year, elev)) %>% pivot_wider(names_
 #stack
 enviro.var.N3 <- abind(ppt, tmean, heatload, elev, along = 3)
 
-
 ## ----- plot climate covariates ----
+## generates figure SA2
 
 ## ppt
 
@@ -207,22 +181,3 @@ sd(enviro.var.N2[,,4])
 
 mean(enviro.var.N3[,,4]) # n3
 sd(enviro.var.N3[,,4])
-
-
-# ** test plotting variation in environmental covariates for each study area **
-par(mfrow = c(2,2))
-matplot(enviro.var[,,1], type = 'l') # ppt
-matplot(enviro.var[,,2], type = 'l') # tmean
-matplot(enviro.var[,,4], type = 'l') # heatload
-matplot(enviro.var[,,5], type = 'l') # elev
-
-matplot(enviro.var.N2[,,1], type = 'l') # ppt
-matplot(enviro.var.N2[,,2], type = 'l') # tmean
-matplot(enviro.var.N2[,,3], type = 'l') # heatload
-matplot(enviro.var.N2[,,4], type = 'l') # elev
-
-matplot(enviro.var.N3[,,1], type = 'l') # ppt
-matplot(enviro.var.N3[,,2], type = 'l') # tmean
-matplot(enviro.var.N3[,,3], type = 'l') # heatload
-matplot(enviro.var.N3[,,4], type = 'l') # elev
-

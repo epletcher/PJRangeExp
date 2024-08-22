@@ -1,10 +1,10 @@
-#.libPaths("C:/Rpackages/R/win-library/4.1") # (elise setting package library location)
-
 # load sampler functions script
-source("R:/Shriver_Lab/PJspread/PJ_spread_repo/SamplerFunctions.R")
+source("mcmc_samplers/SamplerFunctions.R")
 
-# load 'data prepped' workspace
+# load work space from "model_data_prepping/rangeExp_DataPrepping.R"
+# ** you will need the data in csv to run the data prepping script
 
+# load packages
 library("splus2R")
 library('LaplacesDemon')
 
@@ -75,7 +75,7 @@ beta1.tune=.001
 beta2.tune=.001
 tau.tune=.001
 
-for (i in 25001:Niter){
+for (i in 1:Niter){
   
   #alpha 0
   alpha0.star=rnorm(1,alpha0,alpha0.tune)
@@ -276,10 +276,10 @@ for (i in 25001:Niter){
     
   }
   
-  #save
-  if(i %in% seq(1000,Niter, by = 1000)) {
-    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_topo_v2_c1.RData")
-  }
+  # # save partially completed sampler to file
+  # if(i %in% seq(1000,Niter, by = 1000)) {
+  #   save.image(file = "YOUR-FILEPATH/sampler_base.RData")
+  # } 
   
 }
 

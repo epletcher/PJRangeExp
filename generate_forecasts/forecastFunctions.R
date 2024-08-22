@@ -34,20 +34,6 @@ growthTopoClim = function(a0,a1,a2,a3,a4,b0,b1,b2,X,nt) {
   return(G)
 }
 
-## Quadratic Growth
-
-# growth base quad
-growthsimpleQuad = function(b0, b1, b2, nt) {
-  G = exp(b0+b1*nt+b2*nt^2) # output is growth matrix
-  return(G)
-}
-
-# growth clim quad
-
-# growth topo quad
-
-# growth topoClim quad
-
 # rmse
 rmsefunc <- function(pred,obs) {
   n <- length(pred)

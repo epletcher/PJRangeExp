@@ -37,9 +37,6 @@ biasfunc <- function(pred,obs) {
 }
 # -------- LOAD DATA ------------
 
-## setwd to PJ_Photo/cover_spread/data in G drive
-setwd("D:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data")
-
 ## load observed cover for each landscape (tabular)
 N <- read.csv("RAPtreecoverData.csv") %>% dplyr::select(-c(x, y, X)) %>% pivot_wider(names_from = cellnum, values_from = cover) %>% dplyr::select(-year) %>% as.matrix()
   
@@ -49,28 +46,24 @@ N3 <- read.csv("out_of_sample/RAPtreecoverData_oos2.csv") %>% dplyr::select(-c(x
 
 
 ## load observed cover for 1986 for each landscape (raster)
+N.rast <- raster("RAP_treeCover_1986.tif")
 
-N.rast <- raster("RAP_treeCover_1986.tif") %>% 
-  raster::aggregate(., fact = 30)
+N2.rast <- raster("out_of_sample/oos_raster_data/RAP_treeCover_oos1_1986.tif")
 
-N2.rast <- raster("out_of_sample/oos_raster_data/RAP_treeCover_oos1_1986.tif") %>% 
-  raster::aggregate(., fact = 30)
-
-N3.rast <- raster("out_of_sample/oos_raster_data/RAP_treeCover_oos2_1986.tif") %>% 
-  raster::aggregate(., fact = 30)
-
+N3.rast <- raster("out_of_sample/oos_raster_data/RAP_treeCover_oos2_1986.tif")
 
 ## load tabular predictions for each landscape
 # Forecasted cover for each pixel (TABULAR). Columns are pixel number, rows are year
+# median cover predictions generated from "eval_new_area_predictions.R" 
 
 # N
-N.pp <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/median_predictions_for_mapping/in_sample_35y_base_median_5y_avg_init.csv")
+N.pp <- read.csv("FILEPATH/median_predictions_for_mapping/in_sample_35y_base_median_5y_avg_init.csv")
 
 # N2
-N2.pp <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/median_predictions_for_mapping/in_sample_35y_base_median_5y_avg_init.csv")
+N2.pp <- read.csv("FILEPATH/median_predictions_for_mapping/oos1_near_35y_base_median_5y_avg_init.csv")
 
 # N3
-N3.pp <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/median_predictions_for_mapping/in_sample_35y_base_median_5y_avg_init.csv")
+N3.pp <- read.csv("FILEPATH/median_predictions_for_mapping/oos_2_far_35y_base_median_5y_avg_init.csv")
 
 # -------- FUNCTION TO CALCULATE AND MAP VARIOUS METRICS OF ERROR ----------
 
@@ -81,23 +74,25 @@ N3.pp <- read.csv("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_
 mapping_bias <- function(obs.name, pred, obs) { # obs is character name of landscape, pred is data.frame obect name of loaded predictions
  
   ## 1. set file paths for location of observed raster data for each respective landscape
+  # ** you will need to have rasters saved to file
   if(obs.name=="N") {
     # load list (all RAP rasters)
-    RAP.list <- list.files("D:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data", pattern = 'RAP_treeCover*', full.names = TRUE)
+    RAP.list <- list.files("FILEPATH", pattern = 'RAP_treeCover*', full.names = TRUE)
   }
   
   if(obs.name=="N2") {
     # load list (all RAP rasters)
-    RAP.list <- list.files("D:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data/out_of_sample/oos_raster_data", pattern = 'RAP_treeCover_oos1_*', full.names = TRUE)
+    RAP.list <- list.files("FILEPATH", pattern = 'RAP_treeCover_oos1_*', full.names = TRUE)
   }
   
   if(obs.name=="N3") {
     # load list (all RAP rasters)
-    RAP.list <- list.files("D:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data/out_of_sample/oos_raster_data", pattern = 'RAP_treeCover_oos2_*', full.names = TRUE)
+    RAP.list <- list.files("FILEPATH", pattern = 'RAP_treeCover_oos2_*', full.names = TRUE)
   }
   
   # load observed data rasters 
-  tru.rasters <- lapply(lapply(RAP.list, FUN = raster::raster), FUN = raster::aggregate, fact = 30)
+  tru.rasters <- lapply(RAP.list, FUN = raster::raster)
+
   # stack
   truthstack <- raster::stack(tru.rasters)
   
@@ -146,16 +141,8 @@ mapping_bias <- function(obs.name, pred, obs) { # obs is character name of lands
   
   # bias <- calc((forecast.stack[[2:36]] - truthstack[[2:36]]), sum)/n # bias based on observed, exclude 1st year
   
-  # mae <- calc(abs(forecast.stack[[2:36]] - truthstack[[2:36]]), sum)/n
-  
-  # nmae <- calc((abs(forecast.stack[[2:36]] - truthstack[[2:36]])/(max(obs)-min(obs))), sum)/n
-  
-  # nrmse <- sqrt(calc(((forecast.stack[[2:36]] - truthstack[[2:36]])^2), sum)/n)/(max(obs)-min(obs))
-  
   # error between predicted last year's cover and a 5-yr average, normalized by the landscapes max cove
   avgerr <- (forecast.stack[[36]] - calc(truthstack[[31:36]], mean))/max(obs)
-  
-  # eval.raster <- raster::stack(bias, avgerr) 
   
   return(avgerr) # choose which metrics to return here
 }
@@ -169,19 +156,10 @@ N3.bias <- mapping_bias("N3", N3.pp, N3)
 
 col1 = colorRampPalette(rev(brewer.pal(7,"RdBu")))(100)
 
-# -------- BASE PLOT ----------------
-par(mfrow = c(3,2),mai = c(1,0.1,0.1,0.1))
-plot(N.bias, col = col1, zlim = c(-0.6, 0.6), yaxt="n", xaxt="n") # bias
-
-plot(N2.bias, col = col1, zlim = c(-0.6, 0.6), yaxt="n", xaxt="n")
-
-plot(N3.bias, col = col1, zlim = c(-0.6, 0.6), yaxt="n", xaxt="n")
-
-
 # -------- LEVEL PLOT --------------
-
+# generates figure 6
 # ## plot average cover over time
-tiff("R:/Shriver_lab/PJspread/figures/mapping_error_across_landscapes_normalized.tif",width = 8,height=2.75,units="in", res=300)
+tiff("FILEPATH/mapping_error_across_landscapes_normalized.tif",width = 8,height=2.75,units="in", res=300)
 
 # panel
 a.1 <- levelplot(N.bias, col.regions = col1, scales = list(draw=F), margin = F, ylab = "", 

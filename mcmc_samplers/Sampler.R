@@ -1,12 +1,13 @@
-#.libPaths("C:/Rpackages/R/win-library/4.1") # (elise setting package library location)
-
 # load sampler functions script
-source("R:/Shriver_Lab/PJspread/PJ_spread_repo/SamplerFunctions.R")
+source("mcmc_samplers/SamplerFunctions.R")
 
-# load 'dataprepped' workspace
+# load work space from "model_data_prepping/rangeExp_DataPrepping.R"
+# ** you will need the data in csv to run the data prepping script
 
+# load packages
 library("splus2R")
 library('LaplacesDemon')
+
 ###Data####
 # N # observed data, assumed to be a matrix that is year by pixel
 Noos <- N[32:36,] # out of sample data
@@ -41,7 +42,7 @@ for (t in 2:tmax){
 }
 
 
-Niter<-50000 ###Number of iterations. Base this off initial runs: still moving around until 12,000, upping from 20000 to 50000
+Niter<-50000 ###Number of iterations
 burnin<-Niter*0.5
 checkpoint=Niter*0.01
 
@@ -49,7 +50,6 @@ checkpoint=Niter*0.01
 tauOut<-betaOut<-alphaOut<-matrix(NA,Niter,)
 NlatOut<-array(NA,c(tmax,pmax,Niter/10)) # change to all pixels, but only every 10th iteration
 NlatOutLast<-matrix(NA,pmax,Niter)
-#rep.pix <- c(115:145, 910:940, 1865:1895) # representative pixels (high,med,low density)
 tenIter <- seq(10,Niter, by = 10) # vector of every 10th iteration
 sig.pOut<-sig.oOut<-matrix(NA,Niter,1)
 
@@ -64,7 +64,7 @@ beta0.tune=.0001
 tau.tune=.001
 
 
-for (i in 25001:Niter){ # edit starting iteration if start/stopping
+for (i in 1:Niter){ # edit starting iteration if start/stopping
   
   alpha0.star=rnorm(1,alpha0,alpha0.tune)
   Out=UpdateBeta(tmax=tmax,a0=alpha0.star,b0=beta0,Nlat=Nlat,M=M,p=p)
@@ -176,10 +176,10 @@ for (i in 25001:Niter){ # edit starting iteration if start/stopping
       }
     }
     
-  # save
-  if(i %in% seq(1000,Niter, by = 1000)) {
-    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_base_v4_c1.RData")
-  } 
+  # # save partially completed sampler to file
+  # if(i %in% seq(1000,Niter, by = 1000)) {
+  #   save.image(file = "YOUR-FILEPATH/sampler_base.RData")
+  # } 
   print(i)
 }
 

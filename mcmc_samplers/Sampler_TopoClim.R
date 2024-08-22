@@ -1,12 +1,12 @@
-#.libPaths("C:/Rpackages/R/win-library/4.1") # (elise setting package library location)
+# load sampler functions script
+source("mcmc_samplers/SamplerFunctions.R")
+
+# load work space from "model_data_prepping/rangeExp_DataPrepping.R"
+# ** you will need the data in csv to run the data prepping script
+
+# load packages
 library("splus2R")
 library('LaplacesDemon')
-
-# load workspacefile with prepped data: 
-load("R:/Shriver_Lab/PJspread/data_prepped.RData")
-
-# load sampler functions script
-source("R:/Shriver_Lab/PJspread/PJ_spread_repo/SamplerFunctions.R")
 
 ###Data####
 # N<-N # observed data, assumed to be a matrix that is year by pixel (remove last 5 years here, to test forecast)
@@ -319,10 +319,11 @@ for (i in 1:Niter){
     }
     
   }
-  # save
-  if(i %in% seq(1000,Niter, by = 1000)) {
-    save.image(file = "R:/Shriver_Lab/PJspread/sampleroutput/sampler_topoClim_v2_c1.RData")
-  }
+  
+  # # save partially completed sampler to file
+  # if(i %in% seq(1000,Niter, by = 1000)) {
+  #   save.image(file = "YOUR-FILEPATH/sampler_base.RData")
+  # } 
   print(i)
 }
 

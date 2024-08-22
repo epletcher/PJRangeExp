@@ -1,5 +1,4 @@
-## setwd to PJ_Photo/cover_spread/data in G drive
-setwd("G:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data")
+## Code generates Figure 3A and 3B
 
 library(tidyverse)
 library(raster)
@@ -48,7 +47,7 @@ N3.rast <- raster("out_of_sample/oos_raster_data/RAP_treeCover_oos2_1986.tif") %
 
 
 ## plot average cover over time
-tiff("C:/Users/elise/OneDrive/Documents/UNR_Gr/chapter1/figures/study_areas_figure/landscapes_diagram.tif",width = 8,height=5.5,units="in", res=300)
+tiff("FILEPATH/study_areas_figure/landscapes_diagram.tif",width = 8,height=5.5,units="in", res=300)
 
 # ggplot version
 N.avg <- data.frame("avgcover" = rowMeans(N), "year" = seq(1,36,1)) %>% dplyr::mutate(year = year+1985)
@@ -68,6 +67,8 @@ linecols <- c("in sample" = "#bec991", "oos (nearby)" = "#907350", "oos (distant
     ylab("AVG. % TREE COVER") +
     xlab("YEAR") +
     theme_classic())
+
+
 ## plot mapped cover for 1986
 
 cols <- colorRampPalette(brewer.pal(9,"YlGn"), bias = 1.75)(50)

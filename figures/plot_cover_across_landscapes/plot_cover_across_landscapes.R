@@ -1,5 +1,5 @@
 ## setwd to PJ_Photo/cover_spread/data in G drive
-setwd("D:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data")
+setwd("G:/.shortcut-targets-by-id/1FPlPAVacVgAROSPXMiiOGb2Takzm2241/PJ_Photo/cover_spread/Data")
 
 library(tidyverse)
 library(raster)

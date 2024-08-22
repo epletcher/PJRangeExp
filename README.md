@@ -2,6 +2,8 @@
 
 ## Modeling and figure generating scripts for *Anticipating range shifts: forecasting pinyon-juniper woodland expansion in the western US*
 
+Elise Pletcher and Robert K. Shriver 
+
 ## Folders:
 * model_data_prepping: a script for taking tree cover and environmental covariates for the in sample study area and reformatting them as inputs for the mcmc_samplers.
 * mcmc_samplers: contains multiple scripts. Uses reformatted data generated from model_data_prepping to fit spatiotemporal models. The output are workspace files with fit parameter estimates.

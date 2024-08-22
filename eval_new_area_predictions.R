@@ -218,11 +218,11 @@ rmse.35y <- dat %>%
 write.csv(rmse.35y,"R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/rmses_for_model_studyarea_comparisons/oos2_35y_nrmse_yearchunks.csv")
 
 # ------------------ Predicted median and credible intervals ------------
-# N
-base.pred = for.base.N$predOut
-topo.pred = for.topo.N$predOut
-clim.pred = for.clim.N$predOut
-topoclim.pred = for.topoclim.N$predOut
+# # N
+# base.pred = for.base.N$predOut
+# topo.pred = for.topo.N$predOut
+# clim.pred = for.clim.N$predOut
+# topoclim.pred = for.topoclim.N$predOut
 
 # # N2
 # base.pred = for.base.N2$predOut
@@ -230,11 +230,11 @@ topoclim.pred = for.topoclim.N$predOut
 # clim.pred = for.clim.N2$predOut
 # topoclim.pred = for.topoclim.N2$predOut
 
-# # N3
-# base.pred = for.base.N3$predOut
-# topo.pred = for.topo.N3$predOut
-# clim.pred = for.clim.N3$predOut
-# topoclim.pred = for.topoclim.N3$predOut
+# N3
+base.pred = for.base.N3$predOut
+topo.pred = for.topo.N3$predOut
+clim.pred = for.clim.N3$predOut
+topoclim.pred = for.topoclim.N3$predOut
 
 # ## save median predictions and calculate crediable intervals
 med.pred.base <- apply(base.pred, MARGIN = c(1,2), FUN = median)
@@ -375,9 +375,9 @@ plot_pix_gg <- function(pix, obs) {
     geom_line(aes(x = year, y = med.pred.base, col = "base"), lwd = 1.5) + 
     geom_line(aes(x = year, y = med.pred.clim, col = "climate-only"), lwd = 1.5) +
     
-    # scale_y_continuous(limits = c(-5, 45)) + # good scale for N2
-    scale_y_continuous(limits = c(-5, 80)) + # good scale for N3
-    # scale_y_continuous(limits = c(-5, 35)) + # good scale for N 
+    #scale_y_continuous(limits = c(-5, 25)) + # good scale for N
+    #scale_y_continuous(limits = c(-5, 35)) + # good scale for N2
+    scale_y_continuous(limits = c(-5, 80)) + # good scale for N3 
     scale_color_manual(name = '', values = cols) +
     scale_fill_manual(name = '', values = cols) +
     scale_shape_manual(name = '', values = 21, labels = 'observations') +
@@ -435,9 +435,19 @@ plot_pix_gg(711, N2)
 
 # ggsave("R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/single_pixel_low_mid_high_cover_5yr_avg_init.png", plot = last_plot(), dpi = 400)
 
-# ** update file path for each study landscape
-# save as rds to put into a plot later
-saveRDS(three.panel, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/single_pixel_low_mid_high_cover_5yr_avg_init.rds")
+
+# save as panel as rds to combine one plot in another script
+
+## N
+saveRDS(three.panel, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_insample_predictions/single_pixel_low_mid_high_cover_5yr_avg_init_v2.rds")
+
+## N2
+saveRDS(three.panel, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_1_near_predictions/single_pixel_low_mid_high_cover_5yr_avg_init_v2.rds")
+
+## N3
+saveRDS(three.panel, "R:/Shriver_Lab/PJspread/evaluate_out_of_sample/35y_OOS_2_far_predictions/single_pixel_low_mid_high_cover_5yr_avg_init_v2.rds")
+
+
 # ------- PLOT OBSERVED COVER OVER TIME FOR ANY PIXEL -----
 # test out different pixels to plot based on 36-yr trends
 

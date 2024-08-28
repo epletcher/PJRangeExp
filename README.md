@@ -1,6 +1,6 @@
 # Pinyon-Juniper woodland range expansion model
 
-### Modeling and figure generating scripts for *Anticipating range shifts: forecasting pinyon-juniper woodland expansion in the western US* by Elise Pletcher and Robert K. Shriver 
+### Modeling and figure generating scripts for *Intrinsic population processes alone can accurately forecast range shifts in a dominant dryland tree species* by Elise Pletcher and Robert K. Shriver 
 
 ## Folders:
 * **model_data_prepping**: a script for taking tree cover and environmental covariates for the in sample study area and reformatting them as inputs for the mcmc_samplers.

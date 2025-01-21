@@ -7,3 +7,4 @@
 * **Sampler_climate.R** - Basic model + two temporally variable climatic covariates: temp. and precip.
 * **Sampler_TopoClim.R** - Basic model + climatic covariates + topographic covariates
 * **SamplerFunctions.R** - script contains functions for updating each version of the process model and for sampling posterior  distributions of error terms and the latent state.
+*  **inspect_mcmc_outputs.R** - as script that pulls in saved mcmc sampler outputs and thins and combines chains and evlautes model convergence using trace plots and Gelman-Rubin diagnostics.

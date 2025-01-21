@@ -8,7 +8,7 @@ retrieve_param <- function(model) {
   if(model=="clim") {model="r_clim"}
   if(model %in% c("base_v","topo_","topoClim","r_clim","quad")) {
     
-    files <- list.files("R:/Shriver_Lab/PJspread/sampleroutput", pattern=model, include.dirs = TRUE)
+    files <- list.files("YOURFILEPATH/sampleroutput", pattern=model, include.dirs = TRUE)
     
     mod <- list()
     
@@ -79,54 +79,24 @@ gg_traceplot <- function(mod) { # model object needs to be a list of matrices, w
 }
 
 gg_traceplot(mod1)
-ggsave("R:/Shriver_Lab/PJspread/figures/mcmc_base.png", dpi = 600)
 gg_traceplot(mod2)
-ggsave("R:/Shriver_Lab/PJspread/figures/mcmc_topo.png", dpi = 600)
 gg_traceplot(mod3)
-ggsave("R:/Shriver_Lab/PJspread/figures/mcmc_clim.png", dpi = 600)
 gg_traceplot(mod4)
-ggsave("R:/Shriver_Lab/PJspread/figures/mcmc_topoclim.png", dpi = 600)
-
-
 
 # ------ R hats for parameters -----
 
 # base model params
 mod1.mcmc <- list(as.mcmc(mod1[[1]]),as.mcmc(mod1[[2]]))
 gelman.diag(mod1.mcmc, confidence = 0.9)
-write.csv(gelman.diag(mod1.mcmc, confidence = 0.9)[[1]], "R:/Shriver_Lab/PJspread/sampleroutput/rhat_tables/base_model_rhat.csv")
 
 # topo model params
 mod2.mcmc <- list(as.mcmc(mod2[[1]]),as.mcmc(mod2[[2]]))
 gelman.diag(mod2.mcmc, confidence = 0.9)
-write.csv(gelman.diag(mod2.mcmc, confidence = 0.9)[[1]], "R:/Shriver_Lab/PJspread/sampleroutput/rhat_tables/topo_model_rhat.csv")
 
 # clim model params
 mod3.mcmc <- list(as.mcmc(mod3[[1]]),as.mcmc(mod3[[2]]))
 gelman.diag(mod3.mcmc, confidence = 0.9)
-write.csv(gelman.diag(mod3.mcmc, confidence = 0.9)[[1]], "R:/Shriver_Lab/PJspread/sampleroutput/rhat_tables/climate_model_rhat.csv")
 
 # topoclim model params
 mod4.mcmc <- list(as.mcmc(mod4[[1]]),as.mcmc(mod4[[2]]))
 gelman.diag(mod4.mcmc, confidence = 0.9)
-write.csv(gelman.diag(mod4.mcmc, confidence = 0.9)[[1]], "R:/Shriver_Lab/PJspread/sampleroutput/rhat_tables/topoclimate_model_rhat.csv")
-
-# ###------- base traceplot --------
-# traceplot <- function(mod) {
-#   
-#   if(dim(mod[[1]])[2]<=4) {par(mfrow = c(2,2))}
-#   if(dim(mod[[1]])[2]>4 & dim(mod[[1]])[2]<10) {par(mfrow = c(3,3))}
-#   if(dim(mod[[1]])[2]>=10) {par(mfrow = c(3,4))}
-#   
-#   for(i in 1:dim(mod[[1]])[2]) {
-#     
-#     plot(mod[[1]][,i], type = "l", ylab = colnames(mod[[1]])[i], xlab = "iteration", col = "purple")
-#     lines(mod[[2]][,i], col = "aquamarine4")
-#   }
-#   
-# }
-# 
-# traceplot(mod1)
-# traceplot(mod2)
-# traceplot(mod3)
-# traceplot(mod4)

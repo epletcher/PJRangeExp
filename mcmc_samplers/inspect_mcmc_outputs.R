@@ -4,9 +4,12 @@ library(coda)
 # function to retrive parameter estimates for any model
 retrieve_param <- function(model) {
   if(model=="topo") {model="topo_"}
+  if(model=="toponobeta") {model="topo_no"}
+  if(model=="topoClimnobeta") {model="topoClim_no"}
+  if(model=="topoClim") {model="topoClim_v"}
   if(model=="base") {model="base_v"}
   if(model=="clim") {model="r_clim"}
-  if(model %in% c("base_v","topo_","topoClim","r_clim","quad")) {
+  if(model %in% c("base_v","topo_v","topo_no","topoClim_v","topoClim_no","r_clim","quad")) {
     
     files <- list.files("YOURFILEPATH/sampleroutput", pattern=model, include.dirs = TRUE)
     
@@ -52,6 +55,8 @@ mod1 <- retrieve_param("base") # model type here
 mod2 <- retrieve_param("topo")
 mod3 <- retrieve_param("clim")
 mod4 <- retrieve_param("topoClim")
+mod5 <- retrieve_param("toponobeta") # version 2 of model
+mod6 <- retrieve_param("topoClimnobeta") # version 2 of model
 
 # ------ ggplot traceplot ----------
 
@@ -82,6 +87,8 @@ gg_traceplot(mod1)
 gg_traceplot(mod2)
 gg_traceplot(mod3)
 gg_traceplot(mod4)
+gg_traceplot(mod5)
+gg_traceplot(mod6)
 
 # ------ R hats for parameters -----
 
@@ -89,7 +96,7 @@ gg_traceplot(mod4)
 mod1.mcmc <- list(as.mcmc(mod1[[1]]),as.mcmc(mod1[[2]]))
 gelman.diag(mod1.mcmc, confidence = 0.9)
 
-# topo model params
+# topo model params (v1)
 mod2.mcmc <- list(as.mcmc(mod2[[1]]),as.mcmc(mod2[[2]]))
 gelman.diag(mod2.mcmc, confidence = 0.9)
 
@@ -97,6 +104,14 @@ gelman.diag(mod2.mcmc, confidence = 0.9)
 mod3.mcmc <- list(as.mcmc(mod3[[1]]),as.mcmc(mod3[[2]]))
 gelman.diag(mod3.mcmc, confidence = 0.9)
 
-# topoclim model params
+# topoclim model params (v1)
 mod4.mcmc <- list(as.mcmc(mod4[[1]]),as.mcmc(mod4[[2]]))
 gelman.diag(mod4.mcmc, confidence = 0.9)
+
+# topo model params (v2)
+mod5.mcmc <- list(as.mcmc(mod5[[1]]),as.mcmc(mod5[[2]]))
+gelman.diag(mod5.mcmc, confidence = 0.9)
+
+# topoclim model params (v2)
+mod6.mcmc <- list(as.mcmc(mod6[[1]]),as.mcmc(mod6[[2]]))
+gelman.diag(mod6.mcmc, confidence = 0.9)

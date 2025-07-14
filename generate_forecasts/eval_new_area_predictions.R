@@ -21,21 +21,21 @@ normalized_rmse <- function(rmsedat, N) {
 
 # N
 BASE = for.base.N$rmseTotOut
-TOPO = for.topo.N$rmseTotOut
+TOPO = for.toponb.N$rmseTotOut # version 2
 CLIM = for.clim.N$rmseTotOut
-TOPOCLIM = for.topoclim.N$rmseTotOut
+TOPOCLIM = for.topoclimnb.N$rmseTotOut # version 2
 
 # # N2
 # BASE = for.base.N2$rmseTotOut
-# TOPO = for.topo.N2$rmseTotOut
+# TOPO = for.toponb.N2$rmseTotOut # version 2
 # CLIM = for.clim.N2$rmseTotOut
-# TOPOCLIM = for.topoclim.N2$rmseTotOut
+# TOPOCLIM = for.topoclimnb.N2$rmseTotOut # version 2
 # 
 # # N3
 # BASE = for.base.N3$rmseTotOut
-# TOPO = for.topo.N3$rmseTotOut
+# TOPO = for.toponb.N3$rmseTotOut # version 2
 # CLIM = for.clim.N3$rmseTotOut
-# TOPOCLIM = for.topoclim.N3$rmseTotOut
+# TOPOCLIM = for.topoclimnb.N3$rmseTotOut # version 2
 #
 
 # ---------- PLOT RMSE'S ACROSS MODELS TOGETHER ----------
@@ -186,21 +186,21 @@ rmse.35y <- dat %>%
 
 # N
 base.pred = for.base.N$predOut
-topo.pred = for.topo.N$predOut
+topo.pred = for.toponb.N$predOut
 clim.pred = for.clim.N$predOut
-topoclim.pred = for.topoclim.N$predOut
+topoclim.pred = for.topoclimnb.N$predOut
 
 # # N2
 # base.pred = for.base.N2$predOut
-# topo.pred = for.topo.N2$predOut
+# topo.pred = for.toponb.N2$predOut
 # clim.pred = for.clim.N2$predOut
-# topoclim.pred = for.topoclim.N2$predOut
+# topoclim.pred = for.topoclimnb.N2$predOut
 
 # # N3
 # base.pred = for.base.N3$predOut
-# topo.pred = for.topo.N3$predOut
+# topo.pred = for.toponb.N3$predOut
 # clim.pred = for.clim.N3$predOut
-# topoclim.pred = for.topoclim.N3$predOut
+# topoclim.pred = for.topoclimnb.N3$predOut
 
 ## median predictions and 90% credible intervals
 

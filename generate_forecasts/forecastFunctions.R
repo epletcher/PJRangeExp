@@ -22,13 +22,25 @@ growthClim = function(a0,a1,a2,b0,X,nt) {
   return(G)
 }
 
-# growth with topographic covariates
+#growthTopoNB (version 2 of topographic model)
+growthTopoNB = function(a0,a1,a2,b0,X,nt) {
+  G = exp((a0+X[,3]*a1+X[,4]*a2)+b0*nt)
+  return(G)
+}
+
+# growth with topographic covariates (version 1 of topographic model)
 growthTopo = function(a0,a1,a2,b0,b1,b2,X,nt) {
   G = exp((a0+X[,3]*a1+X[,4]*a2)+(b0+X[,3]*b1+X[,4]*b2)*nt)
   return(G)
 }
 
-# growth with topo and climate covariates
+#growth with topo and climate covariates (version 2)
+growthTopoClimNB = function(a0,a1,a2,a3,a4,b0,X,nt) {
+  G = exp((a0+X[,1]*a1+X[,2]*a2+X[,3]*a3+X[,4]*a4)+b0*nt)
+  return(G)
+}
+
+# growth with topo and climate covariates (version 1)
 growthTopoClim = function(a0,a1,a2,a3,a4,b0,b1,b2,X,nt) {
   G = exp((a0+X[,1]*a1+X[,2]*a2+X[,3]*a3+X[,4]*a4)+(b0+X[,3]*b1+X[,4]*b2)*nt)
   return(G)

@@ -119,11 +119,11 @@ Dsq3 <- create_dist_mat(r3)
 
 mod1 <- readRDS(file = "FILEPATH/base_model.rds") # base
 
-mod2 <- readRDS(file = "FILEPATH/topo_model.rds") # topo
+mod2 <- readRDS(file = "FILEPATH/topo_v2_model.rds") # topo version 2
 
 mod3 <- readRDS(file = "FILEPATH/clim_model.rds") # clim
 
-mod4 <- readRDS(file = "FILEPATH/topoclim_model.rds") # topoclim
+mod4 <- readRDS(file = "FILEPATH/topoclim_v2_model.rds") # topoclim version 2
 
 # ----------------- Forecast across new locations -------------------
 
@@ -169,13 +169,21 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
         G <- growthClim(a0=pars$alpha0[i],a1=pars$alpha1[i],a2=pars$alpha2[i],b0=pars$betaOut[i],X=covars[t,,],nt=as.vector(Nt))
       }
       
-      if(mod=='topo') {
-        G <- growthTopo(a0=pars$alpha0[i],a1=pars$alpha1[i],a2=pars$alpha2[i],b0=pars$beta0[i],b1=pars$beta1[i],b2=pars$beta2[i],X=covars[t,,],nt=as.vector(Nt))
-        
+      # if(mod=='topo') { # version 1
+      #   G <- growthTopo(a0=pars$alpha0[i],a1=pars$alpha1[i],a2=pars$alpha2[i],b0=pars$beta0[i],b1=pars$beta1[i],b2=pars$beta2[i],X=covars[t,,],nt=as.vector(Nt))
+      #   
+      # }
+      # 
+      # if(mod=='topoclim') { # version 2
+      #   G <- growthTopoClim(a0=pars$alpha0[i],a1=pars$alpha1[i],a2=pars$alpha2[i],a3=pars$alpha3[i],a4=pars$alpha4[i],b0=pars$beta0[i],b1=pars$beta1[i],b2=pars$beta2[i],X=covars[t,,],nt=as.vector(Nt))
+      # }
+      
+      if(mod=='toponb') {
+        G <- growthTopoNB(a0=pars$alpha0[i],a1=pars$alpha1[i],a2=pars$alpha2[i],b0=pars$betaOut[i],X=covars[t,,],nt=as.vector(Nt))
       }
       
-      if(mod=='topoclim') {
-        G <- growthTopoClim(a0=pars$alpha0[i],a1=pars$alpha1[i],a2=pars$alpha2[i],a3=pars$alpha3[i],a4=pars$alpha4[i],b0=pars$beta0[i],b1=pars$beta1[i],b2=pars$beta2[i],X=covars[t,,],nt=as.vector(Nt))
+      if(mod=='topoclimnb') {
+        G <- growthTopoClimNB(a0=pars$alpha0[i],a1=pars$alpha1[i],a2=pars$alpha2[i],a3=pars$alpha3[i],a4=pars$alpha4[i],b0=pars$betaOut[i],X=covars[t,,],nt=as.vector(Nt))
       }
       
       Nmean <-M1%*%(diag(G)%*%Nt)
@@ -210,24 +218,24 @@ forecast_new_loc <- function(obs, pars, covars, Dsq, mod) {
 
 # N
 for.base.N <- forecast_new_loc(obs = N, pars = mod1$pars, Dsq = Dsq, mod = 'base')
-for.topo.N <- forecast_new_loc(obs = N, pars = mod2$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'topo')
-for.clim.N <- forecast_new_loc(obs = N, pars = mod3$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'clim')
-for.topoclim.N <- forecast_new_loc(obs = N, pars = mod4$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'topoclim')
+for.topo.N <- forecast_new_loc(obs = N, pars = mod2$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'toponb')
+for.clim.N <- forecast_new_loc(obs = N, pars = mod5$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'clim') # version 2
+for.topoclim.N <- forecast_new_loc(obs = N, pars = mod6$pars, covars = enviro.var[,,-3], Dsq = Dsq, mod = 'topoclimnb') # version 2
 
 save.image(file = "FILEPATH/35y_insample_predictions_5y_average_initial.RData")
 
 # N2
 for.base.N2 <- forecast_new_loc(obs = N2, pars = mod1$pars, Dsq = Dsq2, mod = 'base')
-for.topo.N2 <- forecast_new_loc(obs = N2, pars = mod2$pars, covars = enviro.var.N2, Dsq = Dsq2, mod = 'topo')
-for.clim.N2 <- forecast_new_loc(obs = N2, pars = mod3$pars, covars = enviro.var.N2, Dsq = Dsq2, mod = 'clim')
-for.topoclim.N2 <- forecast_new_loc(obs = N2, pars = mod4$pars, covars = enviro.var.N2, Dsq = Dsq2, mod = 'topoclim')
+for.topo.N2 <- forecast_new_loc(obs = N2, pars = mod2$pars, covars = enviro.var.N2, Dsq = Dsq2, mod = 'toponb') # version 2
+for.clim.N2 <- forecast_new_loc(obs = N2, pars = mod5$pars, covars = enviro.var.N2, Dsq = Dsq2, mod = 'clim')
+for.topoclim.N2 <- forecast_new_loc(obs = N2, pars = mod6$pars, covars = enviro.var.N2, Dsq = Dsq2, mod = 'topoclimnb') # version 2
 
 save.image(file = "FILEPATH/35y_OOS_1_near_predictions_5y_average_initial.RData")
 
 # N3
 for.base.N3 <- forecast_new_loc(obs = N3, pars = mod1$pars, Dsq = Dsq3, mod = 'base')
-for.topo.N3 <- forecast_new_loc(obs = N3, pars = mod2$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'topo')
-for.clim.N3 <- forecast_new_loc(obs = N3, pars = mod3$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'clim')
-for.topoclim.N3 <- forecast_new_loc(obs = N3, pars = mod4$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'topoclim')
+for.topo.N3 <- forecast_new_loc(obs = N3, pars = mod2$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'toponb') # version 2
+for.clim.N3 <- forecast_new_loc(obs = N3, pars = mod5$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'clim')
+for.topoclim.N3 <- forecast_new_loc(obs = N3, pars = mod6$pars, covars = enviro.var.N3, Dsq = Dsq3, mod = 'topoclimnb') # version 2
 
 save.image(file = "FILEPATH/35y_OOS_2_far_predictions_5y_average_initial_v2.RData")

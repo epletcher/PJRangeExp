@@ -16,10 +16,13 @@ setwd("FILEPATH/sampleroutput")
 
 ## Pull parameter and latent state estimates based on model version, base, topo, clim or topoclim
 retrieve_mod <- function(model) {
-  if(model=="topo") {model="topo_"}
+  if(model=="topo") {model="topo_v"}
+  if(model=="toponobeta") {model="topo_no"}
+  if(model=="topoClimnobeta") {model="topoClim_no"}
+  if(model=="topoClim") {model="topoClim_v"}
   if(model=="base") {model="base_v"}
   if(model=="clim") {model="r_clim"}
-  if(model %in% c("base_v","topo_","topoClim","r_clim","quad")) {
+  if(model %in% c("base_v","topo_v","topo_no","topoClim_v","topoClim_no","r_clim","quad")) {
     
     files <- list.files("FILEPATH/sampleroutput", pattern=model, include.dirs = TRUE)
       
@@ -90,6 +93,8 @@ mod1 <- retrieve_mod("base") # model type here
 mod2 <- retrieve_mod("topo")
 mod3 <- retrieve_mod("clim")
 mod4 <- retrieve_mod("topoClim")
+mod5 <- retrieve_mod("toponobeta")
+mod6 <- retrieve_mod("topoClimnobeta")
 
 # ----------------- Forecast across withheld years -------------------
 # fixed/single origin forecast
@@ -136,8 +141,16 @@ forecast_is_loc <- function(obs, mod, covars, Dsq, mod.name) {
         G <- growthTopo(a0=pars$alpha0[i],a1=pars$alpha1[i],a2=pars$alpha2[i],b0=pars$beta0[i],b1=pars$beta1[i],b2=pars$beta2[i],X=covars[t,,],nt=Nt)
       }
       
+      if(mod.name=='toponb') {
+        G <- growthTopoNB(a0=pars$alpha0[i],a1=pars$alpha1[i],a2=pars$alpha2[i],b0=pars$betaOut[i],X=covars[t,,],nt=Nt)
+      }
+      
       if(mod.name=='topoclim') {
         G <- growthTopoClim(a0=pars$alpha0[i],a1=pars$alpha1[i],a2=pars$alpha2[i],a3=pars$alpha3[i],a4=pars$alpha4[i],b0=pars$beta0[i],b1=pars$beta1[i],b2=pars$beta2[i],X=covars[t,,],nt=Nt)
+      }
+      
+      if(mod.name=='topoclimnb') {
+        G <- growthTopoClimNB(a0=pars$alpha0[i],a1=pars$alpha1[i],a2=pars$alpha2[i],a3=pars$alpha3[i],a4=pars$alpha4[i],b0=pars$betaOut[i],X=covars[t,,],nt=Nt)
       }
       
       Nmean <-M1%*%(diag(G)%*%Nt)
@@ -172,6 +185,8 @@ for.base.N <- forecast_is_loc(obs = obs, mod = mod1, Dsq = Dsq, mod.name = 'base
 for.topo.N <- forecast_is_loc(obs = obs, mod = mod2, covars = enviro.var[,,-3], Dsq = Dsq, mod.name = 'topo')
 for.clim.N <- forecast_is_loc(obs = obs, mod = mod3, covars = enviro.var[,,-3], Dsq = Dsq, mod.name = 'clim')
 for.topoclim.N <- forecast_is_loc(obs = obs, mod = mod4, covars = enviro.var[,,-3], Dsq = Dsq, mod.name = 'topoclim')
+for.topoNB.N <- forecast_is_loc(obs = obs, mod = mod5, covars = enviro.var[,,-3], Dsq = Dsq, mod.name = 'toponb')
+for.topoclimNB.N <- forecast_is_loc(obs = obs, mod = mod6, covars = enviro.var[,,-3], Dsq = Dsq, mod.name = 'topoclimnb')
 
 # save forecast to file 
 save.image(file = "FILEPATH/eval_model_insample_5y.RData")
@@ -192,6 +207,9 @@ average_rmse(for.base.N)
 average_rmse(for.topo.N)
 average_rmse(for.clim.N)
 average_rmse(for.topoclim.N)
+average_rmse(for.topoNB.N)
+average_rmse(for.topoclimNB.N)
+
 
 normalized_rmse <- function(mod) {
   rmse <- mod$rmseTotOut
@@ -208,15 +226,17 @@ normalized_rmse(for.base.N)
 normalized_rmse(for.topo.N)
 normalized_rmse(for.clim.N)
 normalized_rmse(for.topoclim.N)
-
+normalized_rmse(for.topoNB.N)
+normalized_rmse(for.topoclimNB.N)
 
 ## plot RMSE
 BASE = for.base.N$rmseTotOut
-TOPO = for.topo.N$rmseTotOut
+TOPO = for.toponb.N$rmseTotOut # use version of topographic model
 CLIM = for.clim.N$rmseTotOut
-TOPOCLIM = for.topoclim.N$rmseTotOut
+TOPOCLIM = for.topoclimnb.N$rmseTotOut # use version 2 of topographic model
 
 CLIM = c(CLIM, rep(NA, length(BASE) - length(CLIM)))
+TOPO = c(TOPO, rep(NA, length(BASE) - length(TOPO)))
 TOPOCLIM = c(TOPOCLIM, rep(NA, length(BASE) - length(TOPOCLIM)))
 
 rmsedat <- data.frame(BASE, TOPO, CLIM,TOPOCLIM)

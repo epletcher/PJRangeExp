@@ -82,7 +82,7 @@ UpdateBetaQuad<-function(tmax,b0,b1,b2,Nlat,M,p){ # add X and C to list of argum
   
 }
 
-# growth function w climate covariate
+# growth function w climate covariate (also used this for the topographic model)
 UpdateBetaClim<-function(tmax,a0,a1,a2,X,b0,Nlat,M,p){ # add X and C to list of arguments
   Npred<-matrix(NA,tmax,p)
   G<-matrix(NA,tmax,p)
@@ -97,22 +97,22 @@ UpdateBetaClim<-function(tmax,a0,a1,a2,X,b0,Nlat,M,p){ # add X and C to list of 
   
 }
 
-# growth function w topo covariates on alpha and beta
+# growth function w topo covariates on alpha and beta # old version of topographic model
 UpdateBetaTop<-function(tmax,a0,a1,a2,X,b0,b1,b2,Nlat,M,p){ # add X and gammas to list of arguments
   Npred<-matrix(NA,tmax,p)
   G<-matrix(NA,tmax,p)
   for (t in 2:tmax){
-    G[t,]<-exp((a0+X[t,,1]*a1+X[t,,2]*a2)+(b0+X[t,,1]*b1+X[t,,2]*b2)*Nlat[t-1,]) 
+    G[t,]<-exp((a0+X[t,,1]*a1+X[t,,2]*a2)+(b0+X[t,,1]*b1+X[t,,2]*b2)*Nlat[t-1,])
     Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
-    
-    
-    
+
+
+
   }
   return(list(Npred=Npred,G=G))
-  
+
 }
 
-# growth function w climate and topo covariates on alpha and topo covars on beta
+# growth function w climate and topo covariates on alpha and topo covars on beta # old version of topoclimatic model
 UpdateBetaToCl<-function(tmax,a0,a1,a2,a3,a4,X,b0,b1,b2,Nlat,M,p){ 
   Npred<-matrix(NA,tmax,p)
   G<-matrix(NA,tmax,p)
@@ -124,6 +124,20 @@ UpdateBetaToCl<-function(tmax,a0,a1,a2,a3,a4,X,b0,b1,b2,Nlat,M,p){
   return(list(Npred=Npred,G=G))
   
 }
+
+# growth function w climate and topo covariates on ONLY the alpha
+UpdateBetaToClNB<-function(tmax,a0,a1,a2,a3,a4,X,b0,Nlat,M,p){ 
+  Npred<-matrix(NA,tmax,p)
+  G<-matrix(NA,tmax,p)
+  for (t in 2:tmax){
+    G[t,]<-exp((a0+X[t,,1]*a1+X[t,,2]*a2+X[t,,3]*a3+X[t,,4]*a4)+b0*Nlat[t-1,]) 
+    Npred[t,]<-M%*%(diag(G[t,])%*%Nlat[t-1,])
+    
+  }
+  return(list(Npred=Npred,G=G))
+  
+}
+
 # dispersal
 UpdateDispersal<-function(tmax,tau,Nlat,G,p,D){
   Npred<-matrix(NA,tmax,p)

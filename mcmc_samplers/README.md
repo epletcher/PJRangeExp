@@ -3,8 +3,10 @@
 
 ## Contents:
 * **Sampler.R** - Basic spatiotemporal model with no covariates
-* **Sampler_Topo.R** - Basic model + two spatially variable topographic covariates: heatload and elevation 
+* **Sampler_Topo.R** - Basic model + two spatially variable topographic covariates: heatload and elevation (old version)
+* **Sampler_Topo_v2.R** - Basic model + two spatially variable topographic covariates: heatload and elevation (up to date version)
 * **Sampler_climate.R** - Basic model + two temporally variable climatic covariates: temp. and precip.
-* **Sampler_TopoClim.R** - Basic model + climatic covariates + topographic covariates
+* **Sampler_TopoClim.R** - Basic model + climatic covariates + topographic covariates (old version)
+* **Sampler_TopoClim_v2.R** - Basic model + climatic covariates + topographic covariates (up to date version)
 * **SamplerFunctions.R** - script contains functions for updating each version of the process model and for sampling posterior  distributions of error terms and the latent state.
 *  **inspect_mcmc_outputs.R** - as script that pulls in saved mcmc sampler outputs and thins and combines chains and evlautes model convergence using trace plots and Gelman-Rubin diagnostics.

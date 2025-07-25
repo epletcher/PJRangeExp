@@ -1,3 +1,5 @@
+# a script for taking tree cover and environmental covariates for the in sample study area and reformatting them as inputs for the mcmc_samplers.
+
 # load packages
 library(maptools)
 library(raster)
